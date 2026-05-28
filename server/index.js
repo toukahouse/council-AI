@@ -510,7 +510,8 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
         scriptName = 'proxy_ai.py';
       }
       const pythonScript = path.join(__dirname, scriptName);
-      childProcess = spawn('python', [pythonScript]);
+      const pythonCommand = process.platform === 'win32' ? 'python' : 'python3';
+      childProcess = spawn(pythonCommand, [pythonScript]);
     }
 
     let aiFullResponse = '';
@@ -547,7 +548,9 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
     });
 
     childProcess.stderr.on('data', (data) => {
-      console.error(`Child Process Error: ${data.toString()}`);
+      const errorMsg = data.toString();
+      console.error(`Child Process Error: ${errorMsg}`);
+      res.write(`data: ${JSON.stringify({ type: 'error', chunk: 'Python Error: ' + errorMsg })}\n\n`);
     });
 
     req.on('close', () => {
@@ -784,7 +787,8 @@ ATURAN MUTLAK:
         scriptName = 'proxy_ai.py';
       }
       const pythonScript = path.join(__dirname, scriptName);
-      childProcess = spawn('python', [pythonScript]);
+      const pythonCommand = process.platform === 'win32' ? 'python' : 'python3';
+      childProcess = spawn(pythonCommand, [pythonScript]);
     }
 
     let aiFullResponse = '';
