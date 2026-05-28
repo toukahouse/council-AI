@@ -510,7 +510,7 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
         scriptName = 'proxy_ai.py';
       }
       const pythonScript = path.join(__dirname, scriptName);
-      const pythonCommand = process.platform === 'win32' ? 'python' : 'python3';
+      const pythonCommand = process.platform === 'win32' ? 'python' : 'python3.11';
       childProcess = spawn(pythonCommand, [pythonScript]);
     }
 
@@ -787,7 +787,7 @@ ATURAN MUTLAK:
         scriptName = 'proxy_ai.py';
       }
       const pythonScript = path.join(__dirname, scriptName);
-      const pythonCommand = process.platform === 'win32' ? 'python' : 'python3';
+      const pythonCommand = process.platform === 'win32' ? 'python' : 'python3.11';
       childProcess = spawn(pythonCommand, [pythonScript]);
     }
 
