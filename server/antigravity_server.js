@@ -13,11 +13,11 @@ import dotenv from 'dotenv';
 // Load environment variables from .env
 dotenv.config();
 
-// Initialize proxy support from parent before other imports
-import './antigravity/utils/proxy.js';
-// Import the core proxy app and account manager from parent
-import proxyApp, { accountManager } from './antigravity/server.js';
-import { logger } from './antigravity/utils/logger.js';
+// We must use dynamic imports here because ES module static imports are hoisted
+// and would execute BEFORE dotenv.config(), causing constants to miss the env vars.
+await import('./antigravity/utils/proxy.js');
+const { default: proxyApp, accountManager } = await import('./antigravity/server.js');
+const { logger } = await import('./antigravity/utils/logger.js');
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
