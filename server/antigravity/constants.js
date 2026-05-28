@@ -265,7 +265,10 @@ export const OAUTH_CONFIG = {
     callbackFallbackPorts: OAUTH_CALLBACK_FALLBACK_PORTS,
     scopes: [
         'https://www.googleapis.com/auth/cloud-platform',
-        'https://www.googleapis.com/auth/userinfo.email'
+        'https://www.googleapis.com/auth/userinfo.email',
+        'https://www.googleapis.com/auth/userinfo.profile',
+        'https://www.googleapis.com/auth/cclog',
+        'https://www.googleapis.com/auth/experimentsandconfigs'
     ]
 };
 export const OAUTH_REDIRECT_URI = `http://localhost:${OAUTH_CONFIG.callbackPort}/oauth-callback`;
