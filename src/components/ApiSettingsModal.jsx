@@ -27,6 +27,8 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
   const [gravityAvailableAccounts, setGravityAvailableAccounts] = useState([]);
   const [gravityHealthResult, setGravityHealthResult] = useState(null);
   const [gravityModels, setGravityModels] = useState([]);
+  const [gravityManualCallbackUrl, setGravityManualCallbackUrl] = useState('');
+  const [isGravityManualCallbackVisible, setIsGravityManualCallbackVisible] = useState(false);
 
   // AI Proxy Settings
   const [aiEngine, setAiEngine] = useState('api'); // 'api', 'proxy', or 'copilot'
@@ -228,6 +230,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
       const data = await res.json();
       
       const popup = window.open(data.url, 'oauth-popup', 'width=500,height=700,left=200,top=100');
+      setIsGravityManualCallbackVisible(true);
       
       const pollInterval = setInterval(async () => {
         try {
@@ -267,6 +270,59 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
     } catch (error) {
       console.error(error);
       alert(`Login gagal: ${error.message}`);
+    }
+  };
+
+  const handleGravityManualCallback = async () => {
+    if (!gravityManualCallbackUrl) return;
+    try {
+      const url = gravityProxyUrl ? gravityProxyUrl.replace(/\/+$/, '') : '/proxy';
+      
+      let state = '';
+      try {
+        const parsedUrl = new URL(gravityManualCallbackUrl);
+        state = parsedUrl.searchParams.get('state') || '';
+      } catch (e) {
+        throw new Error('Harap masukkan URL yang valid (mengandung parameter state)');
+      }
+
+      if (!state) throw new Error('State tidak ditemukan di URL. Pastikan Anda mengkopi seluruh URL.');
+
+      const res = await fetch(`${url}/api/auth/complete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ callbackInput: gravityManualCallbackUrl, state })
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Gagal menyelesaikan login');
+      }
+      
+      const accRes = await fetch(`${url}/api/accounts`);
+      const accData = await accRes.json();
+      if (accData.accounts && accData.accounts.length > 0) {
+        const emails = accData.accounts.map(a => a.email);
+        const newestEmail = emails[emails.length - 1];
+        
+        for (const email of emails) {
+          if (email !== newestEmail) {
+            try { await fetch(`${url}/api/accounts/${encodeURIComponent(email)}`, { method: 'DELETE' }); } catch (e) {}
+          }
+        }
+        
+        setGravityAvailableAccounts([newestEmail]);
+        setGravityIsLoggedIn(true);
+        setGravityAccountEmail(newestEmail);
+        setIsGravityManualCallbackVisible(false);
+        setGravityManualCallbackUrl('');
+        alert('Manual login berhasil!');
+      } else {
+        throw new Error('Akun tidak ditemukan setelah login');
+      }
+    } catch (error) {
+      console.error(error);
+      alert(`Manual login gagal: ${error.message}`);
     }
   };
 
@@ -663,6 +719,38 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                       <button className="api-modal__btn api-modal__btn--primary" type="button" onClick={handleGravityLogin} style={{ width: '100%', padding: '10px', marginBottom: '8px' }}>
                         🔗 Ganti Akun Google
                       </button>
+                      
+                      {isGravityManualCallbackVisible && (
+                        <div style={{
+                          background: 'rgba(139, 92, 246, 0.1)',
+                          border: '1px solid rgba(139, 92, 246, 0.3)',
+                          borderRadius: '10px',
+                          padding: '12px',
+                          marginTop: '8px'
+                        }}>
+                          <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginBottom: '8px' }}>
+                            Jika muncul "ERR_CONNECTION_REFUSED" saat login (biasanya karena VPS/HP), kopi seluruh URL error di browser Anda dan paste di sini:
+                          </p>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <input
+                              className="api-modal__input"
+                              type="text"
+                              placeholder="http://localhost:51121/?state=..."
+                              value={gravityManualCallbackUrl}
+                              onChange={(e) => setGravityManualCallbackUrl(e.target.value)}
+                              style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.2)' }}
+                            />
+                            <button 
+                              className="api-modal__btn api-modal__btn--ghost" 
+                              type="button" 
+                              onClick={handleGravityManualCallback}
+                              style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}
+                            >
+                              Kirim
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div className="api-modal__field">
                       <label className="api-modal__label">Koneksi Proxy</label>
