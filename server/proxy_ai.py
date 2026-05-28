@@ -4,7 +4,18 @@ import json
 import asyncio
 import browser_cookie3
 from dotenv import load_dotenv
-from gemini_webapi import GeminiClient
+
+try:
+    from gemini_webapi import GeminiClient
+except ModuleNotFoundError:
+    # PM2 on Linux often drops user site-packages from sys.path. 
+    # Forcefully append common linux user paths before importing.
+    import site
+    sys.path.append(os.path.join(site.getuserbase(), "lib", f"python{sys.version_info.major}.{sys.version_info.minor}", "site-packages"))
+    # Hardcode for nova's specific VPS environment just in case pm2 runs as root
+    sys.path.append("/home/nova/.local/lib/python3.10/site-packages")
+    sys.path.append("/home/nova/.local/lib/python3.12/site-packages")
+    from gemini_webapi import GeminiClient
 
 # Load env variables for fallbacks
 load_dotenv()
