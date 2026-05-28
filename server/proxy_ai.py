@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 
 try:
     from gemini_webapi import GeminiClient
+    from loguru import logger
+    logger.remove()
 except ModuleNotFoundError:
     # PM2 on Linux often drops user site-packages from sys.path. 
     # Forcefully append common linux user paths before importing.
@@ -16,6 +18,8 @@ except ModuleNotFoundError:
     sys.path.append("/home/nova/.local/lib/python3.10/site-packages")
     sys.path.append("/home/nova/.local/lib/python3.12/site-packages")
     from gemini_webapi import GeminiClient
+    from loguru import logger
+    logger.remove() # Silence internal logs to prevent polluting stderr
 
 # Load env variables for fallbacks
 load_dotenv()
