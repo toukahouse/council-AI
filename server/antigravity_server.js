@@ -8,6 +8,10 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+// Load environment variables from .env
+dotenv.config();
 
 // Initialize proxy support from parent before other imports
 import './antigravity/utils/proxy.js';
