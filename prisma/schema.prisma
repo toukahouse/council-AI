@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Character {
+  id           String         @id @default(uuid())
+  name         String
+  author       String?
+  shortDesc    String?
+  avatar       String?
+  status       String?        @default("Offline")
+  color        String?
+  chatCount    String?        @default("0")
+  msgCount     String?        @default("0")
+  scenario     String?
+  personality  String?
+  systemPrompt String?
+  greeting     String?
+  sampleDialog String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  conversations Conversation[]
+  memories     Memory[]
+  scenarios    Scenario[]
+  npcs         Npc[]
+}
+
+model Persona {
+  id          String   @id @default(uuid())
+  name        String
+  role        String?
+  description String?
+  avatar      String?
+  color       String?
+  background  String?
+  traits      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Conversation {
+  id          String    @id @default(uuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  messages    Message[]
+  scenarios   Scenario[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  role           String       // "user" or "ai"
+  content        String
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+}
+
+model Memory {
+  id          String    @id @default(uuid())
+  text        String
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Scenario {
+  id          String    @id @default(uuid())
+  text        String
+  characterId    String?
+  character      Character?    @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  conversationId String?
+  conversation   Conversation? @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime      @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Npc {
+  id          String    @id @default(uuid())
+  text        String
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}

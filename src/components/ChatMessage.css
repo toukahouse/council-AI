@@ -1,0 +1,494 @@
+.message {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.message--animate {
+  animation: message-in 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+@keyframes message-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* User message: content + avatar pushed to the right */
+.message--user {
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+/* AI message: avatar + content on the left */
+.message--ai {
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+/* Avatar */
+.message__avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.message__avatar {
+  width: var(--avatar-size, 40px);
+  height: var(--avatar-size, 40px);
+  border-radius: 50%;
+  object-fit: cover;
+  position: relative;
+  z-index: 2;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  flex-shrink: 0;
+}
+
+.message__avatar--ai {
+  border: var(--bubble-ai-border, 2px solid rgba(124, 58, 237, 0.5));
+  box-shadow: 0 0 16px rgba(124, 58, 237, 0.25);
+}
+
+.message__avatar--user {
+  border: var(--bubble-user-border, 2px solid rgba(255, 255, 255, 0.2));
+}
+
+.message__avatar-glow {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+  animation: avatar-pulse 3s ease infinite;
+}
+
+@keyframes avatar-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* Content */
+.message__content-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-width: 65%;
+}
+
+/* User message: align bubble text and timestamp to the right */
+.message--user .message__content-wrap {
+  align-items: flex-end;
+}
+
+.message__name {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--accent-primary);
+  padding: 0 4px;
+}
+
+/* Bubble */
+.message__bubble {
+  padding: 13px 17px;
+  border-radius: 18px;
+  line-height: 1.6;
+  position: relative;
+  transition: box-shadow 0.2s ease;
+}
+
+.message__bubble--ai {
+  background: var(--bubble-ai, #1a1a25);
+  border: var(--bubble-ai-border, 1px solid var(--border-subtle));
+  border-bottom-left-radius: 4px;
+  color: var(--text-primary);
+}
+
+.message__bubble--ai:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.message__bubble--user {
+  background: var(--bubble-user, #f1f1f5);
+  border: var(--bubble-user-border, none);
+  border-bottom-right-radius: 4px;
+  color: var(--bubble-user-text, #0a0a0f);
+}
+
+.message__bubble--user:hover {
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+}
+
+.message__text {
+  font-size: var(--font-size, 14.5px);
+  font-family: var(--font-family, inherit);
+  font-weight: 400;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Time */
+.message__time {
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 0 4px;
+}
+
+/* Typing indicator */
+.message__typing {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  padding: 2px 0;
+}
+
+.message__typing span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  animation: typing-bounce 1.2s ease infinite;
+}
+
+.message__typing span:nth-child(1) { animation-delay: 0s; }
+.message__typing span:nth-child(2) { animation-delay: 0.2s; }
+.message__typing span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing-bounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    background: var(--text-muted);
+  }
+  30% {
+    transform: translateY(-8px);
+    background: var(--accent-primary);
+  }
+}
+
+/* ============================
+   RESPONSIVE
+   ============================ */
+@media (max-width: 720px) {
+  .message {
+    gap: 8px;
+  }
+
+  .message__content-wrap {
+    max-width: 85%;
+  }
+
+  .message__bubble {
+    padding: 11px 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .message__content-wrap {
+    max-width: 100%;
+  }
+}
+
+/* ==================================================
+   BUBBLE ANIMATIONS
+   ================================================== */
+
+@property --spin-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes spin-gradient {
+  to {
+    --spin-angle: 360deg;
+  }
+}
+
+.anim-spin-snake {
+  position: relative;
+  border: 2px solid transparent !important;
+  background-clip: padding-box, border-box !important;
+  background-origin: padding-box, border-box !important;
+  animation: spin-gradient 3s linear infinite !important;
+}
+
+/* Glow for spinning snake */
+.anim-spin-snake::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  z-index: -1;
+  filter: blur(8px);
+  opacity: 0.8;
+  animation: spin-gradient 3s linear infinite;
+}
+
+/* Spin Themes */
+.message__bubble--ai.anim-spin-orange {
+  background-image: linear-gradient(var(--bubble-ai, #1a0f08), var(--bubble-ai, #1a0f08)), conic-gradient(from var(--spin-angle), transparent 60%, #ff6a00 100%) !important;
+}
+.message__bubble--user.anim-spin-orange {
+  background-image: linear-gradient(var(--bubble-user, #261a0f), var(--bubble-user, #261a0f)), conic-gradient(from var(--spin-angle), transparent 60%, #ff6a00 100%) !important;
+}
+.anim-spin-orange::before { background-image: conic-gradient(from var(--spin-angle), transparent 60%, #ff6a00 100%); }
+
+.message__bubble--ai.anim-spin-green {
+  background-image: linear-gradient(var(--bubble-ai, #05140b), var(--bubble-ai, #05140b)), conic-gradient(from var(--spin-angle), transparent 60%, #00ff73 100%) !important;
+}
+.message__bubble--user.anim-spin-green {
+  background-image: linear-gradient(var(--bubble-user, #0a1f12), var(--bubble-user, #0a1f12)), conic-gradient(from var(--spin-angle), transparent 60%, #00ff73 100%) !important;
+}
+.anim-spin-green::before { background-image: conic-gradient(from var(--spin-angle), transparent 60%, #00ff73 100%); }
+
+.message__bubble--ai.anim-spin-blue {
+  background-image: linear-gradient(var(--bubble-ai, #060b17), var(--bubble-ai, #060b17)), conic-gradient(from var(--spin-angle), transparent 60%, #00b3ff 100%) !important;
+}
+.message__bubble--user.anim-spin-blue {
+  background-image: linear-gradient(var(--bubble-user, #0a1224), var(--bubble-user, #0a1224)), conic-gradient(from var(--spin-angle), transparent 60%, #00b3ff 100%) !important;
+}
+.anim-spin-blue::before { background-image: conic-gradient(from var(--spin-angle), transparent 60%, #00b3ff 100%); }
+
+/* ==================================================
+   RGB GAMER THEMES
+   ================================================== */
+@keyframes rgb-flow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+@keyframes rgb-pulse {
+  0%, 100% { opacity: 1; filter: blur(8px); }
+  50% { opacity: 0.6; filter: blur(16px); }
+}
+
+/* 1. RGB Spin */
+.message__bubble--ai.anim-spin-rgb, .chat-input.anim-spin-rgb {
+  background-image: linear-gradient(var(--bubble-ai, #0a0a0a), var(--bubble-ai, #0a0a0a)), conic-gradient(from var(--spin-angle), #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000) !important;
+}
+.message__bubble--user.anim-spin-rgb {
+  background-image: linear-gradient(var(--bubble-user, #141414), var(--bubble-user, #141414)), conic-gradient(from var(--spin-angle), #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000) !important;
+}
+.anim-spin-rgb::before { background-image: conic-gradient(from var(--spin-angle), #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000); }
+
+/* 2. RGB Flow */
+.anim-flow-rgb {
+  position: relative;
+  border: 2px solid transparent !important;
+  background-clip: padding-box, border-box !important;
+  background-origin: padding-box, border-box !important;
+  animation: rgb-flow 3s linear infinite !important;
+  background-size: auto, 200% 100% !important;
+}
+.anim-flow-rgb::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  z-index: -1;
+  filter: blur(10px);
+  background-size: 200% 100%;
+  animation: rgb-flow 3s linear infinite;
+  background-image: linear-gradient(90deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+}
+.message__bubble--ai.anim-flow-rgb {
+  background-image: linear-gradient(var(--bubble-ai, #0a0a0a), var(--bubble-ai, #0a0a0a)), linear-gradient(90deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000) !important;
+}
+.message__bubble--user.anim-flow-rgb, .chat-input.anim-flow-rgb {
+  background-image: linear-gradient(var(--bubble-user, #141414), var(--bubble-user, #141414)), linear-gradient(90deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000) !important;
+}
+
+/* 3. RGB Pulse */
+.anim-pulse-rgb {
+  position: relative;
+  border: 2px solid transparent !important;
+  background-clip: padding-box, border-box !important;
+  background-origin: padding-box, border-box !important;
+}
+.anim-pulse-rgb::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  z-index: -1;
+  animation: rgb-pulse 2s ease-in-out infinite;
+  background-image: linear-gradient(135deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+}
+.message__bubble--ai.anim-pulse-rgb {
+  background-image: linear-gradient(var(--bubble-ai, #0a0a0a), var(--bubble-ai, #0a0a0a)), linear-gradient(135deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000) !important;
+}
+.message__bubble--user.anim-pulse-rgb, .chat-input.anim-pulse-rgb {
+  background-image: linear-gradient(var(--bubble-user, #141414), var(--bubble-user, #141414)), linear-gradient(135deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000) !important;
+}
+
+/* 4. RGB Neon (Thick glowing border) */
+.anim-neon-rgb {
+  position: relative;
+  border: 3px solid transparent !important;
+  background-clip: padding-box, border-box !important;
+  background-origin: padding-box, border-box !important;
+  animation: rgb-flow 4s linear infinite !important;
+  background-size: auto, 200% 100% !important;
+}
+.anim-neon-rgb::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  z-index: -1;
+  filter: blur(15px);
+  background-size: 200% 100%;
+  animation: rgb-flow 4s linear infinite;
+  background-image: linear-gradient(90deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+}
+.anim-neon-rgb::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  z-index: -2;
+  filter: blur(25px);
+  opacity: 0.6;
+  background-size: 200% 100%;
+  animation: rgb-flow 4s linear infinite;
+  background-image: linear-gradient(90deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+}
+.message__bubble--ai.anim-neon-rgb {
+  background-image: linear-gradient(var(--bubble-ai, #0a0a0a), var(--bubble-ai, #0a0a0a)), linear-gradient(90deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000) !important;
+}
+.message__bubble--user.anim-neon-rgb, .chat-input.anim-neon-rgb {
+  background-image: linear-gradient(var(--bubble-user, #141414), var(--bubble-user, #141414)), linear-gradient(90deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000) !important;
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.0); }
+  50% { box-shadow: 0 0 10px 0 rgba(255,255,255,0.05); }
+}
+.anim-pulse-subtle { animation: pulse-subtle 4s ease-in-out infinite; }
+
+@keyframes glow-purple {
+  0%, 100% { box-shadow: 0 0 5px 0 rgba(139,92,246,0.2); }
+  50% { box-shadow: 0 0 15px 2px rgba(139,92,246,0.4); }
+}
+.anim-glow-purple { animation: glow-purple 3s ease-in-out infinite; }
+
+@keyframes glow-green {
+  0%, 100% { box-shadow: 0 0 5px 0 rgba(16,185,129,0.2); }
+  50% { box-shadow: 0 0 15px 2px rgba(16,185,129,0.4); }
+}
+.anim-glow-green { animation: glow-green 3s ease-in-out infinite; }
+
+@keyframes neon-pulse-purple {
+  0%, 100% { box-shadow: 0 0 8px 1px rgba(168,85,247,0.5), inset 0 0 5px rgba(168,85,247,0.2); border-color: rgba(168,85,247,0.8); }
+  50% { box-shadow: 0 0 20px 3px rgba(168,85,247,0.8), inset 0 0 10px rgba(168,85,247,0.4); border-color: rgba(168,85,247,1); }
+}
+.anim-neon-purple { animation: neon-pulse-purple 2s alternate infinite; }
+.anim-neon-purple-subtle { animation: neon-pulse-purple 3s alternate infinite; opacity: 0.9; }
+
+@keyframes neon-pulse-cyan {
+  0%, 100% { box-shadow: 0 0 8px 1px rgba(6,182,212,0.5), inset 0 0 5px rgba(6,182,212,0.2); border-color: rgba(6,182,212,0.8); }
+  50% { box-shadow: 0 0 20px 3px rgba(6,182,212,0.8), inset 0 0 10px rgba(6,182,212,0.4); border-color: rgba(6,182,212,1); }
+}
+.anim-neon-cyan { animation: neon-pulse-cyan 2s alternate infinite; }
+.anim-neon-cyan-subtle { animation: neon-pulse-cyan 3s alternate infinite; opacity: 0.9; }
+
+@keyframes neon-pulse-rose {
+  0%, 100% { box-shadow: 0 0 8px 1px rgba(251,113,133,0.5), inset 0 0 5px rgba(251,113,133,0.2); border-color: rgba(251,113,133,0.8); }
+  50% { box-shadow: 0 0 20px 3px rgba(251,113,133,0.8), inset 0 0 10px rgba(251,113,133,0.4); border-color: rgba(251,113,133,1); }
+}
+.anim-neon-rose { animation: neon-pulse-rose 2s alternate infinite; }
+.anim-neon-rose-subtle { animation: neon-pulse-rose 3s alternate infinite; opacity: 0.9; }
+
+@keyframes neon-pulse-amber {
+  0%, 100% { box-shadow: 0 0 8px 1px rgba(251,191,36,0.5), inset 0 0 5px rgba(251,191,36,0.2); border-color: rgba(251,191,36,0.8); }
+  50% { box-shadow: 0 0 20px 3px rgba(251,191,36,0.8), inset 0 0 10px rgba(251,191,36,0.4); border-color: rgba(251,191,36,1); }
+}
+.anim-neon-amber { animation: neon-pulse-amber 2s alternate infinite; }
+.anim-neon-amber-subtle { animation: neon-pulse-amber 3s alternate infinite; opacity: 0.9; }
+
+@keyframes glass-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.anim-glass-shimmer {
+  background-image: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%);
+  background-size: 200% 100%;
+  animation: glass-shimmer 4s infinite linear;
+}
+.anim-glass-shimmer-purple {
+  background-image: linear-gradient(90deg, rgba(139,92,246,0) 0%, rgba(139,92,246,0.1) 50%, rgba(139,92,246,0) 100%);
+  background-size: 200% 100%;
+  animation: glass-shimmer 4s infinite linear;
+}
+
+@keyframes aesthetic-gradient-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.anim-wave-sakura, .anim-wave-ocean, .anim-glow-sunset {
+  position: relative;
+  border: 2px solid transparent !important;
+  background-clip: padding-box, border-box !important;
+  background-origin: padding-box, border-box !important;
+  background-size: auto, 300% 300% !important;
+  animation: aesthetic-gradient-flow 4s ease infinite !important;
+}
+
+/* The glow */
+.anim-wave-sakura::before, .anim-wave-ocean::before, .anim-glow-sunset::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background-size: 300% 300%;
+  animation: aesthetic-gradient-flow 4s ease infinite;
+  z-index: -1;
+  filter: blur(10px);
+  opacity: 0.7;
+}
+
+/* AI Bubble Backgrounds */
+.message__bubble--ai.anim-wave-sakura {
+  background-image: linear-gradient(var(--bubble-ai, #1a0e14), var(--bubble-ai, #1a0e14)), linear-gradient(60deg, #fdf2f8, #fbcfe8, #f472b6, #ec4899, #db2777, #f472b6, #fbcfe8) !important;
+}
+.message__bubble--ai.anim-wave-ocean {
+  background-image: linear-gradient(var(--bubble-ai, #0a192f), var(--bubble-ai, #0a192f)), linear-gradient(60deg, #e0f2fe, #bae6fd, #38bdf8, #0284c7, #0369a1, #0284c7, #38bdf8) !important;
+}
+.message__bubble--ai.anim-glow-sunset {
+  background-image: linear-gradient(var(--bubble-ai, #1a0f08), var(--bubble-ai, #1a0f08)), linear-gradient(60deg, #fff7ed, #ffedd5, #fdba74, #ea580c, #c2410c, #ea580c, #fdba74) !important;
+}
+
+/* User Bubble Backgrounds & Chat Input */
+.message__bubble--user.anim-wave-sakura, .chat-input.anim-wave-sakura {
+  background-image: linear-gradient(var(--bubble-user, #2d1422), var(--bubble-user, #2d1422)), linear-gradient(60deg, #fdf2f8, #fbcfe8, #f472b6, #ec4899, #db2777, #f472b6, #fbcfe8) !important;
+}
+.message__bubble--user.anim-wave-ocean, .chat-input.anim-wave-ocean {
+  background-image: linear-gradient(var(--bubble-user, #112240), var(--bubble-user, #112240)), linear-gradient(60deg, #e0f2fe, #bae6fd, #38bdf8, #0284c7, #0369a1, #0284c7, #38bdf8) !important;
+}
+.message__bubble--user.anim-glow-sunset, .chat-input.anim-glow-sunset {
+  background-image: linear-gradient(var(--bubble-user, #261a0f), var(--bubble-user, #261a0f)), linear-gradient(60deg, #fff7ed, #ffedd5, #fdba74, #ea580c, #c2410c, #ea580c, #fdba74) !important;
+}
+
+/* Glow Colors */
+.anim-wave-sakura::before {
+  background-image: linear-gradient(60deg, #fdf2f8, #fbcfe8, #f472b6, #ec4899, #db2777, #f472b6, #fbcfe8);
+}
+.anim-wave-ocean::before {
+  background-image: linear-gradient(60deg, #e0f2fe, #bae6fd, #38bdf8, #0284c7, #0369a1, #0284c7, #38bdf8);
+}
+.anim-glow-sunset::before {
+  background-image: linear-gradient(60deg, #fff7ed, #ffedd5, #fdba74, #ea580c, #c2410c, #ea580c, #fdba74);
+}
+
+/* Fix chat-input ::before bleeding */
+.chat-input::before {
+  display: none !important;
+}
+.chat-input::after {
+  display: none !important;
+}

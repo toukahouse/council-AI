@@ -1,0 +1,132 @@
+import os
+import sys
+import json
+from google import genai
+from google.genai import types
+
+# To run this code you need to install the following dependencies:
+# pip install google-genai
+
+def main():
+    # Read JSON payload from stdin
+    input_data = sys.stdin.read()
+    if not input_data:
+        return
+        
+    try:
+        payload = json.loads(input_data)
+    except Exception as e:
+        print(f"Error parsing JSON: {e}", file=sys.stderr)
+        return
+
+    character = payload.get('character', {})
+    persona = payload.get('persona', {})
+    memories = payload.get('memories', [])
+    history = payload.get('history', [])
+    new_message = payload.get('newMessage', '')
+    api_settings = payload.get('apiSettings', {})
+
+    # 1. System Prompt karakter, persona, dan contoh dialog
+    system_parts = []
+    
+    char_name = character.get('name', 'AI')
+    system_parts.append(f"You are roleplaying as {char_name}.")
+    
+    sys_prompt = character.get('systemPrompt', '')
+    if sys_prompt:
+        system_parts.append(f"System Prompt:\n{sys_prompt}")
+    
+    char_persona = character.get('personality', '')
+    if char_persona:
+        system_parts.append(f"Karakter Persona:\n{char_persona}")
+        
+    sample_dialog = character.get('sampleDialog', '')
+    if sample_dialog:
+        system_parts.append(f"Contoh Dialog:\n{sample_dialog}")
+
+    # 2. Deskripsi persona user
+    user_desc = persona.get('description', '')
+    if user_desc:
+        system_parts.append(f"Deskripsi User:\n{user_desc}")
+
+    # 3. Memory Karakter AI
+    if memories:
+        mem_text = "\n".join([f"- {m}" for m in memories])
+        system_parts.append(f"Memory Karakter AI:\n{mem_text}")
+        
+    system_instruction = "\n\n".join(system_parts)
+
+    api_key = api_settings.get('apiKey')
+    if not api_key:
+        api_key = os.environ.get("GEMINI_API_KEY")
+
+    client = genai.Client(
+        api_key=api_key,
+    )
+
+    model = api_settings.get('activeModelId', "gemma-4-31b-it")
+    contents = []
+    
+    # 4. Chat History
+    for msg in history:
+        # map 'ai' to 'model', otherwise 'user'
+        msg_role = "model" if msg.get("role") == "ai" else "user"
+        contents.append(
+            types.Content(
+                role=msg_role,
+                parts=[types.Part.from_text(text=msg.get("content", ""))]
+            )
+        )
+        
+    # 5. Pesan Baru dari User
+    if new_message:
+        contents.append(
+            types.Content(
+                role="user",
+                parts=[types.Part.from_text(text=new_message)]
+            )
+        )
+
+    temperature = float(api_settings.get('temperature', 0.8))
+    top_p = float(api_settings.get('topP', 0.95))
+    top_k = int(api_settings.get('topK', 40))
+    max_tokens = int(api_settings.get('maxTokens', 2048))
+    thinking_enabled = api_settings.get('thinkingEnabled', True)
+    thinking_level = str(api_settings.get('thinkingLevel', 'HIGH')).upper()
+
+    config_args = {
+        "temperature": temperature,
+        "top_p": top_p,
+        "top_k": top_k,
+        "max_output_tokens": max_tokens,
+        "system_instruction": system_instruction,
+    }
+
+    if thinking_enabled:
+        config_args["thinking_config"] = types.ThinkingConfig(thinking_level=thinking_level)
+        
+    generate_content_config = types.GenerateContentConfig(**config_args)
+
+    try:
+        # Stream response
+        for chunk in client.models.generate_content_stream(
+            model=model,
+            contents=contents,
+            config=generate_content_config,
+        ):
+            if chunk.candidates and chunk.candidates[0].content and chunk.candidates[0].content.parts:
+                for part in chunk.candidates[0].content.parts:
+                    # Some versions might use part.thought as a boolean, others as a string
+                    is_thought = getattr(part, 'thought', False) == True
+                    text_val = getattr(part, 'text', None)
+                    if text_val:
+                        payload = {"type": "thought" if is_thought else "text", "content": text_val}
+                        print(json.dumps(payload), flush=True)
+            elif chunk.text:
+                payload = {"type": "text", "content": chunk.text}
+                print(json.dumps(payload), flush=True)
+    except Exception as e:
+        print(f"[Error from Gemini API: {e}]", file=sys.stderr)
+
+if __name__ == "__main__":
+    main()

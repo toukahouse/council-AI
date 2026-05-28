@@ -1,0 +1,330 @@
+/* ============================
+   SCENARIO MODAL
+   ============================ */
+.scenario-modal__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 6, 12, 0.6);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 120;
+}
+
+.scenario-modal__overlay--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.scenario-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 121;
+}
+
+.scenario-modal--open {
+  pointer-events: auto;
+}
+
+.scenario-modal__panel {
+  width: min(980px, 92vw);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  background:
+    linear-gradient(160deg, rgba(124, 58, 237, 0.12) 0%, rgba(6, 182, 212, 0.08) 45%, rgba(10, 10, 15, 0.92) 100%),
+    var(--bg-secondary);
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  border-radius: 22px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  transform: translateY(18px) scale(0.98);
+  opacity: 0;
+  transition: transform 0.35s ease, opacity 0.35s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.scenario-modal--open .scenario-modal__panel {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.scenario-modal__panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top left, rgba(124, 58, 237, 0.18), transparent 55%);
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.scenario-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 28px 16px;
+  border-bottom: 1px solid rgba(124, 58, 237, 0.18);
+  position: relative;
+  z-index: 1;
+}
+
+.scenario-modal__eyebrow {
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.scenario-modal__title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.scenario-modal__subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  max-width: 520px;
+  line-height: 1.6;
+}
+
+.scenario-modal__close {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scenario-modal__close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.scenario-modal__content {
+  padding: 20px 28px 10px;
+  overflow-y: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.scenario-modal__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  background: rgba(10, 10, 15, 0.35);
+  margin-bottom: 18px;
+}
+
+.scenario-modal__stat {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.scenario-modal__toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scenario-modal__list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.scenario-modal__empty {
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px dashed rgba(124, 58, 237, 0.35);
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: center;
+  background: rgba(10, 10, 15, 0.35);
+}
+
+.scenario-item {
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(124, 58, 237, 0.16);
+  background: rgba(10, 10, 15, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.scenario-item__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.scenario-item__label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.scenario-item__delete {
+  border: none;
+  background: rgba(239, 68, 68, 0.15);
+  color: #fecaca;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.scenario-item__delete:hover {
+  background: rgba(239, 68, 68, 0.25);
+  color: white;
+}
+
+.scenario-item__textarea {
+  background: rgba(10, 10, 15, 0.6);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  border-radius: 12px;
+  padding: 10px 12px;
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  font-size: 13px;
+  line-height: 1.5;
+  transition: var(--transition-smooth);
+  resize: vertical;
+  min-height: 84px;
+}
+
+.scenario-item__textarea:focus {
+  outline: none;
+  border-color: rgba(124, 58, 237, 0.5);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+}
+
+.scenario-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 28px 22px;
+  border-top: 1px solid rgba(124, 58, 237, 0.18);
+  background: rgba(10, 10, 15, 0.4);
+  position: relative;
+  z-index: 1;
+}
+
+.scenario-modal__footer-note {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.scenario-modal__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.scenario-modal__btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-family: var(--font-main);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.scenario-modal__btn--ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border-color: rgba(124, 58, 237, 0.25);
+}
+
+.scenario-modal__btn--ghost:hover {
+  color: var(--text-primary);
+  border-color: rgba(124, 58, 237, 0.5);
+}
+
+.scenario-modal__btn--primary {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.95), rgba(6, 182, 212, 0.85));
+  color: white;
+  box-shadow: 0 10px 20px rgba(124, 58, 237, 0.35);
+}
+
+.scenario-modal__btn--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(124, 58, 237, 0.45);
+}
+
+.scenario-modal__btn--danger {
+  background: rgba(239, 68, 68, 0.18);
+  color: #fecaca;
+  border: 1px solid rgba(239, 68, 68, 0.45);
+}
+
+.scenario-modal__btn--danger:hover {
+  background: rgba(239, 68, 68, 0.3);
+  color: white;
+}
+
+.scenario-modal__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 980px) {
+  .scenario-modal__panel {
+    width: min(900px, 94vw);
+  }
+
+  .scenario-modal__toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .scenario-modal__footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .scenario-modal__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .scenario-modal__content {
+    padding: 16px 20px 10px;
+  }
+
+  .scenario-modal__footer {
+    padding: 16px 20px 20px;
+  }
+}

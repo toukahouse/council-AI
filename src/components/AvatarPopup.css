@@ -1,0 +1,62 @@
+.avatar-popup__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.avatar-popup__overlay--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.avatar-popup__wrapper {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  border-radius: var(--bubble-radius, 18px);
+  cursor: grab;
+  touch-action: none;
+  padding: 0 !important;
+  will-change: transform;
+  overflow: hidden; /* Ensure image doesn't bleed out of border-radius */
+  user-select: none; /* PREVENT BLUE HIGHLIGHT ON DRAG! */
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Ensure the background doesn't show behind transparent edges */
+.avatar-popup__wrapper.message__bubble--ai, 
+.avatar-popup__wrapper.message__bubble--user {
+  background-color: transparent !important;
+}
+
+.avatar-popup__image {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: inherit !important;
+  object-fit: cover !important;
+  display: block !important;
+  pointer-events: none !important;
+  z-index: 9999 !important;
+  opacity: 1 !important;
+  mix-blend-mode: normal !important;
+  filter: none !important;
+}
+
+@media (min-width: 640px) {
+  .avatar-popup__wrapper {
+    width: 300px;
+    height: 300px;
+  }
+}
