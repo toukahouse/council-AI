@@ -355,19 +355,24 @@ Option 4: Exclude port from reservation (run as Administrator)
  * @returns {Promise<{accessToken: string, refreshToken: string, expiresIn: number}>} OAuth tokens
  */
 export async function exchangeCode(code, verifier) {
+    const params = new URLSearchParams({
+        client_id: OAUTH_CONFIG.clientId,
+        code: code,
+        code_verifier: verifier,
+        grant_type: 'authorization_code',
+        redirect_uri: OAUTH_REDIRECT_URI
+    });
+    
+    if (OAUTH_CONFIG.clientSecret && OAUTH_CONFIG.clientSecret !== 'YOUR_CLIENT_SECRET') {
+        params.append('client_secret', OAUTH_CONFIG.clientSecret);
+    }
+
     const response = await throttledFetch(OAUTH_CONFIG.tokenUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: new URLSearchParams({
-            client_id: OAUTH_CONFIG.clientId,
-            client_secret: OAUTH_CONFIG.clientSecret,
-            code: code,
-            code_verifier: verifier,
-            grant_type: 'authorization_code',
-            redirect_uri: OAUTH_REDIRECT_URI
-        })
+        body: params
     });
 
     if (!response.ok) {
@@ -403,17 +408,22 @@ export async function refreshAccessToken(compositeRefresh) {
     // Parse the composite refresh token to extract the actual OAuth token
     const parts = parseRefreshParts(compositeRefresh);
 
+    const params = new URLSearchParams({
+        client_id: OAUTH_CONFIG.clientId,
+        refresh_token: parts.refreshToken,
+        grant_type: 'refresh_token'
+    });
+    
+    if (OAUTH_CONFIG.clientSecret && OAUTH_CONFIG.clientSecret !== 'YOUR_CLIENT_SECRET') {
+        params.append('client_secret', OAUTH_CONFIG.clientSecret);
+    }
+
     const response = await throttledFetch(OAUTH_CONFIG.tokenUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: new URLSearchParams({
-            client_id: OAUTH_CONFIG.clientId,
-            client_secret: OAUTH_CONFIG.clientSecret,
-            refresh_token: parts.refreshToken,  // Use the actual OAuth token
-            grant_type: 'refresh_token'
-        })
+        body: params
     });
 
     if (!response.ok) {
