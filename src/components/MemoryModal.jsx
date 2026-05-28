@@ -16,7 +16,7 @@ export default function MemoryModal({ isOpen, onClose, characterId }) {
   const fetchMemories = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`http://localhost:3001/api/characters/${characterId}/memories`);
+      const response = await fetch(`/api/characters/${characterId}/memories`);
       if (response.ok) {
         const data = await response.json();
         // data looks like [{ id, text, characterId }, ...]
@@ -33,7 +33,7 @@ export default function MemoryModal({ isOpen, onClose, characterId }) {
     if (!characterId) return;
     setIsSaving(true);
     try {
-      const response = await fetch(`http://localhost:3001/api/characters/${characterId}/memories`, {
+      const response = await fetch(`/api/characters/${characterId}/memories`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ memories: memories.map(m => ({ text: m.text })) })

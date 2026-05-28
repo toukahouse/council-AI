@@ -43,7 +43,7 @@ export default function CreateCharacter({ onNavigate }) {
   const handleCreate = async () => {
     setIsSubmitting(true);
     try {
-      const response = await fetch('http://localhost:3001/api/characters', {
+      const response = await fetch('/api/characters', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

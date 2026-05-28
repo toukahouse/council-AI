@@ -8,7 +8,7 @@ export default function PersonaModal({ isOpen, onClose, onSave }) {
 
   useEffect(() => {
     if (isOpen) {
-      fetch('http://localhost:3001/api/personas')
+      fetch('/api/personas')
         .then(res => res.json())
         .then(data => {
           setPersonas(data);

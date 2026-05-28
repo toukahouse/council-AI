@@ -28,7 +28,7 @@ export default function Sidebar({ isOpen, onPersonalizationOpen, onToggle, onNav
   const [chatHistory, setChatHistory] = useState([]);
 
   const fetchConversations = () => {
-    fetch('http://localhost:3001/api/conversations')
+    fetch('/api/conversations')
       .then(res => res.json())
       .then(data => {
         setChatHistory(data);
@@ -53,7 +53,7 @@ export default function Sidebar({ isOpen, onPersonalizationOpen, onToggle, onNav
     e.stopPropagation();
     if (!window.confirm('Are you sure you want to delete this conversation?')) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/conversations/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/conversations/${id}`, { method: 'DELETE' });
       if (res.ok) {
         if (activeChat === id) {
           setActiveChat(null);
@@ -69,7 +69,7 @@ export default function Sidebar({ isOpen, onPersonalizationOpen, onToggle, onNav
   const handleNewChat = async () => {
     if (conversationData?.characterId) {
       try {
-        const res = await fetch('http://localhost:3001/api/conversations', {
+        const res = await fetch('/api/conversations', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ characterId: conversationData.characterId })

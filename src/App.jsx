@@ -26,7 +26,7 @@ export default function App() {
     const { view, id } = parseHash();
     if (view === 'chat' && id && !viewData) {
       setLoading(true);
-      fetch(`http://localhost:3001/api/conversations/${id}`)
+      fetch(`/api/conversations/${id}`)
         .then(res => res.json())
         .then(data => {
           if (data && data.id) {
@@ -73,7 +73,7 @@ export default function App() {
           }
         }
         // Fetch from server if not in sessionStorage
-        fetch(`http://localhost:3001/api/conversations/${id}`)
+        fetch(`/api/conversations/${id}`)
           .then(res => res.json())
           .then(data => {
             if (data && data.id) {

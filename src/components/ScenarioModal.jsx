@@ -14,7 +14,7 @@ export default function ScenarioModal({ isOpen, onClose, characterId, conversati
   useEffect(() => {
     if (isOpen && conversationId) {
       setLoading(true);
-      fetch(`http://localhost:3001/api/conversations/${conversationId}/scenarios`)
+      fetch(`/api/conversations/${conversationId}/scenarios`)
         .then(res => res.json())
         .then(data => {
           setScenarios(Array.isArray(data) ? data : []);
@@ -54,7 +54,7 @@ export default function ScenarioModal({ isOpen, onClose, characterId, conversati
   const handleSave = async () => {
     if (!conversationId) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/conversations/${conversationId}/scenarios`, {
+      const res = await fetch(`/api/conversations/${conversationId}/scenarios`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ scenarios: scenarios.filter(s => s.text.trim()) })
@@ -93,7 +93,7 @@ export default function ScenarioModal({ isOpen, onClose, characterId, conversati
       const savedSettings = localStorage.getItem('apiSettings');
       const apiSettings = savedSettings ? JSON.parse(savedSettings) : {};
 
-      const res = await fetch(`http://localhost:3001/api/chat/${conversationId}/summarize`, {
+      const res = await fetch(`/api/chat/${conversationId}/summarize`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

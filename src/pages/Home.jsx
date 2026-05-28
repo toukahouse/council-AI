@@ -19,7 +19,7 @@ export default function Home({ onNavigate }) {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const charRes = await fetch('http://localhost:3001/api/characters');
+      const charRes = await fetch('/api/characters');
       const charData = await charRes.json();
       if (Array.isArray(charData)) {
         setAiCharacters(charData);
@@ -27,7 +27,7 @@ export default function Home({ onNavigate }) {
         console.error("Failed to load characters:", charData);
       }
 
-      const persRes = await fetch('http://localhost:3001/api/personas');
+      const persRes = await fetch('/api/personas');
       const persData = await persRes.json();
       if (Array.isArray(persData)) {
         setUserPersonas(persData);
@@ -49,7 +49,7 @@ export default function Home({ onNavigate }) {
     setIsDeleting(true);
     try {
       const endpoint = type === 'character' ? `/api/characters/${id}` : `/api/personas/${id}`;
-      const response = await fetch(`http://localhost:3001${endpoint}`, {
+      const response = await fetch(`${endpoint}`, {
         method: 'DELETE',
       });
       if (response.ok) {
@@ -65,7 +65,7 @@ export default function Home({ onNavigate }) {
 
   const handleEditCharacterSave = async (updatedData) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/characters/${popupData.id}`, {
+      const response = await fetch(`/api/characters/${popupData.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -90,7 +90,7 @@ export default function Home({ onNavigate }) {
 
   const handleEditPersonaSave = async (updatedData) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/personas/${popupData.id}`, {
+      const response = await fetch(`/api/personas/${popupData.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

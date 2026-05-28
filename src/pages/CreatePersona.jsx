@@ -40,7 +40,7 @@ export default function CreatePersona({ onNavigate }) {
   const handleCreate = async () => {
     setIsSubmitting(true);
     try {
-      const response = await fetch('http://localhost:3001/api/personas', {
+      const response = await fetch('/api/personas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

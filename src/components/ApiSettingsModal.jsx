@@ -83,7 +83,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
   // Check copilot auth status on mount
   useEffect(() => {
     if (isOpen) {
-      fetch('http://localhost:3001/api/copilot/auth/status')
+      fetch('/api/copilot/auth/status')
         .then(res => res.json())
         .then(data => setCopilotAuthenticated(data.authenticated))
         .catch(() => setCopilotAuthenticated(false));
@@ -99,7 +99,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
     setCopilotAuthStatus('Memulai proses login GitHub...');
     pollAbortRef.current = false;
     try {
-      const res = await fetch('http://localhost:3001/api/copilot/auth/start', { method: 'POST' });
+      const res = await fetch('/api/copilot/auth/start', { method: 'POST' });
       const data = await res.json();
       if (data.error) {
         setCopilotAuthStatus(`Error: ${data.error}`);
@@ -119,7 +119,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
           await new Promise(r => setTimeout(r, waitMs));
           if (pollAbortRef.current) break;
           try {
-            const pollRes = await fetch('http://localhost:3001/api/copilot/auth/poll', {
+            const pollRes = await fetch('/api/copilot/auth/poll', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ device_code: data.device_code })
@@ -156,7 +156,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
 
   const handleCopilotLogout = async () => {
     try {
-      await fetch('http://localhost:3001/api/copilot/auth/logout', { method: 'POST' });
+      await fetch('/api/copilot/auth/logout', { method: 'POST' });
       setCopilotAuthenticated(false);
       setCopilotAuthStatus('Logged out.');
     } catch (e) {

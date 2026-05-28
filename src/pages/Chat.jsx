@@ -140,7 +140,7 @@ export default function Chat({ onNavigate, conversationData }) {
 
   // Load default persona
   useEffect(() => {
-    fetch('http://localhost:3001/api/personas')
+    fetch('/api/personas')
       .then(res => res.json())
       .then(data => {
         if (data.length === 0) {
@@ -171,7 +171,7 @@ export default function Chat({ onNavigate, conversationData }) {
 
   useEffect(() => {
     if (conversationData && conversationData.id) {
-      fetch(`http://localhost:3001/api/messages/${conversationData.id}`)
+      fetch(`/api/messages/${conversationData.id}`)
         .then(res => res.json())
         .then(data => {
           if (data && data.length > 0) {
@@ -191,7 +191,7 @@ export default function Chat({ onNavigate, conversationData }) {
             // Save initial greeting to DB only once per conversation ID
             if (!initializedConvos.current.has(conversationData.id)) {
               initializedConvos.current.add(conversationData.id);
-              fetch(`http://localhost:3001/api/messages/${conversationData.id}`, {
+              fetch(`/api/messages/${conversationData.id}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ role: 'ai', content: content })
@@ -223,7 +223,7 @@ export default function Chat({ onNavigate, conversationData }) {
           const savedSettings = localStorage.getItem('apiSettings');
           const apiSettings = savedSettings ? JSON.parse(savedSettings) : {};
 
-          const res = await fetch(`http://localhost:3001/api/chat/${conversationData.id}/summarize`, {
+          const res = await fetch(`/api/chat/${conversationData.id}/summarize`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ startIndex, endIndex, activePersona, apiSettings })
@@ -321,7 +321,7 @@ export default function Chat({ onNavigate, conversationData }) {
   const handleEditCharacterSave = async (updatedData) => {
     if (!characterData?.id) return;
     try {
-      const response = await fetch(`http://localhost:3001/api/characters/${characterData.id}`, {
+      const response = await fetch(`/api/characters/${characterData.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -349,7 +349,7 @@ export default function Chat({ onNavigate, conversationData }) {
   const saveMessageToDb = async (role, content) => {
     if (!conversationData?.id) return;
     try {
-      await fetch(`http://localhost:3001/api/messages/${conversationData.id}`, {
+      await fetch(`/api/messages/${conversationData.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role, content })
@@ -363,7 +363,7 @@ export default function Chat({ onNavigate, conversationData }) {
   const refreshMessages = async () => {
     if (!conversationData?.id) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/messages/${conversationData.id}`);
+      const res = await fetch(`/api/messages/${conversationData.id}`);
       if (res.ok) {
         const data = await res.json();
         setMessages(prev => {
@@ -475,7 +475,7 @@ export default function Chat({ onNavigate, conversationData }) {
       const savedSettings = localStorage.getItem('apiSettings');
       const apiSettings = savedSettings ? JSON.parse(savedSettings) : {};
       
-      const response = await fetch(`http://localhost:3001/api/chat/${conversationData.id}/stream`, {
+      const response = await fetch(`/api/chat/${conversationData.id}/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -545,7 +545,7 @@ export default function Chat({ onNavigate, conversationData }) {
       const msg = messages.find(m => m.id === msgId);
       if (!msg) return;
       
-      await fetch(`http://localhost:3001/api/messages/${msgId}`, {
+      await fetch(`/api/messages/${msgId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: newContent })
@@ -563,7 +563,7 @@ export default function Chat({ onNavigate, conversationData }) {
 
   const handleDelete = async (msgId) => {
     try {
-      await fetch(`http://localhost:3001/api/messages/${msgId}`, { method: 'DELETE' });
+      await fetch(`/api/messages/${msgId}`, { method: 'DELETE' });
       setMessages(prev => prev.filter(m => m.id !== msgId));
     } catch (err) {
       console.error("Error deleting message:", err);
@@ -586,7 +586,7 @@ export default function Chat({ onNavigate, conversationData }) {
       }
       
       if (targetId) {
-        await fetch(`http://localhost:3001/api/messages/${targetId}?deleteAfter=true`, { method: 'DELETE' });
+        await fetch(`/api/messages/${targetId}?deleteAfter=true`, { method: 'DELETE' });
         const targetIndex = messages.findIndex(m => m.id === targetId);
         if (targetIndex !== -1) {
           setMessages(prev => prev.slice(0, targetIndex));
@@ -600,7 +600,7 @@ export default function Chat({ onNavigate, conversationData }) {
       const savedSettings = localStorage.getItem('apiSettings');
       const apiSettings = savedSettings ? JSON.parse(savedSettings) : {};
       
-      const response = await fetch(`http://localhost:3001/api/chat/${conversationData.id}/stream`, {
+      const response = await fetch(`/api/chat/${conversationData.id}/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

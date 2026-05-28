@@ -9,7 +9,7 @@ export default function SideCharactersModal({ isOpen, onClose, characterId }) {
   useEffect(() => {
     if (isOpen && characterId) {
       setLoading(true);
-      fetch(`http://localhost:3001/api/characters/${characterId}/npcs`)
+      fetch(`/api/characters/${characterId}/npcs`)
         .then(res => res.json())
         .then(data => {
           setNpcs(Array.isArray(data) ? data : []);
@@ -49,7 +49,7 @@ export default function SideCharactersModal({ isOpen, onClose, characterId }) {
   const handleSave = async () => {
     if (!characterId) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/characters/${characterId}/npcs`, {
+      const res = await fetch(`/api/characters/${characterId}/npcs`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ npcs: npcs.filter(n => n.text.trim()) })

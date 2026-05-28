@@ -108,7 +108,7 @@ export default function CardPopup({ data, type, onClose, onNavigate, onDelete, o
       
       // Check if character has a recent conversation
       if (type === 'character') {
-        fetch(`http://localhost:3001/api/characters/${data.id}/recent-conversation`)
+        fetch(`/api/characters/${data.id}/recent-conversation`)
           .then(res => res.json())
           .then(conversation => {
             if (conversation && conversation.id) {
@@ -131,7 +131,7 @@ export default function CardPopup({ data, type, onClose, onNavigate, onDelete, o
 
   const handleNewConversation = async () => {
     try {
-      const res = await fetch('http://localhost:3001/api/conversations', {
+      const res = await fetch('/api/conversations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ characterId: data.id })
