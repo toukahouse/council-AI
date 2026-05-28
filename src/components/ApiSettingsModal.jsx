@@ -212,7 +212,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
 
   const handleGravityLogin = async () => {
     try {
-      const url = gravityProxyUrl ? gravityProxyUrl.replace(/\/+$/, '') : 'http://localhost:8080';
+      const url = gravityProxyUrl ? gravityProxyUrl.replace(/\/+$/, '') : '/proxy';
       
       let initialAccounts = [];
       try {
@@ -273,7 +273,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
   const handleGravityHealthCheck = async () => {
     try {
       setGravityHealthResult('Memeriksa koneksi...');
-      const url = gravityProxyUrl ? gravityProxyUrl.replace(/\/+$/, '') : 'http://localhost:8080';
+      const url = gravityProxyUrl ? gravityProxyUrl.replace(/\/+$/, '') : '/proxy';
       const res = await fetch(`${url}/health`);
       if (!res.ok) throw new Error('Koneksi gagal');
       const data = await res.json();
@@ -305,7 +305,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
 
   const handleGravityFetchModels = async () => {
     try {
-      const url = gravityProxyUrl ? gravityProxyUrl.replace(/\/+$/, '') : 'http://localhost:8080';
+      const url = gravityProxyUrl ? gravityProxyUrl.replace(/\/+$/, '') : '/proxy';
       const res = await fetch(`${url}/v1/models`, { headers: { 'x-api-key': 'test' } });
       if (!res.ok) throw new Error('Gagal mengambil model');
       const data = await res.json();
