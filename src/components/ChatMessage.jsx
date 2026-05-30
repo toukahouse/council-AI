@@ -138,7 +138,7 @@ export default function ChatMessage({ message, seqId, isTyping, animate, charNam
             <div style={{ position: 'relative' }}>
               <button 
                 onClick={() => setShowMenu(!showMenu)}
-                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px 8px', borderRadius: '4px', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                style={{ background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.15)', color: 'var(--text-primary)', cursor: 'pointer', padding: '4px 10px', borderRadius: '8px', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}
                 title="Options"
               >⋮</button>
               
