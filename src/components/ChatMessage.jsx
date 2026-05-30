@@ -111,7 +111,7 @@ export default function ChatMessage({ message, seqId, isTyping, animate, charNam
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '8px', flexDirection: isUser ? 'row-reverse' : 'row' }}>
           <div className={`message__bubble ${isUser ? 'message__bubble--user' : 'message__bubble--ai'} ${animClass}`}>
             {isEditing ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '400px', maxWidth: '100%' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', minWidth: '250px', maxWidth: '100%' }}>
                 <textarea 
                   value={editContent} 
                   onChange={(e) => setEditContent(e.target.value)}
