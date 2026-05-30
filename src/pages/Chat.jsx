@@ -210,8 +210,8 @@ export default function Chat({ onNavigate, conversationData }) {
 
   // Auto-summarization effect
   useEffect(() => {
-    // Only trigger if we have a valid conversation and it's a multiple of 30
-    if (messages.length > 0 && messages.length % 30 === 0 && messages.length > lastSummarizedCount.current && !isTyping && conversationData?.id) {
+    // Only trigger if we have a valid conversation and it's a multiple of 30 exchanges (e.g. at 31 messages: 1 greeting + 15 user + 15 AI)
+    if (messages.length > 30 && (messages.length - 1) % 30 === 0 && messages.length > lastSummarizedCount.current && !isTyping && conversationData?.id) {
       const runAutoSummarize = async () => {
         setIsSummarizing(true);
         lastSummarizedCount.current = messages.length;
