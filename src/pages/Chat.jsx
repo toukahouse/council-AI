@@ -705,7 +705,7 @@ export default function Chat({ onNavigate, conversationData }) {
       {/* Main Chat Area */}
       <main className={`chat-main ${rightSidebarOpen ? 'chat-main--rsidebar-open' : ''}`} style={chatBg}>
         {/* Background decoration */}
-        <div className="chat-main__bg-orb chat-main__bg-orb--1" style={{ background: `radial-gradient(circle, ${settings.accent}18 0%, transparent 70%)` }} />
+        <div className="chat-main__bg-orb chat-main__bg-orb--1" style={{ background: `radial-gradient(circle, ${settings.accent}18 0%, ${settings.accent}00 70%)` }} />
         <div className="chat-main__bg-orb chat-main__bg-orb--2" />
 
         {/* Top Header */}
@@ -744,7 +744,7 @@ export default function Chat({ onNavigate, conversationData }) {
                 <h1 className="chat-header__name">{charName}</h1>
                 <p className="chat-header__status">
                   <span className="chat-header__status-pulse"></span>
-                  Online · Siap membantu
+                  Online
                 </p>
               </div>
             </div>
