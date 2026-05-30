@@ -1,6 +1,7 @@
 .home-container {
   display: flex;
   height: 100vh;
+  height: 100dvh;
   width: 100vw;
   background: var(--bg-primary);
   color: var(--text-primary);
