@@ -35,7 +35,6 @@
   flex-direction: column;
   transform: translateX(100%);
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: -20px 0 60px rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
@@ -51,6 +50,7 @@
 
 .rsidebar--open {
   transform: translateX(0);
+  box-shadow: -20px 0 60px rgba(0, 0, 0, 0.55);
 }
 
 @media (min-width: 1101px) {

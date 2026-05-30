@@ -416,7 +416,7 @@
    ============================ */
 @media (max-width: 900px) {
   .chat-header {
-    padding: 12px 16px;
+    padding: 12px 20px;
   }
 
   .chat-header__left {
