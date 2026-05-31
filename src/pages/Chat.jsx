@@ -13,6 +13,7 @@ import ApiSettingsModal from '../components/ApiSettingsModal';
 import CardPopup from '../components/CardPopup';
 import AvatarPopup from '../components/AvatarPopup';
 import TimeModal from '../components/TimeModal';
+import ChatInput from '../components/ChatInput';
 import '../App.css';
 
 const defaultSettings = {
@@ -107,7 +108,6 @@ export default function Chat({ onNavigate, conversationData }) {
   const [roleplayDate, setRoleplayDate] = useState('');
   
   const [messages, setMessages] = useState([]);
-  const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [settings, setSettings] = useState(() => {
     const saved = localStorage.getItem('personalizeSettings');
@@ -451,10 +451,10 @@ export default function Chat({ onNavigate, conversationData }) {
     }
   };
 
-  const handleSend = async () => {
-    if (!inputValue.trim()) return;
+  const handleSend = async (content) => {
+    if (!content || !content.trim()) return;
 
-    const content = inputValue.trim();
+    content = content.trim();
     const userMsg = {
       id: Date.now().toString(),
       role: 'user',
@@ -463,7 +463,6 @@ export default function Chat({ onNavigate, conversationData }) {
     };
 
     setMessages((prev) => [...prev, userMsg]);
-    setInputValue('');
     setIsTyping(true);
 
     if (!conversationData?.id) return;
@@ -639,12 +638,7 @@ export default function Chat({ onNavigate, conversationData }) {
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
+
 
   let chatBg = backgroundStyles[settings.background] || backgroundStyles.default;
   if (settings.background === 'custom' && settings.customBgUrl) {
@@ -821,50 +815,17 @@ export default function Chat({ onNavigate, conversationData }) {
         </div>
 
         {/* Input */}
-        <div className="chat-input-wrap">
-          <div className={`chat-input ${bubbleTheme.userAnimClass || ''}`}>
-            <textarea
-              ref={inputRef}
-              className="chat-input__textarea"
-              id="chat-textarea"
-              placeholder={isSummarizing ? "Sistem sedang meringkas cerita..." : (!hasPersonas && personasLoaded) ? "Buat Persona terlebih dahulu untuk mulai chat..." : "Type your message..."}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              disabled={isTyping || isSummarizing || (!hasPersonas && personasLoaded)}
-              rows="1"
-              style={{ fontSize: `${settings.fontSize}px` }}
-            />
-            {abortController ? (
-              <button
-                className="chat-input__send chat-input__send--active"
-                onClick={handleStop}
-                aria-label="Stop generation"
-                title="Stop Generation"
-                style={{ background: '#e11d48' }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                </svg>
-              </button>
-            ) : (
-              <button
-                className={`chat-input__send ${inputValue.trim() ? 'chat-input__send--active' : ''}`}
-                id="btn-send"
-                onClick={handleSend}
-                disabled={!inputValue.trim() || isTyping || isSummarizing || (!hasPersonas && personasLoaded)}
-                aria-label="Send message"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-                  <path d="M8 5v14l11-7z"/>
-                </svg>
-              </button>
-            )}
-          </div>
-          <div className="chat-input__note">
-            Gunakan <strong>Shift+Enter</strong> untuk membuat baris baru. Tekan <strong>Enter</strong> untuk mengirim.
-          </div>
-        </div>
+        <ChatInput 
+          bubbleTheme={bubbleTheme}
+          isSummarizing={isSummarizing}
+          hasPersonas={hasPersonas}
+          personasLoaded={personasLoaded}
+          isTyping={isTyping}
+          fontSize={settings.fontSize}
+          abortController={abortController}
+          onStop={handleStop}
+          onSend={handleSend}
+        />
       </main>
 
 

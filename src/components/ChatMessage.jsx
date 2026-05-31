@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './ChatMessage.css';
 
-export default function ChatMessage({ message, seqId, isTyping, animate, charName, charAvatar, userName, userAvatar, onEdit, onDelete, onRegenerate, bubbleTheme, onAvatarClick }) {
+const ChatMessageComponent = ({ message, seqId, isTyping, animate, charName, charAvatar, userName, userAvatar, onEdit, onDelete, onRegenerate, bubbleTheme, onAvatarClick }) => {
   const [showThoughts, setShowThoughts] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -196,4 +196,20 @@ export default function ChatMessage({ message, seqId, isTyping, animate, charNam
       )}
     </div>
   );
-}
+};
+
+import React from 'react';
+
+export default React.memo(ChatMessageComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.message.id === nextProps.message.id &&
+    prevProps.message.content === nextProps.message.content &&
+    prevProps.message.isThinking === nextProps.message.isThinking &&
+    prevProps.message.isGenerating === nextProps.message.isGenerating &&
+    prevProps.message.thoughtProcess === nextProps.message.thoughtProcess &&
+    prevProps.isTyping === nextProps.isTyping &&
+    prevProps.bubbleTheme === nextProps.bubbleTheme &&
+    prevProps.charAvatar === nextProps.charAvatar &&
+    prevProps.userAvatar === nextProps.userAvatar
+  );
+});
