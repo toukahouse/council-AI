@@ -174,6 +174,21 @@ app.post('/api/conversations', async (req, res) => {
   }
 });
 
+// Update conversation time and date
+app.put('/api/conversations/:id/time', async (req, res) => {
+  try {
+    const { roleplayTime, roleplayDate } = req.body;
+    const conversation = await prisma.conversation.update({
+      where: { id: req.params.id },
+      data: { roleplayTime, roleplayDate }
+    });
+    res.json(conversation);
+  } catch (error) {
+    console.error("Error updating conversation time:", error);
+    res.status(500).json({ error: "Failed to update conversation time" });
+  }
+});
+
 
 // ==========================================
 // PERSONA ROUTES

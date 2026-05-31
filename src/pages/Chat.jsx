@@ -104,8 +104,21 @@ export default function Chat({ onNavigate, conversationData }) {
   const [avatarPopup, setAvatarPopup] = useState(null);
   const [timeModalOpen, setTimeModalOpen] = useState(false);
   
-  const [roleplayTime, setRoleplayTime] = useState('12:00');
-  const [roleplayDate, setRoleplayDate] = useState('');
+  const [roleplayTime, setRoleplayTime] = useState(conversationData?.roleplayTime || '12:00');
+  const [roleplayDate, setRoleplayDate] = useState(conversationData?.roleplayDate || '');
+
+  const saveTimeToDb = async (time, date) => {
+    if (!conversationData?.id) return;
+    try {
+      await fetch(`/api/conversations/${conversationData.id}/time`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roleplayTime: time, roleplayDate: date })
+      });
+    } catch (err) {
+      console.error('Failed to save time:', err);
+    }
+  };
   
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -279,12 +292,10 @@ export default function Chat({ onNavigate, conversationData }) {
   // Apply CSS vars when settings change
   useEffect(() => {
     if (conversationData?.id) {
-      const savedTime = localStorage.getItem(`roleplayTime_${conversationData.id}`);
-      const savedDate = localStorage.getItem(`roleplayDate_${conversationData.id}`);
-      if (savedTime) setRoleplayTime(savedTime);
-      if (savedDate) setRoleplayDate(savedDate);
+      if (conversationData.roleplayTime) setRoleplayTime(conversationData.roleplayTime);
+      if (conversationData.roleplayDate) setRoleplayDate(conversationData.roleplayDate);
     }
-  }, [conversationData?.id]);
+  }, [conversationData?.id, conversationData?.roleplayTime, conversationData?.roleplayDate]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -505,7 +516,7 @@ export default function Chat({ onNavigate, conversationData }) {
           }
           const formattedTime = `${newHours.toString().padStart(2, '0')}:${newMinutes.toString().padStart(2, '0')}`;
           setRoleplayTime(formattedTime);
-          localStorage.setItem(`roleplayTime_${conversationData.id}`, formattedTime);
+          saveTimeToDb(formattedTime, roleplayDate);
         } catch(e) {
           console.error("Error parsing time", e);
         }
@@ -926,10 +937,7 @@ export default function Chat({ onNavigate, conversationData }) {
         onSave={(data) => {
           setRoleplayTime(data.time);
           setRoleplayDate(data.date);
-          if (conversationData?.id) {
-            localStorage.setItem(`roleplayTime_${conversationData.id}`, data.time);
-            localStorage.setItem(`roleplayDate_${conversationData.id}`, data.date);
-          }
+          saveTimeToDb(data.time, data.date);
         }}
       />
 
