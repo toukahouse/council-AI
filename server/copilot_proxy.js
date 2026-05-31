@@ -132,6 +132,12 @@ async function main() {
     if (apiSettings?.topP !== undefined) {
       requestBody.top_p = apiSettings.topP;
     }
+    if (apiSettings?.maxTokens) {
+      const parsedMax = parseInt(apiSettings.maxTokens, 10);
+      if (!isNaN(parsedMax) && parsedMax > 0) {
+        requestBody.max_tokens = parsedMax;
+      }
+    }
 
     const response = await fetch('https://api.githubcopilot.com/chat/completions', {
       method: 'POST',
