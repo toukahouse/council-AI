@@ -338,7 +338,11 @@ export default function Chat({ onNavigate, conversationData }) {
         const updatedCharacter = await response.json();
         setEditCharacterOpen(false);
         if (onNavigate) {
-          onNavigate('chat', updatedCharacter);
+          const updatedConversation = {
+            ...conversationData,
+            character: updatedCharacter
+          };
+          onNavigate('chat', updatedConversation);
         }
       }
     } catch (error) {
