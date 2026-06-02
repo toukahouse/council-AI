@@ -115,6 +115,16 @@ export default function Chat({ onNavigate, conversationData }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ roleplayTime: time, roleplayDate: date })
       });
+      
+      const saved = sessionStorage.getItem('chatbot_viewData');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.id === conversationData.id) {
+          parsed.roleplayTime = time;
+          parsed.roleplayDate = date;
+          sessionStorage.setItem('chatbot_viewData', JSON.stringify(parsed));
+        }
+      }
     } catch (err) {
       console.error('Failed to save time:', err);
     }
