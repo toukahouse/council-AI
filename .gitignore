@@ -42,3 +42,5 @@ __pycache__/
 # Local Config and Credentials
 .config/
 server/copilot-data.json
+
+9router/

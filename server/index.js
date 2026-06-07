@@ -513,7 +513,10 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
     res.setHeader('X-Accel-Buffering', 'no'); // Disable Nginx buffering
 
     let childProcess;
-    if (apiSettings && apiSettings.aiEngine === 'copilot') {
+    if (apiSettings && apiSettings.aiEngine === '9router') {
+      const ninerouterScript = path.join(__dirname, 'ninerouter_proxy.js');
+      childProcess = spawn('node', [ninerouterScript]);
+    } else if (apiSettings && apiSettings.aiEngine === 'copilot') {
       const copilotScript = path.join(__dirname, 'copilot_proxy.js');
       childProcess = spawn('node', [copilotScript]);
     } else if (apiSettings && apiSettings.aiEngine === 'gravity') {
@@ -790,7 +793,10 @@ ATURAN MUTLAK:
     };
 
     let childProcess;
-    if (apiSettings && apiSettings.aiEngine === 'copilot') {
+    if (apiSettings && apiSettings.aiEngine === '9router') {
+      const ninerouterScript = path.join(__dirname, 'ninerouter_proxy.js');
+      childProcess = spawn('node', [ninerouterScript]);
+    } else if (apiSettings && apiSettings.aiEngine === 'copilot') {
       const copilotScript = path.join(__dirname, 'copilot_proxy.js');
       childProcess = spawn('node', [copilotScript]);
     } else if (apiSettings && apiSettings.aiEngine === 'gravity') {

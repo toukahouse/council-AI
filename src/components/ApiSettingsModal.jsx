@@ -46,6 +46,11 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
   const [copilotDeviceCode, setCopilotDeviceCode] = useState('');
   const [copilotAuthStatus, setCopilotAuthStatus] = useState('');
 
+  // 9Router Settings
+  const [ninerouterUrl, setNinerouterUrl] = useState('https://supernova-inovategames.me/v1');
+  const [ninerouterApiKey, setNinerouterApiKey] = useState('');
+  const [ninerouterModel, setNinerouterModel] = useState('');
+
   // Load from localStorage on mount
   useState(() => {
     try {
@@ -76,6 +81,11 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
         if (parsed.gravityIsLoggedIn !== undefined) setGravityIsLoggedIn(parsed.gravityIsLoggedIn);
         if (parsed.gravityAccountEmail !== undefined) setGravityAccountEmail(parsed.gravityAccountEmail);
         if (parsed.gravityAvailableAccounts !== undefined) setGravityAvailableAccounts(parsed.gravityAvailableAccounts);
+        
+        // 9Router settings load
+        if (parsed.ninerouterUrl !== undefined) setNinerouterUrl(parsed.ninerouterUrl);
+        if (parsed.ninerouterApiKey !== undefined) setNinerouterApiKey(parsed.ninerouterApiKey);
+        if (parsed.ninerouterModel !== undefined) setNinerouterModel(parsed.ninerouterModel);
       }
     } catch (e) {
       console.error("Error loading settings", e);
@@ -187,7 +197,10 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
       gravityModel,
       gravityIsLoggedIn,
       gravityAccountEmail,
-      gravityAvailableAccounts
+      gravityAvailableAccounts,
+      ninerouterUrl,
+      ninerouterApiKey,
+      ninerouterModel
     };
     localStorage.setItem('apiSettings', JSON.stringify(settings));
     onClose();
@@ -456,6 +469,13 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                       onClick={() => setAiEngine('gravity')}
                     >
                       Gravity Proxy
+                    </button>
+                    <button
+                      className={`api-modal__btn ${aiEngine === '9router' ? 'api-modal__btn--primary' : 'api-modal__btn--ghost'}`}
+                      type="button"
+                      onClick={() => setAiEngine('9router')}
+                    >
+                      9Router
                     </button>
                   </div>
                 </div>
@@ -792,6 +812,41 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                           🔄 Ambil Model
                         </button>
                       </div>
+                    </div>
+                  </>
+                )}
+
+                {aiEngine === '9router' && (
+                  <>
+                    <div className="api-modal__field">
+                      <label className="api-modal__label">9Router API Endpoint</label>
+                      <input
+                        className="api-modal__input"
+                        type="text"
+                        placeholder="Contoh: https://supernova-inovategames.me/v1"
+                        value={ninerouterUrl}
+                        onChange={(e) => setNinerouterUrl(e.target.value)}
+                      />
+                    </div>
+                    <div className="api-modal__field">
+                      <label className="api-modal__label">API Key 9Router</label>
+                      <input
+                        className="api-modal__input"
+                        type="password"
+                        placeholder="Masukkan API Key dari dashboard 9Router"
+                        value={ninerouterApiKey}
+                        onChange={(e) => setNinerouterApiKey(e.target.value)}
+                      />
+                    </div>
+                    <div className="api-modal__field">
+                      <label className="api-modal__label">Nama Combo / Model</label>
+                      <input
+                        className="api-modal__input"
+                        type="text"
+                        placeholder="Contoh: cc/claude-opus-4-6 atau nama combo Anda"
+                        value={ninerouterModel}
+                        onChange={(e) => setNinerouterModel(e.target.value)}
+                      />
                     </div>
                   </>
                 )}
