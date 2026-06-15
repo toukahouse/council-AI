@@ -139,6 +139,18 @@ export default function EditCharacterModal({ isOpen, onClose, data, onSave }) {
                 </div>
 
                 <div className="edit-modal__field">
+                  <label className="edit-modal__label" htmlFor="modal-character-name">Nama karakter</label>
+                  <input
+                    id="modal-character-name"
+                    type="text"
+                    className="edit-modal__input"
+                    placeholder="Contoh: Council AI"
+                    value={formData.name}
+                    onChange={handleFieldChange('name')}
+                  />
+                </div>
+
+                <div className="edit-modal__field">
                   <label className="edit-modal__label" htmlFor="modal-character-short-desc">Deskripsi singkat karakter</label>
                   <textarea
                     id="modal-character-short-desc"
