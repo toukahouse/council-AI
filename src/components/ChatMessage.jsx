@@ -7,11 +7,16 @@ const ChatMessageComponent = ({ message, seqId, isTyping, animate, charName, cha
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState('');
   const isUser = message.role === 'user';
-  const [elapsedMs, setElapsedMs] = useState(0);
+  const [elapsedMs, setElapsedMs] = useState(() => {
+    if (message.endTime && message.startTime) return message.endTime - message.startTime;
+    if (message.startTime) return Math.max(0, Date.now() - message.startTime);
+    return 0;
+  });
 
   useEffect(() => {
     let interval;
     if (message.isGenerating && message.startTime) {
+      setElapsedMs(Date.now() - message.startTime);
       interval = setInterval(() => {
         setElapsedMs(Date.now() - message.startTime);
       }, 100);
@@ -173,7 +178,7 @@ const ChatMessageComponent = ({ message, seqId, isTyping, animate, charName, cha
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', alignSelf: isUser ? 'flex-end' : 'flex-start' }}>
-          {message.startTime && elapsedMs > 0 && (
+          {message.startTime && (
             <span className="message__time" style={{ color: 'var(--accent)', opacity: 0.8 }}>
               {(elapsedMs / 1000).toFixed(1)}s
             </span>

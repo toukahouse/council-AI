@@ -302,8 +302,8 @@ export default function Chat({ onNavigate, conversationData }) {
   // Apply CSS vars when settings change
   useEffect(() => {
     if (conversationData?.id) {
-      if (conversationData.roleplayTime) setRoleplayTime(conversationData.roleplayTime);
-      if (conversationData.roleplayDate) setRoleplayDate(conversationData.roleplayDate);
+      setRoleplayTime(conversationData.roleplayTime || '12:00');
+      setRoleplayDate(conversationData.roleplayDate || '');
     }
   }, [conversationData?.id, conversationData?.roleplayTime, conversationData?.roleplayDate]);
 

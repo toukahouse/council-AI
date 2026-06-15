@@ -28,7 +28,7 @@ export default function Sidebar({ isOpen, onPersonalizationOpen, onToggle, onNav
   const [chatHistory, setChatHistory] = useState([]);
 
   const fetchConversations = () => {
-    fetch('/api/conversations')
+    fetch('/api/conversations', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         setChatHistory(data);
