@@ -492,6 +492,18 @@ export default function Chat({ onNavigate, conversationData }) {
 
     if (!conversationData?.id) return;
 
+    const aiMsgId = (Date.now() + 1).toString();
+    setMessages((prev) => [...prev, { 
+      id: aiMsgId, 
+      role: 'ai', 
+      content: '', 
+      thoughtProcess: '',
+      isThinking: true,
+      isGenerating: true,
+      startTime: Date.now(),
+      time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) 
+    }]);
+
     try {
       const controller = new AbortController();
       setAbortController(controller);
@@ -532,17 +544,6 @@ export default function Chat({ onNavigate, conversationData }) {
         }
       }
 
-      const aiMsgId = (Date.now() + 1).toString();
-      setMessages((prev) => [...prev, { 
-        id: aiMsgId, 
-        role: 'ai', 
-        content: '', 
-        thoughtProcess: '',
-        isThinking: true,
-        isGenerating: true,
-        startTime: Date.now(),
-        time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) 
-      }]);
       setIsTyping(false);
 
       await processStream(response, aiMsgId);
@@ -550,6 +551,7 @@ export default function Chat({ onNavigate, conversationData }) {
     } catch (err) {
       if (err.name !== 'AbortError') {
         console.error("Error during streaming:", err);
+        setMessages((prev) => prev.filter((m) => m.id !== aiMsgId));
       }
       setIsTyping(false);
       setAbortController(null);
@@ -595,6 +597,7 @@ export default function Chat({ onNavigate, conversationData }) {
   };
 
   const handleRegenerate = async (msgId) => {
+    let aiMsgId = null;
     try {
       const msgIndex = messages.findIndex(m => m.id === msgId);
       if (msgIndex === -1) return;
@@ -618,6 +621,19 @@ export default function Chat({ onNavigate, conversationData }) {
       }
       
       setIsTyping(true);
+      
+      aiMsgId = (Date.now() + 1).toString();
+      setMessages((prev) => [...prev, { 
+        id: aiMsgId, 
+        role: 'ai', 
+        content: '', 
+        thoughtProcess: '',
+        isThinking: true,
+        isGenerating: true,
+        startTime: Date.now(),
+        time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) 
+      }]);
+
       const controller = new AbortController();
       setAbortController(controller);
       
@@ -639,17 +655,6 @@ export default function Chat({ onNavigate, conversationData }) {
       
       if (!response.ok) throw new Error('Network response was not ok');
 
-      const aiMsgId = (Date.now() + 1).toString();
-      setMessages((prev) => [...prev, { 
-        id: aiMsgId, 
-        role: 'ai', 
-        content: '', 
-        thoughtProcess: '',
-        isThinking: true,
-        isGenerating: true,
-        startTime: Date.now(),
-        time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) 
-      }]);
       setIsTyping(false);
 
       await processStream(response, aiMsgId);
@@ -657,6 +662,9 @@ export default function Chat({ onNavigate, conversationData }) {
     } catch (err) {
       if (err.name !== 'AbortError') {
         console.error("Error regenerating:", err);
+        if (aiMsgId) {
+          setMessages((prev) => prev.filter((m) => m.id !== aiMsgId));
+        }
       }
       setIsTyping(false);
       setAbortController(null);
@@ -824,17 +832,7 @@ export default function Chat({ onNavigate, conversationData }) {
                 }}
               />
             ))}
-            {isTyping && (
-              <ChatMessage
-                message={{ id: 'typing', role: 'ai', content: '', time: '' }}
-                isTyping={true}
-                animate={true}
-                charName={charName}
-                charAvatar={charAvatar}
-                userName={activePersona?.name}
-                userAvatar={activePersona?.avatar}
-              />
-            )}
+            {/* Removed standalone isTyping bubble because the actual message bubble is pushed immediately and acts as typing indicator */}
             <div ref={messagesEndRef} />
           </div>
         </div>
