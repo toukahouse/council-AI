@@ -80,10 +80,24 @@ def main():
         
     # 5. Pesan Baru dari User
     if new_message:
+        new_msg_text = new_message
+        
+        # --- SYSTEM REMINDER INJECTION ---
+        reminder_parts = []
+        if sys_prompt:
+            reminder_parts.append(f"System Prompt:\n{sys_prompt}")
+        if char_persona:
+            reminder_parts.append(f"Karakter Persona:\n{char_persona}")
+            
+        if reminder_parts:
+            reminder_text = "\n\n[SYSTEM REMINDER: Tolong ingat kembali instruksi berikut]\n" + "\n\n".join(reminder_parts) + "\nSelalu ingat dan ikuti instruksi di atas dalam merespons."
+            new_msg_text += reminder_text
+        # ---------------------------------
+            
         contents.append(
             types.Content(
                 role="user",
-                parts=[types.Part.from_text(text=new_message)]
+                parts=[types.Part.from_text(text=new_msg_text)]
             )
         )
 

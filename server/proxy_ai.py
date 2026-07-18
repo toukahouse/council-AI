@@ -119,6 +119,17 @@ async def main():
             role = "AI" if msg.get("role") == "ai" else "User"
             prompt_parts.append(f"{role}: {msg.get('content', '')}")
             
+    # --- SYSTEM REMINDER INJECTION ---
+    reminder_parts = []
+    if sys_prompt:
+        reminder_parts.append(f"System Prompt:\n{sys_prompt}")
+    if char_persona:
+        reminder_parts.append(f"Karakter Persona:\n{char_persona}")
+        
+    if reminder_parts:
+        prompt_parts.append("[SYSTEM REMINDER: Tolong ingat kembali instruksi berikut]\n" + "\n\n".join(reminder_parts) + "\nSelalu ingat dan ikuti instruksi di atas dalam merespons.")
+    # ---------------------------------
+
     # 5. New Message
     if new_message:
         prompt_parts.append(f"[Pesan Baru]\nUser: {new_message}")

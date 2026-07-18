@@ -84,7 +84,23 @@ async function main() {
 
   // Add new message if present
   if (newMessage) {
-    messages.push({ role: 'user', content: newMessage });
+    let finalNewMessage = newMessage;
+    
+    // --- SYSTEM REMINDER INJECTION ---
+    const reminderParts = [];
+    if (character?.systemPrompt) {
+      reminderParts.push(`System Prompt:\n${character.systemPrompt}`);
+    }
+    if (character?.personality) {
+      reminderParts.push(`Karakter Persona:\n${character.personality}`);
+    }
+    
+    if (reminderParts.length > 0) {
+      finalNewMessage += "\n\n[SYSTEM REMINDER: Tolong ingat kembali instruksi berikut]\n" + reminderParts.join("\n\n") + "\nSelalu ingat dan ikuti instruksi di atas dalam merespons.";
+    }
+    // ---------------------------------
+
+    messages.push({ role: 'user', content: finalNewMessage });
   }
 
   let githubToken = null;

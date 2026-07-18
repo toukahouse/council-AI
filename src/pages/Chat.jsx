@@ -614,10 +614,10 @@ export default function Chat({ onNavigate, conversationData }) {
       
       if (targetId) {
         await fetch(`/api/messages/${targetId}?deleteAfter=true`, { method: 'DELETE' });
-        const targetIndex = messages.findIndex(m => m.id === targetId);
-        if (targetIndex !== -1) {
-          setMessages(prev => prev.slice(0, targetIndex));
-        }
+        setMessages(prev => {
+          const idx = prev.findIndex(m => m.id === targetId);
+          return idx !== -1 ? prev.slice(0, idx) : prev;
+        });
       }
       
       setIsTyping(true);

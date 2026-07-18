@@ -46,6 +46,9 @@ async function main() {
     promptParts.push(`Memory Karakter AI:\n${memories.map(m => `- ${m}`).join('\n')}`);
   }
   
+  // Add cache buster to bypass 9Router's aggressive caching on resend/edit
+  promptParts.push(`[System: Current Time Salt - ${Date.now()}]`);
+  
   const systemPrompt = promptParts.join('\n\n');
   
   // Build messages array (OpenAI Format)
@@ -66,7 +69,23 @@ async function main() {
 
   // Add new message if present
   if (newMessage) {
-    finalMessages.push({ role: 'user', content: newMessage });
+    let finalNewMessage = newMessage;
+    
+    // --- SYSTEM REMINDER INJECTION ---
+    const reminderParts = [];
+    if (character?.systemPrompt) {
+      reminderParts.push(`System Prompt:\n${character.systemPrompt}`);
+    }
+    if (character?.personality) {
+      reminderParts.push(`Karakter Persona:\n${character.personality}`);
+    }
+    
+    if (reminderParts.length > 0) {
+      finalNewMessage += "\n\n[SYSTEM REMINDER: Tolong ingat kembali instruksi berikut]\n" + reminderParts.join("\n\n") + "\nSelalu ingat dan ikuti instruksi di atas dalam merespons.";
+    }
+    // ---------------------------------
+
+    finalMessages.push({ role: 'user', content: finalNewMessage });
   }
 
   try {
