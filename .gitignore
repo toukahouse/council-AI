@@ -44,3 +44,6 @@ __pycache__/
 server/copilot-data.json
 
 9router/
+
+systemprompt.md
+persona.md
