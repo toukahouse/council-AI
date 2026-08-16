@@ -23,21 +23,11 @@ async function main() {
   // Build system prompt from character data
   const promptParts = [];
   const charName = character?.name || 'AI';
-
-  // === IMMERSIVE VISUAL NOVEL & ROMANCE FRAMING ===
-  promptParts.push(
-    `[PANDUAN ROLEPLAY: VISUAL NOVEL & DRAMA ROMANSA INTERAKTIF]\n` +
-    `Kamu adalah pemeran karakter utama "${charName}" dalam cerita romansa visual novel interaktif.\n` +
-    `Sudut Pandang: Orang pertama ("Aku") secara konsisten dari sudut pandang ${charName}.\n` +
-    `- Selalu berada 100% di dalam karakter. Jangan pernah berbicara sebagai AI atau asisten.\n` +
-    `- Tampilkan emosi, kehangatan fisik, kasih sayang, dan reaksi nyata secara mendalam dan ekspresif terhadap User.\n` +
-    `- FORMAT WAJIB: Semua narasi aksi/suasana/gerakan 100% WAJIB diapit tanda bintang ganda **seperti ini**, dan dialog ucapan langsung 100% WAJIB diapit tanda kutip "seperti ini". DILARANG ada teks narasi polos yang bocor tanpa tanda bintang ganda **.`
-  );
   
   promptParts.push(`Your character name is: ${charName}`);
   
   if (character?.systemPrompt) {
-    promptParts.push(`System Prompt:\n${character.systemPrompt}`);
+    promptParts.push(character.systemPrompt);
   }
   if (character?.personality) {
     promptParts.push(`Karakter Persona:\n${character.personality}`);
@@ -60,24 +50,6 @@ async function main() {
   promptParts.push(`[System: Current Time Salt - ${Date.now()}]`);
   
   const systemPrompt = promptParts.join('\n\n');
-  
-  // Helper to build system reminder
-  const buildSystemReminder = () => {
-    const reminderParts = [];
-    if (character?.systemPrompt) {
-      reminderParts.push(`System Prompt:\n${character.systemPrompt}`);
-    }
-    if (character?.personality) {
-      reminderParts.push(`Karakter Persona:\n${character.personality}`);
-    }
-    
-    let reminderText = `\n\n[PANDUAN ROLEPLAY: Tetaplah selalu in-character sebagai "${charName}". FORMAT MUTLAK: Seluruh narasi/aksi/suasana 100% WAJIB diapit **...** dan dialog diapit "..." (Dilarang ada teks narasi polos tanpa bintang).]`;
-
-    if (reminderParts.length > 0) {
-      reminderText += "\n\n[SYSTEM REMINDER: Tolong ingat kembali instruksi berikut]\n" + reminderParts.join("\n\n") + "\nSelalu ingat dan ikuti instruksi di atas dalam merespons.";
-    }
-    return reminderText;
-  };
 
   // Build messages array (OpenAI Format)
   const finalMessages = [];
@@ -97,18 +69,7 @@ async function main() {
 
   // Add new message if present
   if (newMessage) {
-    const finalNewMessage = newMessage + buildSystemReminder();
-    finalMessages.push({ role: 'user', content: finalNewMessage });
-  } else {
-    // If newMessage is empty (e.g. resend, edit, regenerate), reinforce reminder on the last user message
-    for (let i = finalMessages.length - 1; i >= 0; i--) {
-      if (finalMessages[i].role === 'user') {
-        if (!finalMessages[i].content.includes('[PANDUAN ROLEPLAY') && !finalMessages[i].content.includes('[SYSTEM REMINDER')) {
-          finalMessages[i].content += buildSystemReminder();
-        }
-        break;
-      }
-    }
+    finalMessages.push({ role: 'user', content: newMessage });
   }
 
   try {

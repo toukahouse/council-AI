@@ -635,19 +635,7 @@ export default function Chat({ onNavigate, conversationData }) {
       if (msgIndex === -1) return;
       const targetMsg = messages[msgIndex];
 
-      // 1. Update the target message content in DB
-      await fetch(`/api/messages/${msgId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: newContent })
-      });
-
-      // 2. Delete all subsequent messages in DB (messages after targetIndex)
-      await fetch(`/api/messages/${msgId}?onlyAfter=true`, {
-        method: 'DELETE'
-      });
-
-      // 3. Update frontend messages state: truncate after targetIndex and update content
+      // 1. Optimistically update local state immediately so UI is responsive
       const updatedMessages = [
         ...messages.slice(0, msgIndex),
         { ...targetMsg, content: newContent }
@@ -655,7 +643,22 @@ export default function Chat({ onNavigate, conversationData }) {
       setMessages(updatedMessages);
       setSidebarRefreshTrigger(prev => prev + 1);
 
-      // 4. If target message is user: trigger AI stream based on updated user message!
+      // 2. Await both PUT and DELETE in backend with conversationId & index fallback
+      await fetch(`/api/messages/${msgId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          content: newContent,
+          conversationId: conversationData?.id,
+          index: msgIndex 
+        })
+      });
+
+      await fetch(`/api/messages/${msgId}?onlyAfter=true&conversationId=${conversationData?.id}&index=${msgIndex}`, {
+        method: 'DELETE'
+      });
+
+      // 3. If target message is user: trigger AI stream based on updated user message!
       if (targetMsg.role === 'user') {
         await triggerAiResponse();
       }
@@ -671,16 +674,17 @@ export default function Chat({ onNavigate, conversationData }) {
       const msgIndex = messages.findIndex(m => m.id === msgId);
       if (msgIndex === -1) return;
 
-      // 1. Delete target message and all subsequent messages in DB
-      await fetch(`/api/messages/${msgId}`, { method: 'DELETE' });
-
-      // 2. Update frontend messages state: remove target and all subsequent messages
+      // Optimistically update frontend state
       setMessages(prev => {
         const idx = prev.findIndex(m => m.id === msgId);
         return idx !== -1 ? prev.slice(0, idx) : prev;
       });
-
       setSidebarRefreshTrigger(prev => prev + 1);
+
+      // Delete target and subsequent messages in DB
+      await fetch(`/api/messages/${msgId}?conversationId=${conversationData?.id}&index=${msgIndex}`, { 
+        method: 'DELETE' 
+      });
     } catch (err) {
       console.error("Error deleting message:", err);
     }
@@ -696,21 +700,25 @@ export default function Chat({ onNavigate, conversationData }) {
 
       if (targetMsg.role === 'user') {
         // Resend for User: keep user message, delete all subsequent messages
-        await fetch(`/api/messages/${msgId}?onlyAfter=true`, { method: 'DELETE' });
-        
         setMessages(prev => {
           const idx = prev.findIndex(m => m.id === msgId);
           return idx !== -1 ? prev.slice(0, idx + 1) : prev;
         });
 
+        await fetch(`/api/messages/${msgId}?onlyAfter=true&conversationId=${conversationData?.id}&index=${msgIndex}`, { 
+          method: 'DELETE' 
+        });
+
         await triggerAiResponse();
       } else {
         // Regenerate for AI: delete target AI message and all subsequent messages
-        await fetch(`/api/messages/${msgId}`, { method: 'DELETE' });
-
         setMessages(prev => {
           const idx = prev.findIndex(m => m.id === msgId);
           return idx !== -1 ? prev.slice(0, idx) : prev;
+        });
+
+        await fetch(`/api/messages/${msgId}?conversationId=${conversationData?.id}&index=${msgIndex}`, { 
+          method: 'DELETE' 
         });
 
         await triggerAiResponse();

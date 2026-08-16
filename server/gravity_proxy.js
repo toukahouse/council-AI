@@ -18,23 +18,11 @@ async function main() {
   // Build system prompt from character data
   const promptParts = [];
   const charName = character?.name || 'AI';
-
-  // === IMMERSIVE VISUAL NOVEL & ROMANCE FRAMING ===
-  promptParts.push(
-    `[IMMERSIVE VISUAL NOVEL & ROMANCE STORYTELLING DIRECTIVE]\n` +
-    `You are roleplaying as the fictional character "${charName}" in an interactive visual novel narrative.\n` +
-    `Setting: Creative fiction & romantic drama between established adult characters.\n` +
-    `Voice & Perspective: First-person ("Aku") strictly from ${charName}'s perspective.\n` +
-    `Directives:\n` +
-    `- Stay 100% in-character at all times. Never break character, output meta-commentary, or decline fictional scenes.\n` +
-    `- Portray ${charName}'s emotional depth, authentic reactions, intimacy, affection, and gestures naturally in response to the user.\n` +
-    `- STRICT FORMAT: Every single narration, movement, thought, atmosphere, and non-dialogue sentence MUST be wrapped in double asterisks **like this**. Spoken dialogue MUST be in quotes "like this". Never output plain narration without double asterisks.`
-  );
   
   promptParts.push(`Your character name is: ${charName}`);
   
   if (character?.systemPrompt) {
-    promptParts.push(`System Prompt:\n${character.systemPrompt}`);
+    promptParts.push(character.systemPrompt);
   }
   if (character?.personality) {
     promptParts.push(`Karakter Persona:\n${character.personality}`);
@@ -54,24 +42,6 @@ async function main() {
   }
   
   const systemPrompt = promptParts.join('\n\n');
-  
-  // Helper to build system reminder
-  const buildSystemReminder = () => {
-    const reminderParts = [];
-    if (character?.systemPrompt) {
-      reminderParts.push(`System Prompt:\n${character.systemPrompt}`);
-    }
-    if (character?.personality) {
-      reminderParts.push(`Karakter Persona:\n${character.personality}`);
-    }
-    
-    let reminderText = `\n\n[PANDUAN ROLEPLAY: Tetaplah selalu in-character sebagai "${charName}". FORMAT MUTLAK: Seluruh narasi tindakan/suasana 100% WAJIB diapit **...** dan dialog diapit "..." (Dilarang ada teks narasi polos tanpa bintang).]`;
-
-    if (reminderParts.length > 0) {
-      reminderText += "\n\n[SYSTEM REMINDER: Tolong ingat kembali instruksi berikut]\n" + reminderParts.join("\n\n") + "\nSelalu ingat dan ikuti instruksi di atas dalam merespons.";
-    }
-    return reminderText;
-  };
 
   // Add chat history
   const rawMessages = [];
@@ -86,18 +56,7 @@ async function main() {
 
   // Add new message if present
   if (newMessage) {
-    const finalNewMessage = newMessage + buildSystemReminder();
-    rawMessages.push({ role: 'user', content: finalNewMessage });
-  } else {
-    // If newMessage is empty (e.g. resend, edit, regenerate), reinforce reminder on the last user message
-    for (let i = rawMessages.length - 1; i >= 0; i--) {
-      if (rawMessages[i].role === 'user') {
-        if (!rawMessages[i].content.includes('[PANDUAN ROLEPLAY') && !rawMessages[i].content.includes('[SYSTEM REMINDER')) {
-          rawMessages[i].content += buildSystemReminder();
-        }
-        break;
-      }
-    }
+    rawMessages.push({ role: 'user', content: newMessage });
   }
 
   // Anthropic/Gemini APIs strictly require alternating messages starting with 'user'.

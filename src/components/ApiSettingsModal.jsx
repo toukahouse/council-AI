@@ -16,6 +16,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
   const [topP, setTopP] = useState(0.95);
   const [topK, setTopK] = useState(40);
   const [maxTokens, setMaxTokens] = useState(2048);
+  const [historyLimit, setHistoryLimit] = useState(14);
   const [thinkingEnabled, setThinkingEnabled] = useState(true);
   const [thinkingLevel, setThinkingLevel] = useState('high');
 
@@ -64,6 +65,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
         if (parsed.topP !== undefined) setTopP(parsed.topP);
         if (parsed.topK !== undefined) setTopK(parsed.topK);
         if (parsed.maxTokens !== undefined) setMaxTokens(parsed.maxTokens);
+        if (parsed.historyLimit !== undefined) setHistoryLimit(parsed.historyLimit);
         if (parsed.thinkingEnabled !== undefined) setThinkingEnabled(parsed.thinkingEnabled);
         if (parsed.thinkingLevel) setThinkingLevel(parsed.thinkingLevel);
         
@@ -185,6 +187,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
       topP,
       topK,
       maxTokens,
+      historyLimit,
       thinkingEnabled,
       thinkingLevel,
       aiEngine,
@@ -921,6 +924,25 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                       onChange={(event) => setMaxTokens(Number(event.target.value))}
                     />
                     <span className="api-modal__hint">Batas token saat ini.</span>
+                  </div>
+                </div>
+
+                <div className="api-modal__field" style={{ marginTop: '12px' }}>
+                  <label className="api-modal__label" htmlFor="history-limit-slider">Jumlah Riwayat Obrolan (Context History)</label>
+                  <div className="api-modal__range">
+                    <input
+                      id="history-limit-slider"
+                      type="range"
+                      min="4"
+                      max="40"
+                      step="2"
+                      value={historyLimit}
+                      onChange={(event) => setHistoryLimit(Number(event.target.value))}
+                    />
+                    <span className="api-modal__range-value">{historyLimit} pesan</span>
+                  </div>
+                  <div className="api-modal__hint-block">
+                    <span>Rekomendasi roleplay: 12 - 16 pesan (menjaga alur percakapan tetap fokus dan mencegah penolakan filter AI karena akumulasi teks panjang).</span>
                   </div>
                 </div>
               </div>

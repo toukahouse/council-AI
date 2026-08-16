@@ -302,12 +302,32 @@ app.post('/api/messages/:conversationId', async (req, res) => {
 // Update a message
 app.put('/api/messages/:id', async (req, res) => {
   try {
-    const { content } = req.body;
-    const message = await prisma.message.update({
-      where: { id: req.params.id },
-      data: { content }
-    });
-    res.json(message);
+    const { content, conversationId, index } = req.body;
+    const messageId = req.params.id;
+    
+    let targetMessage = await prisma.message.findUnique({ where: { id: messageId } }).catch(() => null);
+    
+    if (!targetMessage && conversationId) {
+      const convMessages = await prisma.message.findMany({
+        where: { conversationId },
+        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }]
+      });
+      if (index !== undefined && convMessages[index]) {
+        targetMessage = convMessages[index];
+      } else if (convMessages.length > 0) {
+        targetMessage = convMessages[convMessages.length - 1];
+      }
+    }
+    
+    if (targetMessage) {
+      const updated = await prisma.message.update({
+        where: { id: targetMessage.id },
+        data: { content }
+      });
+      return res.json(updated);
+    }
+    
+    res.status(404).json({ error: "Message not found" });
   } catch (error) {
     console.error("Error updating message:", error);
     res.status(500).json({ error: "Failed to update message" });
@@ -318,27 +338,37 @@ app.put('/api/messages/:id', async (req, res) => {
 app.delete('/api/messages/:id', async (req, res) => {
   try {
     const messageId = req.params.id;
-    const { onlyAfter } = req.query;
+    const { onlyAfter, conversationId, index } = req.query;
 
-    const targetMessage = await prisma.message.findUnique({ where: { id: messageId } });
-    if (!targetMessage) return res.status(404).json({ error: "Message not found" });
+    let targetMessage = await prisma.message.findUnique({ where: { id: messageId } }).catch(() => null);
+    let convId = targetMessage?.conversationId || conversationId;
+
+    if (!convId) {
+      return res.status(404).json({ error: "Conversation or message not found" });
+    }
 
     // Fetch all messages in the conversation ordered by creation time
     const convMessages = await prisma.message.findMany({
-      where: { conversationId: targetMessage.conversationId },
+      where: { conversationId: convId },
       orderBy: [{ createdAt: 'asc' }, { id: 'asc' }]
     });
 
-    const targetIndex = convMessages.findIndex(m => m.id === messageId);
+    let targetIndex = -1;
+    if (targetMessage) {
+      targetIndex = convMessages.findIndex(m => m.id === targetMessage.id);
+    } else if (index !== undefined) {
+      targetIndex = parseInt(index);
+    }
+
     let idsToDelete = [];
-    if (targetIndex !== -1) {
+    if (targetIndex !== -1 && targetIndex < convMessages.length) {
       if (onlyAfter === 'true') {
         idsToDelete = convMessages.slice(targetIndex + 1).map(m => m.id);
       } else {
         idsToDelete = convMessages.slice(targetIndex).map(m => m.id);
       }
-    } else if (onlyAfter !== 'true') {
-      idsToDelete = [messageId];
+    } else if (onlyAfter !== 'true' && targetMessage) {
+      idsToDelete = [targetMessage.id];
     }
 
     if (idsToDelete.length > 0) {
@@ -349,7 +379,7 @@ app.delete('/api/messages/:id', async (req, res) => {
 
     // Update conversation updatedAt
     await prisma.conversation.update({
-      where: { id: targetMessage.conversationId },
+      where: { id: convId },
       data: { updatedAt: new Date() }
     });
 
@@ -489,12 +519,31 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
     
     if (!conversation) return res.status(404).json({ error: "Conversation not found" });
 
+    const limit = Math.min(Math.max(parseInt(apiSettings?.historyLimit) || 14, 4), 50);
+
     const historyDesc = await prisma.message.findMany({
       where: { conversationId },
       orderBy: { createdAt: 'desc' },
-      take: 30
+      take: limit
     });
-    const history = historyDesc.reverse();
+    
+    // Reverse to chronological order and filter out past AI refusal messages to avoid priming
+    const rawHistory = historyDesc.reverse().filter(msg => {
+      if (msg.role === 'ai' && /^(I cannot participate|I am unable to participate|I cannot fulfill|Maaf, saya tidak dapat|Maaf, saya tidak bisa)/i.test(msg.content.trim())) {
+        return false;
+      }
+      return true;
+    });
+
+    // Normalize consecutive messages of the same role to prevent API 400 errors
+    const history = [];
+    for (const msg of rawHistory) {
+      if (history.length > 0 && history[history.length - 1].role === msg.role) {
+        history[history.length - 1].content += `\n\n${msg.content}`;
+      } else {
+        history.push({ role: msg.role, content: msg.content });
+      }
+    }
 
     const memories = await prisma.memory.findMany({
       where: { characterId: conversation.characterId },

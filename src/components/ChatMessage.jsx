@@ -52,7 +52,10 @@ const ChatMessageComponent = ({ message, seqId, isTyping, animate, charName, cha
   };
 
   return (
-    <div className={`message ${isUser ? 'message--user' : 'message--ai'} ${animate ? 'message--animate' : ''}`}>
+    <div 
+      className={`message ${isUser ? 'message--user' : 'message--ai'} ${animate ? 'message--animate' : ''}`}
+      style={{ position: 'relative', zIndex: (showMenu || showThoughts) ? 50 : 1 }}
+    >
       {/* AI Avatar - always on the left */}
       {!isUser && (
         <div className="message__avatar-wrap">
