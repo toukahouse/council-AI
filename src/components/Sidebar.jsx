@@ -168,8 +168,11 @@ export default function Sidebar({ isOpen, onPersonalizationOpen, onToggle, onNav
                   </div>
                   <span className="sidebar__chat-meta" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     {formatTimeAgo(chat.messages?.[0]?.createdAt)}
-                    <button 
+                    <span 
+                      role="button"
+                      tabIndex={0}
                       onClick={(e) => handleDeleteChat(e, chat.id)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleDeleteChat(e, chat.id); }}
                       style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0 4px', display: 'flex', alignItems: 'center' }}
                       title="Delete Chat"
                     >
@@ -179,7 +182,7 @@ export default function Sidebar({ isOpen, onPersonalizationOpen, onToggle, onNav
                         <line x1="10" y1="11" x2="10" y2="17"></line>
                         <line x1="14" y1="11" x2="14" y2="17"></line>
                       </svg>
-                    </button>
+                    </span>
                   </span>
                 </button>
               </li>

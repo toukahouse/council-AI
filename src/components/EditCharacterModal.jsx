@@ -73,9 +73,16 @@ export default function EditCharacterModal({ isOpen, onClose, data, onSave }) {
     }
   };
 
-  const handleSave = () => {
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
     if (onSave) {
-      onSave({ ...formData, avatarPreview });
+      try {
+        setIsSaving(true);
+        await onSave({ ...formData, avatarPreview });
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -221,8 +228,13 @@ export default function EditCharacterModal({ isOpen, onClose, data, onSave }) {
               <button className="edit-modal__btn edit-modal__btn--ghost" type="button" onClick={handleReset}>
                 Reset
               </button>
-              <button className="edit-modal__btn edit-modal__btn--primary" type="button" onClick={handleSave}>
-                Simpan
+              <button 
+                className="edit-modal__btn edit-modal__btn--primary" 
+                type="button" 
+                onClick={handleSave}
+                disabled={isSaving}
+              >
+                {isSaving ? 'Menyimpan...' : 'Simpan'}
               </button>
             </div>
           </div>

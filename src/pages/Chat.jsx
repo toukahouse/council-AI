@@ -340,7 +340,10 @@ export default function Chat({ onNavigate, conversationData }) {
   };
 
   const handleEditCharacterSave = async (updatedData) => {
-    if (!characterData?.id) return;
+    if (!characterData?.id) {
+      showToast("ID Karakter tidak ditemukan.", "error");
+      return;
+    }
     try {
       const response = await fetch(`/api/characters/${characterData.id}`, {
         method: 'PUT',
@@ -358,6 +361,7 @@ export default function Chat({ onNavigate, conversationData }) {
       if (response.ok) {
         const updatedCharacter = await response.json();
         setEditCharacterOpen(false);
+        showToast("Karakter berhasil disimpan!", "success");
         if (onNavigate) {
           const updatedConversation = {
             ...conversationData,
@@ -365,9 +369,13 @@ export default function Chat({ onNavigate, conversationData }) {
           };
           onNavigate('chat', updatedConversation);
         }
+      } else {
+        const err = await response.json().catch(() => ({}));
+        showToast(`Gagal menyimpan: ${err.error || response.statusText}`, "error");
       }
     } catch (error) {
       console.error("Error updating character:", error);
+      showToast("Terjadi kesalahan jaringan saat menyimpan.", "error");
     }
   };
 
@@ -566,74 +574,23 @@ export default function Chat({ onNavigate, conversationData }) {
     }
   };
 
-  const handleEdit = async (msgId, newContent) => {
-    try {
-      const msg = messages.find(m => m.id === msgId);
-      if (!msg) return;
-      
-      await fetch(`/api/messages/${msgId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: newContent })
-      });
-      
-      setMessages(prev => prev.map(m => m.id === msgId ? { ...m, content: newContent } : m));
-      
-      if (msg.role === 'user') {
-        await handleRegenerate(msgId);
-      }
-    } catch (err) {
-      console.error("Error editing message:", err);
-    }
-  };
+  const triggerAiResponse = async () => {
+    if (!conversationData?.id) return;
+    const aiMsgId = (Date.now() + 1).toString();
+    setMessages((prev) => [...prev, { 
+      id: aiMsgId, 
+      role: 'ai', 
+      content: '', 
+      thoughtProcess: '',
+      isThinking: true,
+      isGenerating: true,
+      startTime: Date.now(),
+      time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) 
+    }]);
 
-  const handleDelete = async (msgId) => {
-    try {
-      await fetch(`/api/messages/${msgId}`, { method: 'DELETE' });
-      setMessages(prev => prev.filter(m => m.id !== msgId));
-    } catch (err) {
-      console.error("Error deleting message:", err);
-    }
-  };
+    setIsTyping(true);
 
-  const handleRegenerate = async (msgId) => {
-    let aiMsgId = null;
     try {
-      const msgIndex = messages.findIndex(m => m.id === msgId);
-      if (msgIndex === -1) return;
-      const msg = messages[msgIndex];
-      
-      let targetId = msgId;
-      if (msg.role === 'user') {
-        if (msgIndex + 1 < messages.length) {
-          targetId = messages[msgIndex + 1].id;
-        } else {
-          targetId = null;
-        }
-      }
-      
-      if (targetId) {
-        await fetch(`/api/messages/${targetId}?deleteAfter=true`, { method: 'DELETE' });
-        setMessages(prev => {
-          const idx = prev.findIndex(m => m.id === targetId);
-          return idx !== -1 ? prev.slice(0, idx) : prev;
-        });
-      }
-      
-      setIsTyping(true);
-      
-      aiMsgId = (Date.now() + 1).toString();
-      setMessages((prev) => [...prev, { 
-        id: aiMsgId, 
-        role: 'ai', 
-        content: '', 
-        thoughtProcess: '',
-        isThinking: true,
-        isGenerating: true,
-        startTime: Date.now(),
-        time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) 
-      }]);
-
       const controller = new AbortController();
       setAbortController(controller);
       
@@ -661,13 +618,105 @@ export default function Chat({ onNavigate, conversationData }) {
       await refreshMessages();
     } catch (err) {
       if (err.name !== 'AbortError') {
-        console.error("Error regenerating:", err);
-        if (aiMsgId) {
-          setMessages((prev) => prev.filter((m) => m.id !== aiMsgId));
-        }
+        console.error("Error during streaming:", err);
+        setMessages((prev) => prev.filter((m) => m.id !== aiMsgId));
       }
       setIsTyping(false);
       setAbortController(null);
+    }
+  };
+
+  const handleEdit = async (msgId, newContent) => {
+    if (!newContent || !newContent.trim()) return;
+    if (abortController) handleStop();
+
+    try {
+      const msgIndex = messages.findIndex(m => m.id === msgId);
+      if (msgIndex === -1) return;
+      const targetMsg = messages[msgIndex];
+
+      // 1. Update the target message content in DB
+      await fetch(`/api/messages/${msgId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: newContent })
+      });
+
+      // 2. Delete all subsequent messages in DB (messages after targetIndex)
+      await fetch(`/api/messages/${msgId}?onlyAfter=true`, {
+        method: 'DELETE'
+      });
+
+      // 3. Update frontend messages state: truncate after targetIndex and update content
+      const updatedMessages = [
+        ...messages.slice(0, msgIndex),
+        { ...targetMsg, content: newContent }
+      ];
+      setMessages(updatedMessages);
+      setSidebarRefreshTrigger(prev => prev + 1);
+
+      // 4. If target message is user: trigger AI stream based on updated user message!
+      if (targetMsg.role === 'user') {
+        await triggerAiResponse();
+      }
+    } catch (err) {
+      console.error("Error editing message:", err);
+    }
+  };
+
+  const handleDelete = async (msgId) => {
+    if (abortController) handleStop();
+
+    try {
+      const msgIndex = messages.findIndex(m => m.id === msgId);
+      if (msgIndex === -1) return;
+
+      // 1. Delete target message and all subsequent messages in DB
+      await fetch(`/api/messages/${msgId}`, { method: 'DELETE' });
+
+      // 2. Update frontend messages state: remove target and all subsequent messages
+      setMessages(prev => {
+        const idx = prev.findIndex(m => m.id === msgId);
+        return idx !== -1 ? prev.slice(0, idx) : prev;
+      });
+
+      setSidebarRefreshTrigger(prev => prev + 1);
+    } catch (err) {
+      console.error("Error deleting message:", err);
+    }
+  };
+
+  const handleRegenerate = async (msgId) => {
+    if (abortController) handleStop();
+
+    try {
+      const msgIndex = messages.findIndex(m => m.id === msgId);
+      if (msgIndex === -1) return;
+      const targetMsg = messages[msgIndex];
+
+      if (targetMsg.role === 'user') {
+        // Resend for User: keep user message, delete all subsequent messages
+        await fetch(`/api/messages/${msgId}?onlyAfter=true`, { method: 'DELETE' });
+        
+        setMessages(prev => {
+          const idx = prev.findIndex(m => m.id === msgId);
+          return idx !== -1 ? prev.slice(0, idx + 1) : prev;
+        });
+
+        await triggerAiResponse();
+      } else {
+        // Regenerate for AI: delete target AI message and all subsequent messages
+        await fetch(`/api/messages/${msgId}`, { method: 'DELETE' });
+
+        setMessages(prev => {
+          const idx = prev.findIndex(m => m.id === msgId);
+          return idx !== -1 ? prev.slice(0, idx) : prev;
+        });
+
+        await triggerAiResponse();
+      }
+    } catch (err) {
+      console.error("Error regenerating message:", err);
     }
   };
 
