@@ -519,7 +519,7 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
     
     if (!conversation) return res.status(404).json({ error: "Conversation not found" });
 
-    const limit = Math.min(Math.max(parseInt(apiSettings?.historyLimit) || 14, 4), 50);
+    const limit = Math.min(Math.max(parseInt(apiSettings?.historyLimit) || 30, 4), 100);
 
     const historyDesc = await prisma.message.findMany({
       where: { conversationId },
