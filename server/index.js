@@ -739,10 +739,12 @@ app.put('/api/characters/:characterId/memories', async (req, res) => {
       });
       
       if (memories && memories.length > 0) {
+        const now = Date.now();
         await tx.memory.createMany({
-          data: memories.map(m => ({
+          data: memories.map((m, index) => ({
             text: m.text,
-            characterId
+            characterId,
+            createdAt: new Date(now + index)
           }))
         });
       }
@@ -791,10 +793,12 @@ app.put('/api/conversations/:conversationId/scenarios', async (req, res) => {
       });
       
       if (scenarios && scenarios.length > 0) {
+        const now = Date.now();
         await tx.scenario.createMany({
-          data: scenarios.map(s => ({
+          data: scenarios.map((s, index) => ({
             text: s.text,
-            conversationId
+            conversationId,
+            createdAt: new Date(now + index)
           }))
         });
       }
@@ -974,10 +978,12 @@ app.put('/api/characters/:characterId/npcs', async (req, res) => {
       });
 
       if (npcs && npcs.length > 0) {
+        const now = Date.now();
         await prisma.npc.createMany({
-          data: npcs.map(n => ({
+          data: npcs.map((n, index) => ({
             text: n.text,
-            characterId
+            characterId,
+            createdAt: new Date(now + index)
           }))
         });
       }
