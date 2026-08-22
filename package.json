@@ -8,6 +8,7 @@
     "server": "npx nodemon --watch server --ignore '*.json' --ignore 'debug_*' server/index.js",
     "proxy": "node server/antigravity_server.js",
     "dev:all": "concurrently \"npm run server\" \"npm run dev\" \"npm run proxy\"",
+    "start": "concurrently \"node server/index.js\" \"npm run proxy\"",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
