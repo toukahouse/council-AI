@@ -59,8 +59,8 @@ jobs:
             EOF
             
             # Restart service
-            docker-compose down
-            docker-compose up -d
+            docker compose down
+            docker compose up -d
             
             # Bersihkan sisa image lama agar penyimpanan lega
             docker image prune -a -f
