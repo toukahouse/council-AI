@@ -16,6 +16,9 @@ RUN npm install
 # Copy seluruh source code project Anda
 COPY . .
 
+# Generate Prisma Client (Wajib untuk database)
+RUN npx prisma generate
+
 # Build React/Vite Frontend
 RUN npm run build
 
