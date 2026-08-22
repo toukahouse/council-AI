@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  council-ai:
+    # Ganti 'username_github' dengan username asli Anda
+    image: ghcr.io/username_github/council-ai:latest
+    container_name: council-ai-app
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      # - PORT=3001
+      # Tambahkan variabel .env Anda yang lain di sini

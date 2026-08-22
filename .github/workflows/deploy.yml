@@ -1,0 +1,66 @@
+name: CI/CD Deploy Council AI
+
+on:
+  push:
+    branches:
+      - streaming # Branch utama Anda saat ini
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Login to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.CR_PAT }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/council-ai:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            echo ${{ secrets.CR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            # Tarik image terbaru
+            docker pull ghcr.io/${{ github.repository_owner }}/council-ai:latest
+            
+            # Buat folder kerja (Karena kita menggunakan akun nova, mari simpan dengan rapi di dalam home directory nova)
+            mkdir -p /home/nova/council-ai
+            cd /home/nova/council-ai
+            
+            # Buat file docker-compose.yml on the fly:
+            cat << 'EOF' > docker-compose.yml
+            version: '3.8'
+            services:
+              council-ai:
+                image: ghcr.io/${{ github.repository_owner }}/council-ai:latest
+                container_name: council-ai-app
+                restart: always
+                ports:
+                  - "3001:3001"
+            EOF
+            
+            # Restart service
+            docker-compose down
+            docker-compose up -d
+            
+            # Bersihkan sisa image lama agar penyimpanan lega
+            docker image prune -a -f
