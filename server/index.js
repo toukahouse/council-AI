@@ -13,6 +13,10 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
+// Load Gravity Proxy module
+await import('./antigravity/utils/proxy.js');
+const { default: proxyApp } = await import('./antigravity/server.js');
+
 const connectionString = process.env.DATABASE_URL;
 const pool = new pg.Pool({ 
   connectionString,
@@ -999,6 +1003,10 @@ app.put('/api/characters/:characterId/npcs', async (req, res) => {
 // ==========================================
 // SERVE STATIC FRONTEND
 // ==========================================
+
+// Mount Gravity Proxy API routes at /proxy
+app.use('/proxy', proxyApp);
+
 const distPath = path.join(__dirname, '../dist');
 app.use(express.static(distPath));
 
