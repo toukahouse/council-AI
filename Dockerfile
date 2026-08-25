@@ -25,8 +25,9 @@ RUN npm run build
 # Buat virtual environment Python (jika script Python Anda butuh module khusus)
 RUN python3 -m venv /app/venv
 ENV PATH="/app/venv/bin:$PATH"
-# Jika Anda punya requirements.txt:
-# RUN if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+# Install module Python yang dibutuhkan oleh council_ai.py
+RUN pip install google-genai requests
 
 # Expose port backend (sesuaikan dengan port Express Anda, default 3001)
 EXPOSE 3001
