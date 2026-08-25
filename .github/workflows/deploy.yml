@@ -56,8 +56,28 @@ jobs:
                 restart: always
                 ports:
                   - "3001:3001"
+                environment:
+                  - DATABASE_URL=postgresql://nova:Swimer1789@db:5432/chatbot_db?schema=public
                 env_file:
                   - .env
+                depends_on:
+                  - db
+
+              db:
+                image: postgres:15-alpine
+                container_name: council-ai-db
+                restart: always
+                environment:
+                  POSTGRES_USER: nova
+                  POSTGRES_PASSWORD: Swimer1789
+                  POSTGRES_DB: chatbot_db
+                ports:
+                  - "5432:5432"
+                volumes:
+                  - postgres_data:/var/lib/postgresql/data
+
+            volumes:
+              postgres_data:
             EOF
             
             # Restart service
