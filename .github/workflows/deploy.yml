@@ -71,6 +71,8 @@ jobs:
                   POSTGRES_USER: nova
                   POSTGRES_PASSWORD: Swimer1789
                   POSTGRES_DB: chatbot_db
+                ports:
+                  - "5433:5432"
                 volumes:
                   - postgres_data:/var/lib/postgresql/data
 

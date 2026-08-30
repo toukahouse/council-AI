@@ -611,12 +611,11 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
     } else if (apiSettings && apiSettings.aiEngine === 'gravity') {
       const gravityScript = path.join(__dirname, 'gravity_proxy.js');
       childProcess = spawn('node', [gravityScript]);
+    } else if (apiSettings && apiSettings.aiEngine === 'puter') {
+      const puterScript = path.join(__dirname, 'puter_proxy.js');
+      childProcess = spawn('node', [puterScript]);
     } else {
-      let scriptName = 'council_ai.py';
-      if (apiSettings && apiSettings.aiEngine === 'proxy') {
-        scriptName = 'proxy_ai.py';
-      }
-      const pythonScript = path.join(__dirname, scriptName);
+      const pythonScript = path.join(__dirname, 'council_ai.py');
       const pythonCommand = process.platform === 'win32' ? 'python' : 'python3.11';
       childProcess = spawn(pythonCommand, [pythonScript]);
     }
@@ -895,12 +894,11 @@ ATURAN MUTLAK:
     } else if (apiSettings && apiSettings.aiEngine === 'gravity') {
       const gravityScript = path.join(__dirname, 'gravity_proxy.js');
       childProcess = spawn('node', [gravityScript]);
+    } else if (apiSettings && apiSettings.aiEngine === 'puter') {
+      const puterScript = path.join(__dirname, 'puter_proxy.js');
+      childProcess = spawn('node', [puterScript]);
     } else {
-      let scriptName = 'council_ai.py';
-      if (apiSettings && apiSettings.aiEngine === 'proxy') {
-        scriptName = 'proxy_ai.py';
-      }
-      const pythonScript = path.join(__dirname, scriptName);
+      const pythonScript = path.join(__dirname, 'council_ai.py');
       const pythonCommand = process.platform === 'win32' ? 'python' : 'python3.11';
       childProcess = spawn(pythonCommand, [pythonScript]);
     }

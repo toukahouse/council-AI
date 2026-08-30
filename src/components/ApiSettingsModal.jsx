@@ -6,6 +6,64 @@ const initialModels = [
   { id: 'gemini-2.5-pro', label: 'gemini-2.5-pro' },
 ];
 
+const PUTER_MODEL_METADATA = {
+  // Anthropic
+  'claude-3-7-sonnet': { name: 'Claude 3.7 Sonnet', provider: 'Anthropic', icon: '🧠', desc: 'Model terbaru Anthropic dengan hybrid reasoning & coding terbaik' },
+  'claude-3-5-sonnet': { name: 'Claude 3.5 Sonnet', provider: 'Anthropic', icon: '🧠', desc: 'Model sangat cerdas dan bernalar tinggi dari Anthropic' },
+  'claude-3-5-haiku': { name: 'Claude 3.5 Haiku', provider: 'Anthropic', icon: '🪶', desc: 'Super cepat, hemat, dan responsif' },
+  'claude-3-opus': { name: 'Claude 3 Opus', provider: 'Anthropic', icon: '👑', desc: 'Model analitis mendalam dari Anthropic' },
+  
+  // OpenAI
+  'o3-mini': { name: 'o3-mini', provider: 'OpenAI', icon: '⚡', desc: 'Model penalaran terbaru OpenAI yang cepat dan presisi' },
+  'o1': { name: 'o1', provider: 'OpenAI', icon: '🧠', desc: 'Flagship reasoning model OpenAI dengan CoT mendalam' },
+  'o1-mini': { name: 'o1-mini', provider: 'OpenAI', icon: '🔬', desc: 'Penalaran STEM dan coding hemat daya' },
+  'gpt-4o': { name: 'GPT-4o', provider: 'OpenAI', icon: '✨', desc: 'Model flagship multimodal unggulan OpenAI' },
+  'gpt-4o-mini': { name: 'GPT-4o Mini', provider: 'OpenAI', icon: '⚡', desc: 'Cepat, cerdas, dan sangat hemat' },
+  'chatgpt-4o-latest': { name: 'ChatGPT-4o Latest', provider: 'OpenAI', icon: '🤖', desc: 'Versi ChatGPT-4o terkini' },
+  'gpt-3.5-turbo': { name: 'GPT-3.5 Turbo', provider: 'OpenAI', icon: '🤖', desc: 'Model klasik OpenAI' },
+
+  // Google
+  'gemini-2.0-flash': { name: 'Gemini 2.0 Flash', provider: 'Google', icon: '💎', desc: 'Generasi terbaru Google, super cepat dan cerdas' },
+  'gemini-2.0-pro-exp-02-05': { name: 'Gemini 2.0 Pro Exp', provider: 'Google', icon: '👑', desc: 'Model Gemini 2.0 paling bertenaga untuk penalaran rumit' },
+  'gemini-1.5-pro': { name: 'Gemini 1.5 Pro', provider: 'Google', icon: '👑', desc: 'Kapasitas konteks raksasa dan penalaran pro' },
+  'gemini-1.5-flash': { name: 'Gemini 1.5 Flash', provider: 'Google', icon: '⚡', desc: 'Ringan dan cepat dari Google' },
+
+  // DeepSeek
+  'deepseek-reasoner': { name: 'DeepSeek Reasoner (R1)', provider: 'DeepSeek', icon: '🌲', desc: 'Model penalaran terobosan (Chain-of-Thought) DeepSeek' },
+  'deepseek-chat': { name: 'DeepSeek Chat (V3)', provider: 'DeepSeek', icon: '🧭', desc: 'Model 671B MoE terdepan dari DeepSeek' },
+
+  // xAI
+  'grok-2-latest': { name: 'Grok 2 Latest', provider: 'xAI', icon: '🚀', desc: 'Model AI terkemuka dari xAI (Elon Musk)' },
+  'grok-beta': { name: 'Grok Beta', provider: 'xAI', icon: '🚀', desc: 'Versi preview Grok dari xAI' },
+
+  // Qwen (Alibaba)
+  'qwen/qwen-2.5-72b-instruct': { name: 'Qwen 2.5 72B Instruct', provider: 'Alibaba Cloud', icon: '🌐', desc: 'Model open-weight kelas dunia dari Alibaba' },
+  'qwen/qwq-32b-preview': { name: 'QwQ 32B Preview', provider: 'Alibaba Cloud', icon: '🔬', desc: 'Model penalaran matematika & coding Qwen' },
+
+  // Meta & Mistral
+  'meta-llama/llama-3.3-70b-instruct': { name: 'Llama 3.3 70B Instruct', provider: 'Meta AI', icon: '🦙', desc: 'Model open source generasi terbaru dari Meta' },
+  'meta-llama/llama-3.2-11b-vision-instruct': { name: 'Llama 3.2 11B Vision', provider: 'Meta AI', icon: '👁️', desc: 'Model vision & multimodal dari Meta' },
+  'meta-llama/meta-llama-3.1-70b-instruct': { name: 'Llama 3.1 70B', provider: 'Meta AI', icon: '🦙', desc: 'Model Llama 3.1 70B parameter' },
+  'mistral-large-latest': { name: 'Mistral Large', provider: 'Mistral AI', icon: '🌪️', desc: 'Model flagship dari Mistral AI' },
+  'codestral-latest': { name: 'Codestral', provider: 'Mistral AI', icon: '💻', desc: 'Spesialis generasi dan pemahaman kode' },
+  'pixtral-large-latest': { name: 'Pixtral Large', provider: 'Mistral AI', icon: '🖼️', desc: 'Model multimodal flagship Mistral' }
+};
+
+function extractProvider(modelId) {
+  if (!modelId) return 'AI Provider';
+  const lower = modelId.toLowerCase();
+  if (lower.includes('claude') || lower.includes('anthropic')) return 'Anthropic';
+  if (lower.includes('gpt') || lower.includes('o1') || lower.includes('o3') || lower.includes('openai') || lower.includes('chatgpt')) return 'OpenAI';
+  if (lower.includes('gemini') || lower.includes('google')) return 'Google';
+  if (lower.includes('deepseek')) return 'DeepSeek';
+  if (lower.includes('grok') || lower.includes('xai') || lower.includes('x-ai')) return 'xAI';
+  if (lower.includes('qwen') || lower.includes('alibaba') || lower.includes('qwq')) return 'Alibaba';
+  if (lower.includes('llama') || lower.includes('meta')) return 'Meta AI';
+  if (lower.includes('mistral') || lower.includes('codestral') || lower.includes('pixtral')) return 'Mistral AI';
+  if (modelId.includes('/')) return modelId.split('/')[0];
+  return 'Puter AI';
+}
+
 export default function ApiSettingsModal({ isOpen, onClose }) {
   const [activePage, setActivePage] = useState('ai');
   const [apiKey, setApiKey] = useState('');
@@ -20,6 +78,24 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
   const [thinkingEnabled, setThinkingEnabled] = useState(true);
   const [thinkingLevel, setThinkingLevel] = useState('high');
 
+  // AI Engine selector ('api', 'puter', 'copilot', 'gravity', '9router')
+  const [aiEngine, setAiEngine] = useState('api');
+
+  // Puter Proxy Settings
+  const [puterModel, setPuterModel] = useState('claude-3-5-sonnet');
+  const [puterKeys, setPuterKeys] = useState([]); // [{ id, token, label, status: 'ready'|'limited' }]
+  const [puterActiveKeyId, setPuterActiveKeyId] = useState(null);
+  const [newPuterKey, setNewPuterKey] = useState('');
+  const [customPuterModel, setCustomPuterModel] = useState('');
+  const [isModelCatalogOpen, setIsModelCatalogOpen] = useState(false);
+  const [catalogSearchQuery, setCatalogSearchQuery] = useState('');
+  const [catalogProviderFilter, setCatalogProviderFilter] = useState('all');
+  const [catalogModels, setCatalogModels] = useState([]);
+  const [isCatalogLoading, setIsCatalogLoading] = useState(false);
+  const [puterAuthUser, setPuterAuthUser] = useState(null);
+  const [isPuterLoggingIn, setIsPuterLoggingIn] = useState(false);
+  const [puterSdkStatus, setPuterSdkStatus] = useState('loading');
+
   // Gravity Proxy Settings
   const [gravityProxyUrl, setGravityProxyUrl] = useState('');
   const [gravityModel, setGravityModel] = useState('claude-sonnet-4-6');
@@ -30,13 +106,6 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
   const [gravityModels, setGravityModels] = useState([]);
   const [gravityManualCallbackUrl, setGravityManualCallbackUrl] = useState('');
   const [isGravityManualCallbackVisible, setIsGravityManualCallbackVisible] = useState(false);
-
-  // AI Proxy Settings
-  const [aiEngine, setAiEngine] = useState('api'); // 'api', 'proxy', or 'copilot'
-  const [cookiePsid, setCookiePsid] = useState('');
-  const [cookiePsidts, setCookiePsidts] = useState('');
-  const [browserName, setBrowserName] = useState('edge');
-  const [proxyModel, setProxyModel] = useState('gemini-3-pro-plus');
 
   // Copilot Proxy Settings
   const [copilotModel, setCopilotModel] = useState('gpt-4o');
@@ -53,7 +122,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
   const [ninerouterModel, setNinerouterModel] = useState('');
 
   // Load from localStorage on mount
-  useState(() => {
+  useEffect(() => {
     try {
       const saved = localStorage.getItem('apiSettings');
       if (saved) {
@@ -69,14 +138,19 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
         if (parsed.thinkingEnabled !== undefined) setThinkingEnabled(parsed.thinkingEnabled);
         if (parsed.thinkingLevel) setThinkingLevel(parsed.thinkingLevel);
         
-        // Proxy settings load
-        if (parsed.aiEngine) setAiEngine(parsed.aiEngine);
-        if (parsed.cookiePsid !== undefined) setCookiePsid(parsed.cookiePsid);
-        if (parsed.cookiePsidts !== undefined) setCookiePsidts(parsed.cookiePsidts);
-        if (parsed.browserName !== undefined) setBrowserName(parsed.browserName);
-        if (parsed.proxyModel !== undefined) setProxyModel(parsed.proxyModel);
+        // Engine selector (Migrate legacy 'proxy' to 'puter')
+        if (parsed.aiEngine) {
+          setAiEngine(parsed.aiEngine === 'proxy' ? 'puter' : parsed.aiEngine);
+        }
+
+        // Puter settings load
+        if (parsed.puterModel !== undefined) setPuterModel(parsed.puterModel);
+        if (Array.isArray(parsed.puterKeys)) setPuterKeys(parsed.puterKeys);
+        if (parsed.puterActiveKeyId) setPuterActiveKeyId(parsed.puterActiveKeyId);
+
         // Copilot settings load
         if (parsed.copilotModel !== undefined) setCopilotModel(parsed.copilotModel);
+
         // Gravity settings load
         if (parsed.gravityProxyUrl !== undefined) setGravityProxyUrl(parsed.gravityProxyUrl);
         if (parsed.gravityModel !== undefined) setGravityModel(parsed.gravityModel);
@@ -92,7 +166,91 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
     } catch (e) {
       console.error("Error loading settings", e);
     }
-  });
+  }, []);
+
+  // Check Puter SDK and Auth Status
+  useEffect(() => {
+    const checkPuter = async () => {
+      if (typeof window !== 'undefined' && typeof window.puter !== 'undefined') {
+        setPuterSdkStatus('ready');
+        try {
+          if (window.puter.auth && window.puter.auth.isSignedIn()) {
+            const user = await window.puter.auth.getUser();
+            setPuterAuthUser(user?.username || user?.name || 'Puter User');
+          }
+        } catch (err) {
+          console.warn('Puter user check:', err);
+        }
+      } else {
+        setPuterSdkStatus('loading');
+        let retries = 0;
+        const interval = setInterval(async () => {
+          retries++;
+          if (typeof window !== 'undefined' && typeof window.puter !== 'undefined') {
+            clearInterval(interval);
+            setPuterSdkStatus('ready');
+            try {
+              if (window.puter.auth && window.puter.auth.isSignedIn()) {
+                const user = await window.puter.auth.getUser();
+                setPuterAuthUser(user?.username || user?.name || 'Puter User');
+              }
+            } catch (e) {}
+          } else if (retries > 10) {
+            clearInterval(interval);
+            setPuterSdkStatus('offline');
+          }
+        }, 500);
+      }
+    };
+    if (isOpen) {
+      checkPuter();
+    }
+  }, [isOpen]);
+
+  // Load Catalog Models
+  useEffect(() => {
+    const fetchCatalog = async () => {
+      setIsCatalogLoading(true);
+      try {
+        const res = await fetch('https://api.puter.com/puterai/chat/models/details');
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.models && Array.isArray(data.models)) {
+            const mapped = data.models.map(m => {
+              const meta = PUTER_MODEL_METADATA[m.id] || PUTER_MODEL_METADATA[m.puterId] || {};
+              return {
+                id: m.id || m.puterId,
+                name: m.name || meta.name || m.id,
+                provider: m.provider || meta.provider || extractProvider(m.id || m.name),
+                desc: m.description || meta.desc || `Model ${m.provider || 'AI'}`,
+                context: m.context ? `${(m.context / 1024).toFixed(0)}k context` : (m.max_tokens ? `${m.max_tokens} tokens` : null),
+                icon: meta.icon || '⚡'
+              };
+            });
+            setCatalogModels(mapped);
+            setIsCatalogLoading(false);
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to fetch from Puter models API:', e);
+      }
+
+      // Fallback
+      setCatalogModels(Object.keys(PUTER_MODEL_METADATA).map(k => ({
+        id: k,
+        name: PUTER_MODEL_METADATA[k].name,
+        provider: PUTER_MODEL_METADATA[k].provider,
+        desc: PUTER_MODEL_METADATA[k].desc,
+        icon: PUTER_MODEL_METADATA[k].icon
+      })));
+      setIsCatalogLoading(false);
+    };
+
+    if (isOpen && catalogModels.length === 0) {
+      fetchCatalog();
+    }
+  }, [isOpen, catalogModels.length]);
 
   // Check copilot auth status on mount
   useEffect(() => {
@@ -107,8 +265,96 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
   // Ref to cancel polling on unmount
   const pollAbortRef = { current: false };
 
+  // ==========================================
+  // PUTER KEY MANAGEMENT HANDLERS
+  // ==========================================
+  const handleAddPuterKey = (customToken = '', customLabel = '') => {
+    const tokenToAdd = (customToken || newPuterKey).trim();
+    if (!tokenToAdd) return;
+
+    // Check duplicate
+    const exists = puterKeys.find(k => k.token === tokenToAdd);
+    if (exists) {
+      setPuterActiveKeyId(exists.id);
+      setNewPuterKey('');
+      return;
+    }
+
+    const keyIndex = puterKeys.length + 1;
+    const newKeyObj = {
+      id: 'key_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+      token: tokenToAdd,
+      label: customLabel || `Key #${keyIndex}`,
+      status: 'ready'
+    };
+
+    const updatedKeys = [...puterKeys, newKeyObj];
+    setPuterKeys(updatedKeys);
+    if (!puterActiveKeyId || puterKeys.length === 0) {
+      setPuterActiveKeyId(newKeyObj.id);
+    }
+    setNewPuterKey('');
+  };
+
+  const handleRemovePuterKey = (keyId) => {
+    const updated = puterKeys.filter(k => k.id !== keyId);
+    setPuterKeys(updated);
+    if (puterActiveKeyId === keyId) {
+      setPuterActiveKeyId(updated.length > 0 ? updated[0].id : null);
+    }
+  };
+
+  const handleSetActivePuterKey = (keyId) => {
+    setPuterActiveKeyId(keyId);
+    // Reset status to ready if was limited
+    setPuterKeys(prev => prev.map(k => k.id === keyId ? { ...k, status: 'ready' } : k));
+  };
+
+  const handlePuterLogin = async () => {
+    if (typeof window === 'undefined' || typeof window.puter === 'undefined' || !window.puter.auth) {
+      alert('Puter SDK belum siap. Silakan coba sesaat lagi atau paste token secara manual.');
+      return;
+    }
+    try {
+      setIsPuterLoggingIn(true);
+      if (window.puter.auth.isSignedIn() && window.puter.auth.authToken) {
+        const user = await window.puter.auth.getUser().catch(() => ({}));
+        const username = user?.username || user?.name || 'Puter';
+        setPuterAuthUser(username);
+        handleAddPuterKey(window.puter.auth.authToken, `Akun @${username}`);
+      } else {
+        await window.puter.auth.signIn();
+        if (window.puter.auth.authToken) {
+          const user = await window.puter.auth.getUser().catch(() => ({}));
+          const username = user?.username || user?.name || 'Puter';
+          setPuterAuthUser(username);
+          handleAddPuterKey(window.puter.auth.authToken, `Akun @${username}`);
+        }
+      }
+    } catch (err) {
+      console.warn('Puter login error:', err);
+    } finally {
+      setIsPuterLoggingIn(false);
+    }
+  };
+
+  const handleSelectPuterModel = (modelId) => {
+    setPuterModel(modelId);
+    setIsModelCatalogOpen(false);
+  };
+
+  const handleApplyCustomPuterModel = () => {
+    const trimmed = customPuterModel.trim();
+    if (!trimmed) return;
+    setPuterModel(trimmed);
+    setCustomPuterModel('');
+  };
+
+  // ==========================================
+  // COPILOT HANDLERS
+  // ==========================================
   const handleCopilotLogin = async () => {
-    if (copilotAuthLoading) return; // Prevent double-click
+    if (copilotAuthLoading) return;
     setCopilotAuthLoading(true);
     setCopilotAuthStatus('Memulai proses login GitHub...');
     pollAbortRef.current = false;
@@ -125,8 +371,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
       setCopilotDeviceCode(data.device_code);
       setCopilotAuthStatus('Masukkan kode di browser, lalu tunggu...');
 
-      // Sequential polling (safer than setInterval to avoid overlapping requests)
-      let waitMs = Math.max((data.interval || 5) * 1000, 6000); // At least 6 seconds to be safe
+      let waitMs = Math.max((data.interval || 5) * 1000, 6000);
 
       const poll = async () => {
         while (!pollAbortRef.current) {
@@ -147,13 +392,12 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
               setCopilotVerificationUri('');
               return;
             } else if (pollData.slow_down) {
-              waitMs += 5000; // Increase interval by 5 seconds
+              waitMs += 5000;
             } else if (pollData.error) {
               setCopilotAuthLoading(false);
               setCopilotAuthStatus(`Error: ${pollData.error}`);
               return;
             }
-            // If pending, continue loop
           } catch (e) {
             setCopilotAuthLoading(false);
             setCopilotAuthStatus('Polling gagal.');
@@ -178,56 +422,9 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
     }
   };
 
-  const handleSave = () => {
-    const settings = {
-      apiKey,
-      models,
-      activeModelId,
-      temperature,
-      topP,
-      topK,
-      maxTokens,
-      historyLimit,
-      thinkingEnabled,
-      thinkingLevel,
-      aiEngine,
-      cookiePsid,
-      cookiePsidts,
-      browserName,
-      proxyModel,
-      copilotModel,
-      gravityProxyUrl,
-      gravityModel,
-      gravityIsLoggedIn,
-      gravityAccountEmail,
-      gravityAvailableAccounts,
-      ninerouterUrl,
-      ninerouterApiKey,
-      ninerouterModel
-    };
-    localStorage.setItem('apiSettings', JSON.stringify(settings));
-    onClose();
-  };
-
-  const handleAddModel = () => {
-    const trimmed = newModelId.trim();
-    if (!trimmed) return;
-    if (models.some((item) => item.id === trimmed)) {
-      setNewModelId('');
-      return;
-    }
-    setModels((prev) => [...prev, { id: trimmed, label: trimmed }]);
-    setNewModelId('');
-  };
-
-  const handleDeleteModel = (id) => {
-    setModels((prev) => prev.filter((item) => item.id !== id));
-    if (activeModelId === id && models.length > 1) {
-      const nextModel = models.find((item) => item.id !== id);
-      if (nextModel) setActiveModelId(nextModel.id);
-    }
-  };
-
+  // ==========================================
+  // GRAVITY HANDLERS
+  // ==========================================
   const handleGravityLogin = async () => {
     try {
       const url = gravityProxyUrl ? gravityProxyUrl.replace(/\/+$/, '') : '/proxy';
@@ -263,7 +460,6 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
             if (currentEmails.length > 0) {
               const newestEmail = currentEmails[currentEmails.length - 1];
               
-              // Hapus semua akun kecuali yang terbaru
               for (const email of currentEmails) {
                 if (email !== newestEmail) {
                   try {
@@ -358,7 +554,6 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
           const emails = accData.accounts.map(a => a.email);
           const newestEmail = emails[emails.length - 1];
           
-          // Cleanup: hapus akun-akun lama jika masih ada
           for (const email of emails) {
             if (email !== newestEmail) {
               fetch(`${url}/api/accounts/${encodeURIComponent(email)}`, { method: 'DELETE' }).catch(() => {});
@@ -390,11 +585,85 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
     }
   };
 
+  const handleSave = () => {
+    const settings = {
+      apiKey,
+      models,
+      activeModelId,
+      temperature,
+      topP,
+      topK,
+      maxTokens,
+      historyLimit,
+      thinkingEnabled,
+      thinkingLevel,
+      aiEngine,
+      puterModel,
+      puterKeys,
+      puterActiveKeyId,
+      copilotModel,
+      gravityProxyUrl,
+      gravityModel,
+      gravityIsLoggedIn,
+      gravityAccountEmail,
+      gravityAvailableAccounts,
+      ninerouterUrl,
+      ninerouterApiKey,
+      ninerouterModel
+    };
+    localStorage.setItem('apiSettings', JSON.stringify(settings));
+    onClose();
+  };
+
+  const handleAddModel = () => {
+    const trimmed = newModelId.trim();
+    if (!trimmed) return;
+    if (models.some((item) => item.id === trimmed)) {
+      setNewModelId('');
+      return;
+    }
+    setModels((prev) => [...prev, { id: trimmed, label: trimmed }]);
+    setNewModelId('');
+  };
+
+  const handleDeleteModel = (id) => {
+    setModels((prev) => prev.filter((item) => item.id !== id));
+    if (activeModelId === id && models.length > 1) {
+      const nextModel = models.find((item) => item.id !== id);
+      if (nextModel) setActiveModelId(nextModel.id);
+    }
+  };
+
   const pages = [
     { id: 'ai', label: 'AI Settings' },
     { id: 'model', label: 'Model Settings' },
     { id: 'thinking', label: 'Thinking Settings' },
   ];
+
+  // Filter models in catalog
+  const filteredCatalogModels = catalogModels.filter(m => {
+    const query = catalogSearchQuery.trim().toLowerCase();
+    const provider = catalogProviderFilter.toLowerCase();
+    
+    if (provider !== 'all') {
+      const p = (m.provider || '').toLowerCase();
+      const id = (m.id || '').toLowerCase();
+      if (provider === 'anthropic' && !p.includes('anthropic') && !id.includes('claude')) return false;
+      if (provider === 'openai' && !p.includes('openai') && !id.includes('gpt') && !id.includes('o1') && !id.includes('o3') && !id.includes('chatgpt')) return false;
+      if (provider === 'google' && !p.includes('google') && !id.includes('gemini')) return false;
+      if (provider === 'deepseek' && !p.includes('deepseek')) return false;
+      if (provider === 'xai' && !p.includes('xai') && !p.includes('x-ai') && !id.includes('grok')) return false;
+      if (provider === 'meta' && !p.includes('meta') && !id.includes('llama')) return false;
+      if (provider === 'mistral' && !p.includes('mistral') && !id.includes('mistral') && !id.includes('codestral') && !id.includes('pixtral')) return false;
+      if (provider === 'alibaba' && !p.includes('alibaba') && !id.includes('qwen') && !id.includes('qwq')) return false;
+    }
+
+    if (!query) return true;
+    return (m.id && m.id.toLowerCase().includes(query)) ||
+           (m.name && m.name.toLowerCase().includes(query)) ||
+           (m.provider && m.provider.toLowerCase().includes(query)) ||
+           (m.desc && m.desc.toLowerCase().includes(query));
+  });
 
   return (
     <>
@@ -414,7 +683,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
               <span className="api-modal__eyebrow">API Settings</span>
               <h2 className="api-modal__title" id="api-modal-title">Pengaturan Model AI</h2>
               <p className="api-modal__subtitle">
-                Kelola API key, model, dan parameter generasi untuk roleplay.
+                Kelola API key, multi-key proxy pool, model pilihan, dan parameter generasi untuk roleplay.
               </p>
             </div>
             <button className="api-modal__close" onClick={onClose} type="button" aria-label="Tutup">
@@ -453,11 +722,11 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                       Gemini API
                     </button>
                     <button
-                      className={`api-modal__btn ${aiEngine === 'proxy' ? 'api-modal__btn--primary' : 'api-modal__btn--ghost'}`}
+                      className={`api-modal__btn ${aiEngine === 'puter' ? 'api-modal__btn--primary' : 'api-modal__btn--ghost'}`}
                       type="button"
-                      onClick={() => setAiEngine('proxy')}
+                      onClick={() => setAiEngine('puter')}
                     >
-                      AI Proxy
+                      Puter Proxy
                     </button>
                     <button
                       className={`api-modal__btn ${aiEngine === 'copilot' ? 'api-modal__btn--primary' : 'api-modal__btn--ghost'}`}
@@ -483,6 +752,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                   </div>
                 </div>
 
+                {/* Gemini API Engine */}
                 {aiEngine === 'api' && (
                   <>
                     <div className="api-modal__field">
@@ -542,61 +812,185 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                   </>
                 )}
 
-                {aiEngine === 'proxy' && (
+                {/* Puter Proxy Engine */}
+                {aiEngine === 'puter' && (
                   <>
-                    <div className="api-modal__field">
-                      <label className="api-modal__label" htmlFor="cookie-psid-input">GEMINI_COOKIE_1PSID</label>
-                      <input
-                        id="cookie-psid-input"
-                        className="api-modal__input"
-                        type="password"
-                        placeholder="Masukkan cookie __Secure-1PSID"
-                        value={cookiePsid}
-                        onChange={(event) => setCookiePsid(event.target.value)}
-                      />
-                    </div>
-                    <div className="api-modal__field">
-                      <label className="api-modal__label" htmlFor="cookie-psidts-input">GEMINI_COOKIE_1PSIDTS</label>
-                      <input
-                        id="cookie-psidts-input"
-                        className="api-modal__input"
-                        type="password"
-                        placeholder="Masukkan cookie __Secure-1PSIDTS"
-                        value={cookiePsidts}
-                        onChange={(event) => setCookiePsidts(event.target.value)}
-                      />
-                    </div>
-                    <div className="api-modal__field">
-                      <label className="api-modal__label" htmlFor="browser-name-input">BROWSER_NAME</label>
-                      <input
-                        id="browser-name-input"
-                        className="api-modal__input"
-                        type="text"
-                        placeholder="Contoh: edge, chrome, firefox"
-                        value={browserName}
-                        onChange={(event) => setBrowserName(event.target.value)}
-                      />
-                    </div>
-                    <div className="api-modal__field">
-                      <label className="api-modal__label" htmlFor="proxy-model-input">GEMINI_MODEL</label>
-                      <input
-                        id="proxy-model-input"
-                        className="api-modal__input"
-                        type="text"
-                        placeholder="Contoh: gemini-3-pro-plus"
-                        value={proxyModel}
-                        onChange={(event) => setProxyModel(event.target.value)}
-                      />
-                      <div className="api-modal__hint-block" style={{ marginTop: '8px' }}>
-                        <span><strong>Model tersedia:</strong> unspecified, gemini-3-pro, gemini-3-flash, gemini-3-flash-thinking, gemini-3-pro-plus, gemini-3-flash-plus, gemini-3-flash-thinking-plus, gemini-3-pro-advanced, gemini-3-flash-advanced, gemini-3-flash-thinking-advanced</span>
+                    {/* Multi-Key Pool Manager Card */}
+                    <div className="puter-key-pool-card">
+                      <div className="puter-key-pool-header">
+                        <div className="puter-key-pool-title">
+                          <span className="puter-key-icon">🔑</span>
+                          <span>Multi-Key Pool (Anti-Limit Engine)</span>
+                        </div>
+                        <span className="puter-badge puter-badge--key-count">
+                          {puterKeys.length} Key Terdaftar
+                        </span>
                       </div>
+
+                      {/* Key List Container */}
+                      <div className="puter-key-list">
+                        {puterKeys.length === 0 ? (
+                          <div className="puter-key-empty">
+                            <span>ℹ️ Belum ada Key khusus. Tambahkan beberapa token Puter di bawah untuk kapasitas 300+ pesan tanpa limit!</span>
+                          </div>
+                        ) : (
+                          puterKeys.map((k) => {
+                            const isActive = k.id === puterActiveKeyId;
+                            const isLimited = k.status === 'limited';
+                            const mask = k.token.length > 12 ? `${k.token.slice(0, 7)}...${k.token.slice(-4)}` : 'ptr-xxxx';
+                            
+                            return (
+                              <div key={k.id} className={`puter-key-item ${isActive ? 'puter-key-item--active' : ''} ${isLimited ? 'puter-key-item--limited' : ''}`}>
+                                <div className="puter-key-item__info">
+                                  <span className={`puter-status-dot ${isActive ? 'puter-status-dot--active' : (isLimited ? 'puter-status-dot--limited' : 'puter-status-dot--ready')}`} />
+                                  <span className="puter-key-item__label">{k.label}</span>
+                                  <span className="puter-key-item__mask">({mask})</span>
+                                </div>
+                                <div className="puter-key-item__actions">
+                                  {!isActive ? (
+                                    <button
+                                      className="puter-btn-action puter-btn-action--set"
+                                      type="button"
+                                      onClick={() => handleSetActivePuterKey(k.id)}
+                                      title="Jadikan Key Aktif"
+                                    >
+                                      ✓ Gunakan
+                                    </button>
+                                  ) : (
+                                    <span className="puter-active-tag">[AKTIF]</span>
+                                  )}
+                                  <button
+                                    className="puter-btn-action puter-btn-action--del"
+                                    type="button"
+                                    onClick={() => handleRemovePuterKey(k.id)}
+                                    title="Hapus Key"
+                                  >
+                                    🗑️
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+
+                      {/* Add Key Input Row */}
+                      <div className="puter-key-input-row">
+                        <input
+                          type="password"
+                          className="api-modal__input puter-key-input"
+                          placeholder="Paste Puter Token (ptr-xxxx)..."
+                          value={newPuterKey}
+                          onChange={(e) => setNewPuterKey(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAddPuterKey();
+                            }
+                          }}
+                        />
+                        <button
+                          className="api-modal__btn api-modal__btn--primary"
+                          type="button"
+                          onClick={() => handleAddPuterKey()}
+                        >
+                          + Tambah Key
+                        </button>
+                      </div>
+
+                      {/* Quick Login / Grab Token Button */}
+                      <div className="puter-quick-login-row">
+                        <button
+                          className="puter-quick-btn"
+                          type="button"
+                          onClick={handlePuterLogin}
+                          disabled={isPuterLoggingIn}
+                        >
+                          ⚡ {isPuterLoggingIn ? 'Menghubungkan...' : (puterAuthUser ? `Gunakan Akun Login (@${puterAuthUser})` : 'Masuk Akun Puter (Ambil Token Otomatis)')}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Model Selection Group (Interactive Button Trigger) */}
+                    <div className="api-modal__field">
+                      <label className="api-modal__label">Model AI Puter (500+ Model Tersedia)</label>
+                      
+                      {/* Clickable Model Selector Trigger Box */}
+                      <div
+                        className="puter-model-trigger-btn"
+                        onClick={() => setIsModelCatalogOpen(true)}
+                        role="button"
+                        tabIndex={0}
+                        title="Klik untuk membuka katalog dan memilih model AI"
+                      >
+                        <div className="puter-model-trigger-left">
+                          <span className="puter-model-trigger-icon">
+                            {PUTER_MODEL_METADATA[puterModel]?.icon || '✨'}
+                          </span>
+                          <div className="puter-model-trigger-info">
+                            <span className="puter-model-trigger-name">
+                              {PUTER_MODEL_METADATA[puterModel]?.name || puterModel}
+                            </span>
+                            <span className="puter-model-trigger-provider">
+                              {PUTER_MODEL_METADATA[puterModel]?.provider || extractProvider(puterModel)}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="puter-model-trigger-right">
+                          <span className="puter-model-change-badge">
+                            🔍 Ganti Model (500+)
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Custom Model Input Group */}
+                      <div className="puter-custom-model-row">
+                        <input
+                          type="text"
+                          className="api-modal__input"
+                          placeholder="Atau ketik ID model manual... (contoh: openai/gpt-4o, deepseek-ai/deepseek-v3)"
+                          value={customPuterModel}
+                          onChange={(e) => setCustomPuterModel(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleApplyCustomPuterModel();
+                            }
+                          }}
+                        />
+                        <button
+                          className="api-modal__btn api-modal__btn--ghost"
+                          type="button"
+                          onClick={handleApplyCustomPuterModel}
+                        >
+                          Terapkan
+                        </button>
+                      </div>
+
+                      <span className="api-modal__hint">
+                        Klik tombol model di atas untuk mencari dan memilih dari 500+ model AI yang tersedia di katalog Puter.
+                      </span>
+                    </div>
+
+                    {/* Puter SDK Status Card */}
+                    <div className="puter-sdk-status-card">
+                      <div className="puter-sdk-status-header">
+                        <span className={`puter-status-dot ${puterSdkStatus === 'ready' ? 'puter-status-dot--active' : 'puter-status-dot--loading'}`} />
+                        <span className="puter-sdk-status-title">
+                          {puterSdkStatus === 'ready' ? 'Puter.js SDK Terhubung & Siap' : 'Menghubungkan ke Puter.js SDK...'}
+                        </span>
+                      </div>
+                      <p className="puter-sdk-status-desc">
+                        Akses 500+ AI models langsung dan aman melalui reverse proxy Puter. Tambahkan token di pool untuk anti-limit.
+                      </p>
                     </div>
                   </>
                 )}
 
+                {/* Copilot Engine */}
                 {aiEngine === 'copilot' && (
                   <>
-                    {/* Auth Status */}
                     <div className="api-modal__field">
                       <label className="api-modal__label">Status Autentikasi GitHub</label>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
@@ -691,7 +1085,6 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                       )}
                     </div>
 
-                    {/* Model Selection */}
                     <div className="api-modal__field">
                       <label className="api-modal__label" htmlFor="copilot-model-input">Model AI</label>
                       <input
@@ -709,6 +1102,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                   </>
                 )}
 
+                {/* Gravity Engine */}
                 {aiEngine === 'gravity' && (
                   <>
                     <div className="api-modal__field">
@@ -819,6 +1213,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                   </>
                 )}
 
+                {/* 9Router Engine */}
                 {aiEngine === '9router' && (
                   <>
                     <div className="api-modal__field">
@@ -1009,6 +1404,133 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
           </div>
         </div>
       </section>
+
+      {/* Model Catalog Modal (500+ Models) */}
+      {isModelCatalogOpen && (
+        <div className="catalog-modal__overlay" onClick={() => setIsModelCatalogOpen(false)}>
+          <div className="catalog-modal__panel" onClick={(e) => e.stopPropagation()}>
+            <div className="catalog-modal__header">
+              <div className="catalog-modal__title-group">
+                <h3 className="catalog-modal__title">
+                  <span>✨</span> Katalog Model AI Puter
+                </h3>
+                <span className="catalog-modal__count-badge">
+                  {filteredCatalogModels.length} Model
+                </span>
+              </div>
+              <button
+                className="catalog-modal__close"
+                type="button"
+                onClick={() => setIsModelCatalogOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Search Input */}
+            <div className="catalog-modal__search-box">
+              <span className="catalog-search-icon">🔍</span>
+              <input
+                type="text"
+                className="catalog-modal__search-input"
+                placeholder="Cari model berdasarkan nama, provider, atau kemampuan (contoh: claude-3-7, deepseek, vision)..."
+                value={catalogSearchQuery}
+                onChange={(e) => setCatalogSearchQuery(e.target.value)}
+                autoFocus
+              />
+              {catalogSearchQuery && (
+                <button
+                  className="catalog-search-clear"
+                  type="button"
+                  onClick={() => setCatalogSearchQuery('')}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            {/* Provider Filter Tabs */}
+            <div className="catalog-modal__provider-tabs">
+              {[
+                { id: 'all', label: 'Semua' },
+                { id: 'anthropic', label: 'Anthropic' },
+                { id: 'openai', label: 'OpenAI' },
+                { id: 'google', label: 'Google' },
+                { id: 'deepseek', label: 'DeepSeek' },
+                { id: 'xai', label: 'xAI' },
+                { id: 'meta', label: 'Meta AI' },
+                { id: 'mistral', label: 'Mistral' },
+                { id: 'alibaba', label: 'Alibaba' },
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  className={`catalog-tab-btn ${catalogProviderFilter === tab.id ? 'catalog-tab-btn--active' : ''}`}
+                  onClick={() => setCatalogProviderFilter(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Model List Grid */}
+            <div className="catalog-modal__list">
+              {isCatalogLoading ? (
+                <div className="catalog-loading">
+                  <span className="catalog-spinner" />
+                  <span>Memuat katalog model dari Puter...</span>
+                </div>
+              ) : filteredCatalogModels.length === 0 ? (
+                <div className="catalog-empty">
+                  <span>Tidak ada model yang cocok dengan pencarian "<strong>{catalogSearchQuery}</strong>"</span>
+                  <button
+                    className="api-modal__btn api-modal__btn--primary"
+                    type="button"
+                    style={{ marginTop: '12px' }}
+                    onClick={() => {
+                      handleSelectPuterModel(catalogSearchQuery);
+                    }}
+                  >
+                    Gunakan "{catalogSearchQuery}" sebagai Custom Model
+                  </button>
+                </div>
+              ) : (
+                <div className="catalog-grid">
+                  {filteredCatalogModels.map((m) => {
+                    const isSelected = m.id === puterModel;
+                    return (
+                      <div
+                        key={m.id}
+                        className={`catalog-card ${isSelected ? 'catalog-card--selected' : ''}`}
+                        onClick={() => handleSelectPuterModel(m.id)}
+                      >
+                        <div className="catalog-card__header">
+                          <div className="catalog-card__title">
+                            <span className="catalog-card__icon">{m.icon || '⚡'}</span>
+                            <span className="catalog-card__name">{m.name}</span>
+                          </div>
+                          <span className="catalog-card__provider">{m.provider}</span>
+                        </div>
+                        <div className="catalog-card__id">{m.id}</div>
+                        <div className="catalog-card__desc">{m.desc}</div>
+                        {m.context && (
+                          <div className="catalog-card__context">📊 {m.context}</div>
+                        )}
+                        <button
+                          className={`catalog-card__btn ${isSelected ? 'catalog-card__btn--selected' : ''}`}
+                          type="button"
+                        >
+                          {isSelected ? '✓ Terpilih' : 'Pilih Model'}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
