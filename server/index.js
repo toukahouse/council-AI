@@ -13,6 +13,9 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
+// Load Universal Proxy Manager
+import * as universalManager from './universal_manager.js';
+
 // Load Gravity Proxy module
 await import('./antigravity/utils/proxy.js');
 const { default: proxyApp } = await import('./antigravity/server.js');
@@ -492,6 +495,85 @@ app.post('/api/copilot/auth/logout', async (req, res) => {
   }
 });
 
+// ==========================================
+// UNIVERSAL PROXY (GEMINI & CLAUDE WEB2API) ROUTES
+// ==========================================
+
+// Get Universal Proxy status
+app.get('/api/universal/status', async (req, res) => {
+  try {
+    const status = await universalManager.getUniversalStatus();
+    res.json(status);
+  } catch (error) {
+    console.error('Universal status error:', error);
+    res.status(500).json({ error: 'Failed to get universal proxy status' });
+  }
+});
+
+// Get Universal Proxy available models
+app.get('/api/universal/models', async (req, res) => {
+  try {
+    const models = await universalManager.getUniversalModels();
+    res.json(models);
+  } catch (error) {
+    console.error('Universal models error:', error);
+    res.status(500).json({ error: 'Failed to get universal models' });
+  }
+});
+
+// Save cookies for Gemini or Claude
+app.post('/api/universal/cookies/:service', async (req, res) => {
+  try {
+    const { cookies } = req.body;
+    const result = await universalManager.saveCookies(req.params.service, cookies);
+    res.json(result);
+  } catch (error) {
+    console.error('Save cookies error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Restart Gemini, Claude, or Panel proxy
+app.post('/api/universal/restart/:service', async (req, res) => {
+  try {
+    const result = await universalManager.restartProxy(req.params.service);
+    res.json(result);
+  } catch (error) {
+    console.error('Restart proxy error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Test proxy health
+app.post('/api/universal/test/:service', async (req, res) => {
+  try {
+    const result = await universalManager.testProxyHealth(req.params.service);
+    res.json(result);
+  } catch (error) {
+    console.error('Test health error:', error);
+    res.status(500).json({ success: false, response: error.message });
+  }
+});
+
+// Get proxy logs
+app.get('/api/universal/logs/:service', async (req, res) => {
+  try {
+    const service = req.params.service;
+    const lines = parseInt(req.query.lines, 10) || 60;
+    const ON_WINDOWS = process.platform === 'win32';
+    const os = await import('os');
+    const logPath = ON_WINDOWS 
+      ? path.join(os.tmpdir(), service === 'gemini' ? 'gemini_proxy.log' : (service === 'claude' ? 'claude_proxy.log' : 'panel.log'))
+      : `/tmp/${service === 'gemini' ? 'gemini_proxy.log' : (service === 'claude' ? 'claude_proxy.log' : 'panel.log')}`;
+    
+    const logs = universalManager.readLogFile(logPath, lines);
+    res.json({ service, logs, exists: logs !== null });
+  } catch (error) {
+    console.error('Read logs error:', error);
+    res.status(500).json({ error: 'Failed to read logs' });
+  }
+});
+
 // Stream AI response
 app.post('/api/chat/:conversationId/stream', async (req, res) => {
   try {
@@ -602,7 +684,10 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
     res.setHeader('X-Accel-Buffering', 'no'); // Disable Nginx buffering
 
     let childProcess;
-    if (apiSettings && apiSettings.aiEngine === '9router') {
+    if (apiSettings && (apiSettings.aiEngine === 'universal' || apiSettings.aiEngine === 'puter')) {
+      const universalScript = path.join(__dirname, 'universal_proxy.js');
+      childProcess = spawn('node', [universalScript]);
+    } else if (apiSettings && apiSettings.aiEngine === '9router') {
       const ninerouterScript = path.join(__dirname, 'ninerouter_proxy.js');
       childProcess = spawn('node', [ninerouterScript]);
     } else if (apiSettings && apiSettings.aiEngine === 'copilot') {
@@ -611,9 +696,6 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
     } else if (apiSettings && apiSettings.aiEngine === 'gravity') {
       const gravityScript = path.join(__dirname, 'gravity_proxy.js');
       childProcess = spawn('node', [gravityScript]);
-    } else if (apiSettings && apiSettings.aiEngine === 'puter') {
-      const puterScript = path.join(__dirname, 'puter_proxy.js');
-      childProcess = spawn('node', [puterScript]);
     } else {
       const pythonScript = path.join(__dirname, 'council_ai.py');
       const pythonCommand = process.platform === 'win32' ? 'python' : 'python3.11';
@@ -885,7 +967,10 @@ ATURAN MUTLAK:
     };
 
     let childProcess;
-    if (apiSettings && apiSettings.aiEngine === '9router') {
+    if (apiSettings && (apiSettings.aiEngine === 'universal' || apiSettings.aiEngine === 'puter')) {
+      const universalScript = path.join(__dirname, 'universal_proxy.js');
+      childProcess = spawn('node', [universalScript]);
+    } else if (apiSettings && apiSettings.aiEngine === '9router') {
       const ninerouterScript = path.join(__dirname, 'ninerouter_proxy.js');
       childProcess = spawn('node', [ninerouterScript]);
     } else if (apiSettings && apiSettings.aiEngine === 'copilot') {
@@ -894,9 +979,6 @@ ATURAN MUTLAK:
     } else if (apiSettings && apiSettings.aiEngine === 'gravity') {
       const gravityScript = path.join(__dirname, 'gravity_proxy.js');
       childProcess = spawn('node', [gravityScript]);
-    } else if (apiSettings && apiSettings.aiEngine === 'puter') {
-      const puterScript = path.join(__dirname, 'puter_proxy.js');
-      childProcess = spawn('node', [puterScript]);
     } else {
       const pythonScript = path.join(__dirname, 'council_ai.py');
       const pythonCommand = process.platform === 'win32' ? 'python' : 'python3.11';

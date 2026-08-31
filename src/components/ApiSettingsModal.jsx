@@ -6,63 +6,107 @@ const initialModels = [
   { id: 'gemini-2.5-pro', label: 'gemini-2.5-pro' },
 ];
 
-const PUTER_MODEL_METADATA = {
-  // Anthropic
-  'claude-3-7-sonnet': { name: 'Claude 3.7 Sonnet', provider: 'Anthropic', icon: '🧠', desc: 'Model terbaru Anthropic dengan hybrid reasoning & coding terbaik' },
-  'claude-3-5-sonnet': { name: 'Claude 3.5 Sonnet', provider: 'Anthropic', icon: '🧠', desc: 'Model sangat cerdas dan bernalar tinggi dari Anthropic' },
-  'claude-3-5-haiku': { name: 'Claude 3.5 Haiku', provider: 'Anthropic', icon: '🪶', desc: 'Super cepat, hemat, dan responsif' },
-  'claude-3-opus': { name: 'Claude 3 Opus', provider: 'Anthropic', icon: '👑', desc: 'Model analitis mendalam dari Anthropic' },
-  
-  // OpenAI
-  'o3-mini': { name: 'o3-mini', provider: 'OpenAI', icon: '⚡', desc: 'Model penalaran terbaru OpenAI yang cepat dan presisi' },
-  'o1': { name: 'o1', provider: 'OpenAI', icon: '🧠', desc: 'Flagship reasoning model OpenAI dengan CoT mendalam' },
-  'o1-mini': { name: 'o1-mini', provider: 'OpenAI', icon: '🔬', desc: 'Penalaran STEM dan coding hemat daya' },
-  'gpt-4o': { name: 'GPT-4o', provider: 'OpenAI', icon: '✨', desc: 'Model flagship multimodal unggulan OpenAI' },
-  'gpt-4o-mini': { name: 'GPT-4o Mini', provider: 'OpenAI', icon: '⚡', desc: 'Cepat, cerdas, dan sangat hemat' },
-  'chatgpt-4o-latest': { name: 'ChatGPT-4o Latest', provider: 'OpenAI', icon: '🤖', desc: 'Versi ChatGPT-4o terkini' },
-  'gpt-3.5-turbo': { name: 'GPT-3.5 Turbo', provider: 'OpenAI', icon: '🤖', desc: 'Model klasik OpenAI' },
+const UNIVERSAL_MODELS = [
+  // Google Gemini Models
+  {
+    id: 'gemini-3.7-flash',
+    name: 'Gemini 3.7 Flash',
+    provider: 'Google',
+    badge: '🌟 Rekomendasi Terkini',
+    icon: '💎',
+    desc: 'Model terbaru Google yang sangat cepat, pintar, dan responsif untuk roleplay.'
+  },
+  {
+    id: 'gemini-3.5-flash-thinking',
+    name: 'Gemini 3.5 Flash Thinking',
+    provider: 'Google',
+    badge: '🧠 Deep Reasoning',
+    icon: '🔮',
+    desc: 'Penalaran diperluas (Chain-of-Thought) untuk pemecahan masalah & narasi kompleks.'
+  },
+  {
+    id: 'gemini-3.1-pro',
+    name: 'Gemini 3.1 Pro',
+    provider: 'Google',
+    badge: '👑 Flagship Canggih',
+    icon: '⚡',
+    desc: 'Penalaran tingkat tinggi untuk logika mendalam, coding, dan deskripsi detail.'
+  },
+  {
+    id: 'gemini-3.5-flash-lite',
+    name: 'Gemini 3.5 Flash-Lite',
+    provider: 'Google',
+    badge: '⚡ Super Cepat',
+    icon: '🪶',
+    desc: 'Versi teringan dengan latensi respons super instan.'
+  },
+  {
+    id: 'gemini-3.5-flash',
+    name: 'Gemini 3.5 Flash',
+    provider: 'Google',
+    badge: '💡 Cepat & Pintar',
+    icon: '✨',
+    desc: 'Model serbaguna untuk percakapan sehari-hari yang seimbang.'
+  },
+  {
+    id: 'gemini-pro',
+    name: 'Gemini Pro',
+    provider: 'Google',
+    badge: '🎯 Pro Mode',
+    icon: '👑',
+    desc: 'Alias model Gemini 3.1 Pro.'
+  },
+  {
+    id: 'gemini-auto',
+    name: 'Gemini Auto',
+    provider: 'Google',
+    badge: '🤖 Auto Route',
+    icon: '⚙️',
+    desc: 'Pemilihan model otomatis oleh sistem proxy.'
+  },
 
-  // Google
-  'gemini-2.0-flash': { name: 'Gemini 2.0 Flash', provider: 'Google', icon: '💎', desc: 'Generasi terbaru Google, super cepat dan cerdas' },
-  'gemini-2.0-pro-exp-02-05': { name: 'Gemini 2.0 Pro Exp', provider: 'Google', icon: '👑', desc: 'Model Gemini 2.0 paling bertenaga untuk penalaran rumit' },
-  'gemini-1.5-pro': { name: 'Gemini 1.5 Pro', provider: 'Google', icon: '👑', desc: 'Kapasitas konteks raksasa dan penalaran pro' },
-  'gemini-1.5-flash': { name: 'Gemini 1.5 Flash', provider: 'Google', icon: '⚡', desc: 'Ringan dan cepat dari Google' },
-
-  // DeepSeek
-  'deepseek-reasoner': { name: 'DeepSeek Reasoner (R1)', provider: 'DeepSeek', icon: '🌲', desc: 'Model penalaran terobosan (Chain-of-Thought) DeepSeek' },
-  'deepseek-chat': { name: 'DeepSeek Chat (V3)', provider: 'DeepSeek', icon: '🧭', desc: 'Model 671B MoE terdepan dari DeepSeek' },
-
-  // xAI
-  'grok-2-latest': { name: 'Grok 2 Latest', provider: 'xAI', icon: '🚀', desc: 'Model AI terkemuka dari xAI (Elon Musk)' },
-  'grok-beta': { name: 'Grok Beta', provider: 'xAI', icon: '🚀', desc: 'Versi preview Grok dari xAI' },
-
-  // Qwen (Alibaba)
-  'qwen/qwen-2.5-72b-instruct': { name: 'Qwen 2.5 72B Instruct', provider: 'Alibaba Cloud', icon: '🌐', desc: 'Model open-weight kelas dunia dari Alibaba' },
-  'qwen/qwq-32b-preview': { name: 'QwQ 32B Preview', provider: 'Alibaba Cloud', icon: '🔬', desc: 'Model penalaran matematika & coding Qwen' },
-
-  // Meta & Mistral
-  'meta-llama/llama-3.3-70b-instruct': { name: 'Llama 3.3 70B Instruct', provider: 'Meta AI', icon: '🦙', desc: 'Model open source generasi terbaru dari Meta' },
-  'meta-llama/llama-3.2-11b-vision-instruct': { name: 'Llama 3.2 11B Vision', provider: 'Meta AI', icon: '👁️', desc: 'Model vision & multimodal dari Meta' },
-  'meta-llama/meta-llama-3.1-70b-instruct': { name: 'Llama 3.1 70B', provider: 'Meta AI', icon: '🦙', desc: 'Model Llama 3.1 70B parameter' },
-  'mistral-large-latest': { name: 'Mistral Large', provider: 'Mistral AI', icon: '🌪️', desc: 'Model flagship dari Mistral AI' },
-  'codestral-latest': { name: 'Codestral', provider: 'Mistral AI', icon: '💻', desc: 'Spesialis generasi dan pemahaman kode' },
-  'pixtral-large-latest': { name: 'Pixtral Large', provider: 'Mistral AI', icon: '🖼️', desc: 'Model multimodal flagship Mistral' }
-};
-
-function extractProvider(modelId) {
-  if (!modelId) return 'AI Provider';
-  const lower = modelId.toLowerCase();
-  if (lower.includes('claude') || lower.includes('anthropic')) return 'Anthropic';
-  if (lower.includes('gpt') || lower.includes('o1') || lower.includes('o3') || lower.includes('openai') || lower.includes('chatgpt')) return 'OpenAI';
-  if (lower.includes('gemini') || lower.includes('google')) return 'Google';
-  if (lower.includes('deepseek')) return 'DeepSeek';
-  if (lower.includes('grok') || lower.includes('xai') || lower.includes('x-ai')) return 'xAI';
-  if (lower.includes('qwen') || lower.includes('alibaba') || lower.includes('qwq')) return 'Alibaba';
-  if (lower.includes('llama') || lower.includes('meta')) return 'Meta AI';
-  if (lower.includes('mistral') || lower.includes('codestral') || lower.includes('pixtral')) return 'Mistral AI';
-  if (modelId.includes('/')) return modelId.split('/')[0];
-  return 'Puter AI';
-}
+  // Anthropic Claude Models
+  {
+    id: 'claude-haiku-4-5-20251001',
+    name: 'Claude Haiku 4.5',
+    provider: 'Anthropic',
+    badge: '🌟 Rekomendasi Claude',
+    icon: '🧠',
+    desc: 'Model Claude terbaru yang cepat, cerdas, dan gaya bahasa naratif sangat alami.'
+  },
+  {
+    id: 'claude-3-5-sonnet-20241022',
+    name: 'Claude 3.5 Sonnet',
+    provider: 'Anthropic',
+    badge: '👑 Narasi & Menulis',
+    icon: '🎭',
+    desc: 'Penulisan roleplay, nuansa emosi karakter, dan deskripsi suasana terbaik.'
+  },
+  {
+    id: 'claude-3-5-haiku-20241022',
+    name: 'Claude 3.5 Haiku',
+    provider: 'Anthropic',
+    badge: '🪶 Ringan & Gesit',
+    icon: '⚡',
+    desc: 'Model responsif dengan gaya bahasa yang luwes dan ekspresif.'
+  },
+  {
+    id: 'claude-3-opus-20240229',
+    name: 'Claude 3 Opus',
+    provider: 'Anthropic',
+    badge: '🏰 Deep Analysis',
+    icon: '👑',
+    desc: 'Pemahaman mendalam tentang karakter dan peran rumit.'
+  },
+  {
+    id: 'claude-sonnet-4-6',
+    name: 'Claude Sonnet 4.6',
+    provider: 'Anthropic',
+    badge: '💎 Edisi Khusus',
+    icon: '✨',
+    desc: 'Edisi khusus cerdas untuk interaksi mendalam.'
+  }
+];
 
 export default function ApiSettingsModal({ isOpen, onClose }) {
   const [activePage, setActivePage] = useState('ai');
@@ -78,23 +122,34 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
   const [thinkingEnabled, setThinkingEnabled] = useState(true);
   const [thinkingLevel, setThinkingLevel] = useState('high');
 
-  // AI Engine selector ('api', 'puter', 'copilot', 'gravity', '9router')
-  const [aiEngine, setAiEngine] = useState('api');
+  // AI Engine selector ('api', 'universal', 'copilot', 'gravity', '9router')
+  const [aiEngine, setAiEngine] = useState('universal');
 
-  // Puter Proxy Settings
-  const [puterModel, setPuterModel] = useState('claude-3-5-sonnet');
-  const [puterKeys, setPuterKeys] = useState([]); // [{ id, token, label, status: 'ready'|'limited' }]
-  const [puterActiveKeyId, setPuterActiveKeyId] = useState(null);
-  const [newPuterKey, setNewPuterKey] = useState('');
-  const [customPuterModel, setCustomPuterModel] = useState('');
-  const [isModelCatalogOpen, setIsModelCatalogOpen] = useState(false);
-  const [catalogSearchQuery, setCatalogSearchQuery] = useState('');
-  const [catalogProviderFilter, setCatalogProviderFilter] = useState('all');
-  const [catalogModels, setCatalogModels] = useState([]);
-  const [isCatalogLoading, setIsCatalogLoading] = useState(false);
-  const [puterAuthUser, setPuterAuthUser] = useState(null);
-  const [isPuterLoggingIn, setIsPuterLoggingIn] = useState(false);
-  const [puterSdkStatus, setPuterSdkStatus] = useState('loading');
+  // Universal Proxy Settings
+  const [universalModel, setUniversalModel] = useState('gemini-3.7-flash');
+  const [universalProxyUrl, setUniversalProxyUrl] = useState('http://127.0.0.1:8083');
+  const [customUniversalModel, setCustomUniversalModel] = useState('');
+  const [universalStatus, setUniversalStatus] = useState(null);
+  const [isUniversalStatusLoading, setIsUniversalStatusLoading] = useState(false);
+  
+  // Universal Cookie Management Modal
+  const [cookieModalService, setCookieModalService] = useState(null); // 'gemini' | 'claude' | null
+  const [cookieInput, setCookieInput] = useState('');
+  const [isSavingCookie, setIsSavingCookie] = useState(false);
+  const [cookieFeedback, setCookieFeedback] = useState(null);
+
+  // Universal Logs Viewer Modal
+  const [logsModalService, setLogsModalService] = useState(null); // 'gemini' | 'claude' | null
+  const [logsContent, setLogsContent] = useState('');
+  const [isLogsLoading, setIsLogsLoading] = useState(false);
+
+  // Universal Health Testing
+  const [testRunningService, setTestRunningService] = useState(null);
+  const [testResult, setTestResult] = useState(null);
+
+  // Universal Restarting
+  const [restartingService, setRestartingService] = useState(null);
+  const [restartResult, setRestartResult] = useState(null);
 
   // Gravity Proxy Settings
   const [gravityProxyUrl, setGravityProxyUrl] = useState('');
@@ -121,7 +176,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
   const [ninerouterApiKey, setNinerouterApiKey] = useState('');
   const [ninerouterModel, setNinerouterModel] = useState('');
 
-  // Load from localStorage on mount
+  // Load settings from localStorage
   useEffect(() => {
     try {
       const saved = localStorage.getItem('apiSettings');
@@ -138,27 +193,30 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
         if (parsed.thinkingEnabled !== undefined) setThinkingEnabled(parsed.thinkingEnabled);
         if (parsed.thinkingLevel) setThinkingLevel(parsed.thinkingLevel);
         
-        // Engine selector (Migrate legacy 'proxy' to 'puter')
+        // Engine selector (Migrate legacy 'puter' or 'proxy' to 'universal')
         if (parsed.aiEngine) {
-          setAiEngine(parsed.aiEngine === 'proxy' ? 'puter' : parsed.aiEngine);
+          if (parsed.aiEngine === 'puter' || parsed.aiEngine === 'proxy') {
+            setAiEngine('universal');
+          } else {
+            setAiEngine(parsed.aiEngine);
+          }
         }
 
-        // Puter settings load
-        if (parsed.puterModel !== undefined) setPuterModel(parsed.puterModel);
-        if (Array.isArray(parsed.puterKeys)) setPuterKeys(parsed.puterKeys);
-        if (parsed.puterActiveKeyId) setPuterActiveKeyId(parsed.puterActiveKeyId);
+        // Universal proxy settings
+        if (parsed.universalModel) setUniversalModel(parsed.universalModel);
+        if (parsed.universalProxyUrl) setUniversalProxyUrl(parsed.universalProxyUrl);
 
-        // Copilot settings load
+        // Copilot settings
         if (parsed.copilotModel !== undefined) setCopilotModel(parsed.copilotModel);
 
-        // Gravity settings load
+        // Gravity settings
         if (parsed.gravityProxyUrl !== undefined) setGravityProxyUrl(parsed.gravityProxyUrl);
         if (parsed.gravityModel !== undefined) setGravityModel(parsed.gravityModel);
         if (parsed.gravityIsLoggedIn !== undefined) setGravityIsLoggedIn(parsed.gravityIsLoggedIn);
         if (parsed.gravityAccountEmail !== undefined) setGravityAccountEmail(parsed.gravityAccountEmail);
         if (parsed.gravityAvailableAccounts !== undefined) setGravityAvailableAccounts(parsed.gravityAvailableAccounts);
         
-        // 9Router settings load
+        // 9Router settings
         if (parsed.ninerouterUrl !== undefined) setNinerouterUrl(parsed.ninerouterUrl);
         if (parsed.ninerouterApiKey !== undefined) setNinerouterApiKey(parsed.ninerouterApiKey);
         if (parsed.ninerouterModel !== undefined) setNinerouterModel(parsed.ninerouterModel);
@@ -168,89 +226,27 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
     }
   }, []);
 
-  // Check Puter SDK and Auth Status
-  useEffect(() => {
-    const checkPuter = async () => {
-      if (typeof window !== 'undefined' && typeof window.puter !== 'undefined') {
-        setPuterSdkStatus('ready');
-        try {
-          if (window.puter.auth && window.puter.auth.isSignedIn()) {
-            const user = await window.puter.auth.getUser();
-            setPuterAuthUser(user?.username || user?.name || 'Puter User');
-          }
-        } catch (err) {
-          console.warn('Puter user check:', err);
-        }
-      } else {
-        setPuterSdkStatus('loading');
-        let retries = 0;
-        const interval = setInterval(async () => {
-          retries++;
-          if (typeof window !== 'undefined' && typeof window.puter !== 'undefined') {
-            clearInterval(interval);
-            setPuterSdkStatus('ready');
-            try {
-              if (window.puter.auth && window.puter.auth.isSignedIn()) {
-                const user = await window.puter.auth.getUser();
-                setPuterAuthUser(user?.username || user?.name || 'Puter User');
-              }
-            } catch (e) {}
-          } else if (retries > 10) {
-            clearInterval(interval);
-            setPuterSdkStatus('offline');
-          }
-        }, 500);
+  // Fetch Universal Proxy Status
+  const fetchUniversalStatus = async () => {
+    setIsUniversalStatusLoading(true);
+    try {
+      const res = await fetch('/api/universal/status');
+      if (res.ok) {
+        const data = await res.json();
+        setUniversalStatus(data);
       }
-    };
-    if (isOpen) {
-      checkPuter();
+    } catch (e) {
+      console.warn('Failed to fetch universal status:', e);
+    } finally {
+      setIsUniversalStatusLoading(false);
     }
-  }, [isOpen]);
+  };
 
-  // Load Catalog Models
   useEffect(() => {
-    const fetchCatalog = async () => {
-      setIsCatalogLoading(true);
-      try {
-        const res = await fetch('https://api.puter.com/puterai/chat/models/details');
-        if (res.ok) {
-          const data = await res.json();
-          if (data?.models && Array.isArray(data.models)) {
-            const mapped = data.models.map(m => {
-              const meta = PUTER_MODEL_METADATA[m.id] || PUTER_MODEL_METADATA[m.puterId] || {};
-              return {
-                id: m.id || m.puterId,
-                name: m.name || meta.name || m.id,
-                provider: m.provider || meta.provider || extractProvider(m.id || m.name),
-                desc: m.description || meta.desc || `Model ${m.provider || 'AI'}`,
-                context: m.context ? `${(m.context / 1024).toFixed(0)}k context` : (m.max_tokens ? `${m.max_tokens} tokens` : null),
-                icon: meta.icon || '⚡'
-              };
-            });
-            setCatalogModels(mapped);
-            setIsCatalogLoading(false);
-            return;
-          }
-        }
-      } catch (e) {
-        console.warn('Failed to fetch from Puter models API:', e);
-      }
-
-      // Fallback
-      setCatalogModels(Object.keys(PUTER_MODEL_METADATA).map(k => ({
-        id: k,
-        name: PUTER_MODEL_METADATA[k].name,
-        provider: PUTER_MODEL_METADATA[k].provider,
-        desc: PUTER_MODEL_METADATA[k].desc,
-        icon: PUTER_MODEL_METADATA[k].icon
-      })));
-      setIsCatalogLoading(false);
-    };
-
-    if (isOpen && catalogModels.length === 0) {
-      fetchCatalog();
+    if (isOpen && activePage === 'ai') {
+      fetchUniversalStatus();
     }
-  }, [isOpen, catalogModels.length]);
+  }, [isOpen, activePage]);
 
   // Check copilot auth status on mount
   useEffect(() => {
@@ -262,92 +258,108 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
     }
   }, [isOpen]);
 
-  // Ref to cancel polling on unmount
   const pollAbortRef = { current: false };
 
   // ==========================================
-  // PUTER KEY MANAGEMENT HANDLERS
+  // UNIVERSAL PROXY HANDLERS
   // ==========================================
-  const handleAddPuterKey = (customToken = '', customLabel = '') => {
-    const tokenToAdd = (customToken || newPuterKey).trim();
-    if (!tokenToAdd) return;
 
-    // Check duplicate
-    const exists = puterKeys.find(k => k.token === tokenToAdd);
-    if (exists) {
-      setPuterActiveKeyId(exists.id);
-      setNewPuterKey('');
-      return;
-    }
-
-    const keyIndex = puterKeys.length + 1;
-    const newKeyObj = {
-      id: 'key_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-      token: tokenToAdd,
-      label: customLabel || `Key #${keyIndex}`,
-      status: 'ready'
-    };
-
-    const updatedKeys = [...puterKeys, newKeyObj];
-    setPuterKeys(updatedKeys);
-    if (!puterActiveKeyId || puterKeys.length === 0) {
-      setPuterActiveKeyId(newKeyObj.id);
-    }
-    setNewPuterKey('');
-  };
-
-  const handleRemovePuterKey = (keyId) => {
-    const updated = puterKeys.filter(k => k.id !== keyId);
-    setPuterKeys(updated);
-    if (puterActiveKeyId === keyId) {
-      setPuterActiveKeyId(updated.length > 0 ? updated[0].id : null);
-    }
-  };
-
-  const handleSetActivePuterKey = (keyId) => {
-    setPuterActiveKeyId(keyId);
-    // Reset status to ready if was limited
-    setPuterKeys(prev => prev.map(k => k.id === keyId ? { ...k, status: 'ready' } : k));
-  };
-
-  const handlePuterLogin = async () => {
-    if (typeof window === 'undefined' || typeof window.puter === 'undefined' || !window.puter.auth) {
-      alert('Puter SDK belum siap. Silakan coba sesaat lagi atau paste token secara manual.');
-      return;
-    }
+  const handleRestartProxy = async (service) => {
+    setRestartingService(service);
+    setRestartResult(null);
     try {
-      setIsPuterLoggingIn(true);
-      if (window.puter.auth.isSignedIn() && window.puter.auth.authToken) {
-        const user = await window.puter.auth.getUser().catch(() => ({}));
-        const username = user?.username || user?.name || 'Puter';
-        setPuterAuthUser(username);
-        handleAddPuterKey(window.puter.auth.authToken, `Akun @${username}`);
-      } else {
-        await window.puter.auth.signIn();
-        if (window.puter.auth.authToken) {
-          const user = await window.puter.auth.getUser().catch(() => ({}));
-          const username = user?.username || user?.name || 'Puter';
-          setPuterAuthUser(username);
-          handleAddPuterKey(window.puter.auth.authToken, `Akun @${username}`);
-        }
-      }
-    } catch (err) {
-      console.warn('Puter login error:', err);
+      const res = await fetch(`/api/universal/restart/${service}`, { method: 'POST' });
+      const data = await res.json();
+      setRestartResult({ service, success: data.success, message: data.message });
+      await fetchUniversalStatus();
+    } catch (e) {
+      setRestartResult({ service, success: false, message: `Gagal me-restart: ${e.message}` });
     } finally {
-      setIsPuterLoggingIn(false);
+      setRestartingService(null);
     }
   };
 
-  const handleSelectPuterModel = (modelId) => {
-    setPuterModel(modelId);
-    setIsModelCatalogOpen(false);
+  const handleTestHealth = async (service) => {
+    setTestRunningService(service);
+    setTestResult(null);
+    try {
+      const res = await fetch(`/api/universal/test/${service}`, { method: 'POST' });
+      const data = await res.json();
+      setTestResult({
+        service,
+        success: data.success,
+        response: data.response,
+        time: data.time
+      });
+      await fetchUniversalStatus();
+    } catch (e) {
+      setTestResult({
+        service,
+        success: false,
+        response: `Koneksi gagal: ${e.message}`,
+        time: null
+      });
+    } finally {
+      setTestRunningService(null);
+    }
   };
 
-  const handleApplyCustomPuterModel = () => {
-    const trimmed = customPuterModel.trim();
+  const handleOpenCookieModal = (service) => {
+    setCookieModalService(service);
+    setCookieInput('');
+    setCookieFeedback(null);
+  };
+
+  const handleSaveCookie = async () => {
+    if (!cookieInput.trim()) return;
+    setIsSavingCookie(true);
+    setCookieFeedback(null);
+    try {
+      const res = await fetch(`/api/universal/cookies/${cookieModalService}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cookies: cookieInput.trim() })
+      });
+      const data = await res.json();
+      setCookieFeedback({
+        success: data.success,
+        message: data.message || (data.success ? 'Cookie berhasil diperbarui!' : 'Gagal menyimpan cookie.')
+      });
+      if (data.success) {
+        await fetchUniversalStatus();
+        setTimeout(() => {
+          setCookieModalService(null);
+          setCookieInput('');
+          setCookieFeedback(null);
+        }, 1800);
+      }
+    } catch (e) {
+      setCookieFeedback({ success: false, message: `Error: ${e.message}` });
+    } finally {
+      setIsSavingCookie(false);
+    }
+  };
+
+  const handleOpenLogs = async (service) => {
+    setLogsModalService(service);
+    setIsLogsLoading(true);
+    setLogsContent('');
+    try {
+      const res = await fetch(`/api/universal/logs/${service}?lines=120`);
+      const data = await res.json();
+      setLogsContent(data.logs || 'Log kosong atau belum ada aktivitas tercatat.');
+    } catch (e) {
+      setLogsContent(`Gagal memuat log: ${e.message}`);
+    } finally {
+      setIsLogsLoading(false);
+    }
+  };
+
+  const handleApplyCustomUniversalModel = () => {
+    const trimmed = customUniversalModel.trim();
     if (!trimmed) return;
-    setPuterModel(trimmed);
-    setCustomPuterModel('');
+    setUniversalModel(trimmed);
+    setCustomUniversalModel('');
   };
 
   // ==========================================
@@ -598,9 +610,8 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
       thinkingEnabled,
       thinkingLevel,
       aiEngine,
-      puterModel,
-      puterKeys,
-      puterActiveKeyId,
+      universalModel,
+      universalProxyUrl,
       copilotModel,
       gravityProxyUrl,
       gravityModel,
@@ -640,31 +651,6 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
     { id: 'thinking', label: 'Thinking Settings' },
   ];
 
-  // Filter models in catalog
-  const filteredCatalogModels = catalogModels.filter(m => {
-    const query = catalogSearchQuery.trim().toLowerCase();
-    const provider = catalogProviderFilter.toLowerCase();
-    
-    if (provider !== 'all') {
-      const p = (m.provider || '').toLowerCase();
-      const id = (m.id || '').toLowerCase();
-      if (provider === 'anthropic' && !p.includes('anthropic') && !id.includes('claude')) return false;
-      if (provider === 'openai' && !p.includes('openai') && !id.includes('gpt') && !id.includes('o1') && !id.includes('o3') && !id.includes('chatgpt')) return false;
-      if (provider === 'google' && !p.includes('google') && !id.includes('gemini')) return false;
-      if (provider === 'deepseek' && !p.includes('deepseek')) return false;
-      if (provider === 'xai' && !p.includes('xai') && !p.includes('x-ai') && !id.includes('grok')) return false;
-      if (provider === 'meta' && !p.includes('meta') && !id.includes('llama')) return false;
-      if (provider === 'mistral' && !p.includes('mistral') && !id.includes('mistral') && !id.includes('codestral') && !id.includes('pixtral')) return false;
-      if (provider === 'alibaba' && !p.includes('alibaba') && !id.includes('qwen') && !id.includes('qwq')) return false;
-    }
-
-    if (!query) return true;
-    return (m.id && m.id.toLowerCase().includes(query)) ||
-           (m.name && m.name.toLowerCase().includes(query)) ||
-           (m.provider && m.provider.toLowerCase().includes(query)) ||
-           (m.desc && m.desc.toLowerCase().includes(query));
-  });
-
   return (
     <>
       <div
@@ -683,7 +669,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
               <span className="api-modal__eyebrow">API Settings</span>
               <h2 className="api-modal__title" id="api-modal-title">Pengaturan Model AI</h2>
               <p className="api-modal__subtitle">
-                Kelola API key, multi-key proxy pool, model pilihan, dan parameter generasi untuk roleplay.
+                Kelola provider AI, Universal Proxy (Gemini & Claude Web2API), model pilihan, dan parameter generasi untuk roleplay.
               </p>
             </div>
             <button className="api-modal__close" onClick={onClose} type="button" aria-label="Tutup">
@@ -715,18 +701,18 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                   <label className="api-modal__label">AI Engine</label>
                   <div className="api-modal__engine-toggle">
                     <button
+                      className={`api-modal__btn ${aiEngine === 'universal' ? 'api-modal__btn--primary' : 'api-modal__btn--ghost'}`}
+                      type="button"
+                      onClick={() => setAiEngine('universal')}
+                    >
+                      Universal Proxy
+                    </button>
+                    <button
                       className={`api-modal__btn ${aiEngine === 'api' ? 'api-modal__btn--primary' : 'api-modal__btn--ghost'}`}
                       type="button"
                       onClick={() => setAiEngine('api')}
                     >
                       Gemini API
-                    </button>
-                    <button
-                      className={`api-modal__btn ${aiEngine === 'puter' ? 'api-modal__btn--primary' : 'api-modal__btn--ghost'}`}
-                      type="button"
-                      onClick={() => setAiEngine('puter')}
-                    >
-                      Puter Proxy
                     </button>
                     <button
                       className={`api-modal__btn ${aiEngine === 'copilot' ? 'api-modal__btn--primary' : 'api-modal__btn--ghost'}`}
@@ -751,6 +737,305 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                     </button>
                   </div>
                 </div>
+
+                {/* ========================================== */}
+                {/* UNIVERSAL PROXY ENGINE (GEMINI & CLAUDE) */}
+                {/* ========================================== */}
+                {aiEngine === 'universal' && (
+                  <div className="universal-proxy-container">
+                    
+                    {/* Status Feedback / Notifications */}
+                    {testResult && (
+                      <div className={`universal-alert ${testResult.success ? 'universal-alert--success' : 'universal-alert--error'}`}>
+                        <div className="universal-alert__header">
+                          <span>{testResult.success ? '✅ Tes Kesehatan Berhasil' : '❌ Tes Kesehatan Gagal'} ({testResult.service.toUpperCase()})</span>
+                          {testResult.time && <span className="universal-alert__time">{testResult.time}s</span>}
+                        </div>
+                        <p className="universal-alert__text">{testResult.response}</p>
+                      </div>
+                    )}
+
+                    {restartResult && (
+                      <div className={`universal-alert ${restartResult.success ? 'universal-alert--success' : 'universal-alert--error'}`}>
+                        <span>{restartResult.success ? '🔄 ' : '⚠️ '}{restartResult.message}</span>
+                      </div>
+                    )}
+
+                    {/* Services Live Status Cards */}
+                    <div className="universal-status-grid">
+                      {/* Gemini Proxy Card */}
+                      <div className={`universal-card ${universalStatus?.gemini?.alive ? 'universal-card--online' : 'universal-card--offline'}`}>
+                        <div className="universal-card__header">
+                          <div className="universal-card__title">
+                            <span className="universal-card__brand-icon">💎</span>
+                            <div>
+                              <h4>Google Gemini Proxy</h4>
+                              <span className="universal-card__port">Port: 8081</span>
+                            </div>
+                          </div>
+                          <div className="universal-card__badge-wrapper">
+                            <span className={`universal-status-pill ${universalStatus?.gemini?.alive ? 'universal-status-pill--online' : 'universal-status-pill--offline'}`}>
+                              <span className="universal-dot" />
+                              {universalStatus?.gemini?.alive ? 'Online' : 'Offline'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="universal-card__meta">
+                          <div className="universal-meta-row">
+                            <span className="universal-meta-label">Status Cookie:</span>
+                            <span className={`universal-meta-val ${universalStatus?.gemini?.cookie_expiry_days ? 'universal-meta-val--ok' : 'universal-meta-val--warn'}`}>
+                              {universalStatus?.gemini?.cookie_expiry_days
+                                ? `Aktif (${universalStatus.gemini.cookie_expiry_days} hari)`
+                                : (universalStatus?.gemini?.cookie_exists ? 'Cookie Tersimpan' : 'Belum Ada Cookie')}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="universal-card__actions">
+                          <button
+                            type="button"
+                            className="universal-action-btn universal-action-btn--test"
+                            onClick={() => handleTestHealth('gemini')}
+                            disabled={testRunningService === 'gemini'}
+                            title="Tes chat respons"
+                          >
+                            {testRunningService === 'gemini' ? '⏳ Menguji...' : '⚡ Test Health'}
+                          </button>
+                          <button
+                            type="button"
+                            className="universal-action-btn universal-action-btn--cookie"
+                            onClick={() => handleOpenCookieModal('gemini')}
+                            title="Update Cookie Firefox"
+                          >
+                            🍪 Update Cookie
+                          </button>
+                          <button
+                            type="button"
+                            className="universal-action-btn universal-action-btn--restart"
+                            onClick={() => handleRestartProxy('gemini')}
+                            disabled={restartingService === 'gemini'}
+                            title="Restart service proxy"
+                          >
+                            {restartingService === 'gemini' ? '🔄...' : '🔄 Restart'}
+                          </button>
+                          <button
+                            type="button"
+                            className="universal-action-btn universal-action-btn--logs"
+                            onClick={() => handleOpenLogs('gemini')}
+                            title="Lihat Log Server"
+                          >
+                            📜 Logs
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Claude Proxy Card */}
+                      <div className={`universal-card ${universalStatus?.claude?.alive ? 'universal-card--online' : 'universal-card--offline'}`}>
+                        <div className="universal-card__header">
+                          <div className="universal-card__title">
+                            <span className="universal-card__brand-icon">🧠</span>
+                            <div>
+                              <h4>Anthropic Claude Proxy</h4>
+                              <span className="universal-card__port">Port: 8082</span>
+                            </div>
+                          </div>
+                          <div className="universal-card__badge-wrapper">
+                            <span className={`universal-status-pill ${universalStatus?.claude?.alive ? 'universal-status-pill--online' : 'universal-status-pill--offline'}`}>
+                              <span className="universal-dot" />
+                              {universalStatus?.claude?.alive ? 'Online' : 'Offline'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="universal-card__meta">
+                          <div className="universal-meta-row">
+                            <span className="universal-meta-label">Status Cookie:</span>
+                            <span className={`universal-meta-val ${universalStatus?.claude?.cookie_expiry_days ? 'universal-meta-val--ok' : 'universal-meta-val--warn'}`}>
+                              {universalStatus?.claude?.cookie_expiry_days
+                                ? `Aktif (${universalStatus.claude.cookie_expiry_days} hari)`
+                                : (universalStatus?.claude?.cookie_exists ? 'Cookie Tersimpan' : 'Belum Ada Cookie')}
+                            </span>
+                          </div>
+                          {universalStatus?.claude?.usage && (
+                            <div className="universal-meta-row">
+                              <span className="universal-meta-label">Completions:</span>
+                              <span className="universal-meta-val">{universalStatus.claude.usage.completions || 0} reqs</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="universal-card__actions">
+                          <button
+                            type="button"
+                            className="universal-action-btn universal-action-btn--test"
+                            onClick={() => handleTestHealth('claude')}
+                            disabled={testRunningService === 'claude'}
+                            title="Tes chat respons"
+                          >
+                            {testRunningService === 'claude' ? '⏳ Menguji...' : '⚡ Test Health'}
+                          </button>
+                          <button
+                            type="button"
+                            className="universal-action-btn universal-action-btn--cookie"
+                            onClick={() => handleOpenCookieModal('claude')}
+                            title="Update Cookie Claude"
+                          >
+                            🍪 Update Cookie
+                          </button>
+                          <button
+                            type="button"
+                            className="universal-action-btn universal-action-btn--restart"
+                            onClick={() => handleRestartProxy('claude')}
+                            disabled={restartingService === 'claude'}
+                            title="Restart service proxy"
+                          >
+                            {restartingService === 'claude' ? '🔄...' : '🔄 Restart'}
+                          </button>
+                          <button
+                            type="button"
+                            className="universal-action-btn universal-action-btn--logs"
+                            onClick={() => handleOpenLogs('claude')}
+                            title="Lihat Log Server"
+                          >
+                            📜 Logs
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Model Selection Group */}
+                    <div className="api-modal__field">
+                      <div className="universal-section-header">
+                        <label className="api-modal__label">Pilihan Model AI Universal (Web Reverse Proxy)</label>
+                        <button
+                          type="button"
+                          className="universal-refresh-status-btn"
+                          onClick={fetchUniversalStatus}
+                          disabled={isUniversalStatusLoading}
+                          title="Refresh status proxy"
+                        >
+                          {isUniversalStatusLoading ? '🔄 Memeriksa...' : '🔄 Cek Status Proxy'}
+                        </button>
+                      </div>
+
+                      {/* Google Gemini Models Category */}
+                      <div className="universal-model-category">
+                        <div className="universal-model-category__title">
+                          <span>💎</span> Google Gemini (Free Web Proxy)
+                        </div>
+                        <div className="universal-model-grid">
+                          {UNIVERSAL_MODELS.filter(m => m.provider === 'Google').map(m => {
+                            const isSelected = universalModel === m.id;
+                            return (
+                              <div
+                                key={m.id}
+                                className={`universal-model-card ${isSelected ? 'universal-model-card--selected' : ''}`}
+                                onClick={() => setUniversalModel(m.id)}
+                              >
+                                <div className="universal-model-card__top">
+                                  <div className="universal-model-card__name-wrapper">
+                                    <span className="universal-model-card__icon">{m.icon}</span>
+                                    <span className="universal-model-card__name">{m.name}</span>
+                                  </div>
+                                  <span className="universal-model-card__badge">{m.badge}</span>
+                                </div>
+                                <div className="universal-model-card__id">{m.id}</div>
+                                <div className="universal-model-card__desc">{m.desc}</div>
+                                <div className="universal-model-card__footer">
+                                  <span className={`universal-radio-indicator ${isSelected ? 'universal-radio-indicator--selected' : ''}`} />
+                                  <span className="universal-model-card__select-text">
+                                    {isSelected ? 'Model Aktif' : 'Gunakan Model'}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Anthropic Claude Models Category */}
+                      <div className="universal-model-category">
+                        <div className="universal-model-category__title">
+                          <span>🧠</span> Anthropic Claude (Free Web Proxy)
+                        </div>
+                        <div className="universal-model-grid">
+                          {UNIVERSAL_MODELS.filter(m => m.provider === 'Anthropic').map(m => {
+                            const isSelected = universalModel === m.id;
+                            return (
+                              <div
+                                key={m.id}
+                                className={`universal-model-card ${isSelected ? 'universal-model-card--selected' : ''}`}
+                                onClick={() => setUniversalModel(m.id)}
+                              >
+                                <div className="universal-model-card__top">
+                                  <div className="universal-model-card__name-wrapper">
+                                    <span className="universal-model-card__icon">{m.icon}</span>
+                                    <span className="universal-model-card__name">{m.name}</span>
+                                  </div>
+                                  <span className="universal-model-card__badge">{m.badge}</span>
+                                </div>
+                                <div className="universal-model-card__id">{m.id}</div>
+                                <div className="universal-model-card__desc">{m.desc}</div>
+                                <div className="universal-model-card__footer">
+                                  <span className={`universal-radio-indicator ${isSelected ? 'universal-radio-indicator--selected' : ''}`} />
+                                  <span className="universal-model-card__select-text">
+                                    {isSelected ? 'Model Aktif' : 'Gunakan Model'}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Custom Model ID Input */}
+                      <div className="universal-custom-model-row">
+                        <input
+                          type="text"
+                          className="api-modal__input"
+                          placeholder="Atau masukkan Model ID custom (contoh: gemini-3.7-flash, claude-haiku-4-5-20251001)..."
+                          value={customUniversalModel}
+                          onChange={(e) => setCustomUniversalModel(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleApplyCustomUniversalModel();
+                            }
+                          }}
+                        />
+                        <button
+                          type="button"
+                          className="api-modal__btn api-modal__btn--ghost"
+                          onClick={handleApplyCustomUniversalModel}
+                        >
+                          Terapkan
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Advanced Configuration (Proxy URL) */}
+                    <div className="universal-advanced-box">
+                      <div className="universal-advanced-header">
+                        <span className="universal-advanced-icon">⚙️</span>
+                        <span>Konfigurasi Endpoint Universal Proxy</span>
+                      </div>
+                      <div className="api-modal__field" style={{ marginTop: '8px' }}>
+                        <input
+                          type="text"
+                          className="api-modal__input"
+                          placeholder="http://127.0.0.1:8083"
+                          value={universalProxyUrl}
+                          onChange={(e) => setUniversalProxyUrl(e.target.value)}
+                        />
+                        <span className="api-modal__hint">
+                          Default: <code>http://127.0.0.1:8083</code> (Universal Control Panel Router). Semua request akan di-route secara otomatis ke Gemini (8081) atau Claude (8082).
+                        </span>
+                      </div>
+                    </div>
+
+                  </div>
+                )}
 
                 {/* Gemini API Engine */}
                 {aiEngine === 'api' && (
@@ -812,291 +1097,83 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                   </>
                 )}
 
-                {/* Puter Proxy Engine */}
-                {aiEngine === 'puter' && (
-                  <>
-                    {/* Multi-Key Pool Manager Card */}
-                    <div className="puter-key-pool-card">
-                      <div className="puter-key-pool-header">
-                        <div className="puter-key-pool-title">
-                          <span className="puter-key-icon">🔑</span>
-                          <span>Multi-Key Pool (Anti-Limit Engine)</span>
-                        </div>
-                        <span className="puter-badge puter-badge--key-count">
-                          {puterKeys.length} Key Terdaftar
-                        </span>
-                      </div>
-
-                      {/* Key List Container */}
-                      <div className="puter-key-list">
-                        {puterKeys.length === 0 ? (
-                          <div className="puter-key-empty">
-                            <span>ℹ️ Belum ada Key khusus. Tambahkan beberapa token Puter di bawah untuk kapasitas 300+ pesan tanpa limit!</span>
-                          </div>
-                        ) : (
-                          puterKeys.map((k) => {
-                            const isActive = k.id === puterActiveKeyId;
-                            const isLimited = k.status === 'limited';
-                            const mask = k.token.length > 12 ? `${k.token.slice(0, 7)}...${k.token.slice(-4)}` : 'ptr-xxxx';
-                            
-                            return (
-                              <div key={k.id} className={`puter-key-item ${isActive ? 'puter-key-item--active' : ''} ${isLimited ? 'puter-key-item--limited' : ''}`}>
-                                <div className="puter-key-item__info">
-                                  <span className={`puter-status-dot ${isActive ? 'puter-status-dot--active' : (isLimited ? 'puter-status-dot--limited' : 'puter-status-dot--ready')}`} />
-                                  <span className="puter-key-item__label">{k.label}</span>
-                                  <span className="puter-key-item__mask">({mask})</span>
-                                </div>
-                                <div className="puter-key-item__actions">
-                                  {!isActive ? (
-                                    <button
-                                      className="puter-btn-action puter-btn-action--set"
-                                      type="button"
-                                      onClick={() => handleSetActivePuterKey(k.id)}
-                                      title="Jadikan Key Aktif"
-                                    >
-                                      ✓ Gunakan
-                                    </button>
-                                  ) : (
-                                    <span className="puter-active-tag">[AKTIF]</span>
-                                  )}
-                                  <button
-                                    className="puter-btn-action puter-btn-action--del"
-                                    type="button"
-                                    onClick={() => handleRemovePuterKey(k.id)}
-                                    title="Hapus Key"
-                                  >
-                                    🗑️
-                                  </button>
-                                </div>
-                              </div>
-                            );
-                          })
-                        )}
-                      </div>
-
-                      {/* Add Key Input Row */}
-                      <div className="puter-key-input-row">
-                        <input
-                          type="password"
-                          className="api-modal__input puter-key-input"
-                          placeholder="Paste Puter Token (ptr-xxxx)..."
-                          value={newPuterKey}
-                          onChange={(e) => setNewPuterKey(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              handleAddPuterKey();
-                            }
-                          }}
-                        />
-                        <button
-                          className="api-modal__btn api-modal__btn--primary"
-                          type="button"
-                          onClick={() => handleAddPuterKey()}
-                        >
-                          + Tambah Key
-                        </button>
-                      </div>
-
-                      {/* Quick Login / Grab Token Button */}
-                      <div className="puter-quick-login-row">
-                        <button
-                          className="puter-quick-btn"
-                          type="button"
-                          onClick={handlePuterLogin}
-                          disabled={isPuterLoggingIn}
-                        >
-                          ⚡ {isPuterLoggingIn ? 'Menghubungkan...' : (puterAuthUser ? `Gunakan Akun Login (@${puterAuthUser})` : 'Masuk Akun Puter (Ambil Token Otomatis)')}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Model Selection Group (Interactive Button Trigger) */}
-                    <div className="api-modal__field">
-                      <label className="api-modal__label">Model AI Puter (500+ Model Tersedia)</label>
-                      
-                      {/* Clickable Model Selector Trigger Box */}
-                      <div
-                        className="puter-model-trigger-btn"
-                        onClick={() => setIsModelCatalogOpen(true)}
-                        role="button"
-                        tabIndex={0}
-                        title="Klik untuk membuka katalog dan memilih model AI"
-                      >
-                        <div className="puter-model-trigger-left">
-                          <span className="puter-model-trigger-icon">
-                            {PUTER_MODEL_METADATA[puterModel]?.icon || '✨'}
-                          </span>
-                          <div className="puter-model-trigger-info">
-                            <span className="puter-model-trigger-name">
-                              {PUTER_MODEL_METADATA[puterModel]?.name || puterModel}
-                            </span>
-                            <span className="puter-model-trigger-provider">
-                              {PUTER_MODEL_METADATA[puterModel]?.provider || extractProvider(puterModel)}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="puter-model-trigger-right">
-                          <span className="puter-model-change-badge">
-                            🔍 Ganti Model (500+)
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Custom Model Input Group */}
-                      <div className="puter-custom-model-row">
-                        <input
-                          type="text"
-                          className="api-modal__input"
-                          placeholder="Atau ketik ID model manual... (contoh: openai/gpt-4o, deepseek-ai/deepseek-v3)"
-                          value={customPuterModel}
-                          onChange={(e) => setCustomPuterModel(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              handleApplyCustomPuterModel();
-                            }
-                          }}
-                        />
-                        <button
-                          className="api-modal__btn api-modal__btn--ghost"
-                          type="button"
-                          onClick={handleApplyCustomPuterModel}
-                        >
-                          Terapkan
-                        </button>
-                      </div>
-
-                      <span className="api-modal__hint">
-                        Klik tombol model di atas untuk mencari dan memilih dari 500+ model AI yang tersedia di katalog Puter.
-                      </span>
-                    </div>
-
-                    {/* Puter SDK Status Card */}
-                    <div className="puter-sdk-status-card">
-                      <div className="puter-sdk-status-header">
-                        <span className={`puter-status-dot ${puterSdkStatus === 'ready' ? 'puter-status-dot--active' : 'puter-status-dot--loading'}`} />
-                        <span className="puter-sdk-status-title">
-                          {puterSdkStatus === 'ready' ? 'Puter.js SDK Terhubung & Siap' : 'Menghubungkan ke Puter.js SDK...'}
-                        </span>
-                      </div>
-                      <p className="puter-sdk-status-desc">
-                        Akses 500+ AI models langsung dan aman melalui reverse proxy Puter. Tambahkan token di pool untuk anti-limit.
-                      </p>
-                    </div>
-                  </>
-                )}
-
                 {/* Copilot Engine */}
                 {aiEngine === 'copilot' && (
                   <>
                     <div className="api-modal__field">
                       <label className="api-modal__label">Status Autentikasi GitHub</label>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                        <span style={{
-                          display: 'inline-block',
-                          width: '10px',
-                          height: '10px',
-                          borderRadius: '50%',
-                          background: copilotAuthenticated ? '#22c55e' : '#ef4444',
-                          boxShadow: copilotAuthenticated ? '0 0 8px rgba(34,197,94,0.5)' : '0 0 8px rgba(239,68,68,0.5)',
-                        }} />
-                        <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>
-                          {copilotAuthenticated ? 'Terautentikasi' : 'Belum login'}
-                        </span>
+                      <div className="copilot-auth-card">
+                        <div className="copilot-auth-status">
+                          <span className={`copilot-status-dot ${copilotAuthenticated ? 'copilot-status-dot--active' : ''}`} />
+                          <span className="copilot-status-text">
+                            {copilotAuthenticated ? 'Terhubung dengan GitHub Copilot' : 'Belum Terautentikasi'}
+                          </span>
+                        </div>
+                        {copilotAuthenticated ? (
+                          <button
+                            type="button"
+                            className="api-modal__btn api-modal__btn--danger"
+                            onClick={handleCopilotLogout}
+                          >
+                            Logout GitHub
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="api-modal__btn api-modal__btn--primary"
+                            onClick={handleCopilotLogin}
+                            disabled={copilotAuthLoading}
+                          >
+                            {copilotAuthLoading ? 'Memproses...' : 'Login dengan GitHub'}
+                          </button>
+                        )}
                       </div>
-
-                      {!copilotAuthenticated && !copilotUserCode && (
-                        <button
-                          className="api-modal__btn api-modal__btn--primary"
-                          type="button"
-                          onClick={handleCopilotLogin}
-                          disabled={copilotAuthLoading}
-                          style={{ width: '100%', padding: '10px', marginBottom: '8px' }}
-                        >
-                          {copilotAuthLoading ? 'Memproses...' : '🔗 Login with GitHub'}
-                        </button>
+                      {copilotAuthStatus && (
+                        <div className="copilot-auth-message">{copilotAuthStatus}</div>
                       )}
-
-                      {copilotUserCode && !copilotAuthenticated && (
-                        <div style={{
-                          background: 'rgba(139, 92, 246, 0.1)',
-                          border: '1px solid rgba(139, 92, 246, 0.3)',
-                          borderRadius: '10px',
-                          padding: '16px',
-                          textAlign: 'center',
-                          marginBottom: '8px'
-                        }}>
-                          <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginBottom: '8px' }}>
-                            Buka link di bawah ini dan masukkan kode berikut:
-                          </p>
-                          <div style={{
-                            fontSize: '28px',
-                            fontWeight: '700',
-                            fontFamily: 'monospace',
-                            color: '#8b5cf6',
-                            letterSpacing: '4px',
-                            padding: '8px 0',
-                            userSelect: 'all'
-                          }}>
-                            {copilotUserCode}
+                      {copilotUserCode && copilotVerificationUri && (
+                        <div className="copilot-device-code-box">
+                          <p>Buka tautan verifikasi dan masukkan kode berikut:</p>
+                          <div className="copilot-code-display">
+                            <code>{copilotUserCode}</code>
+                            <button
+                              type="button"
+                              className="api-modal__btn api-modal__btn--ghost api-modal__btn--small"
+                              onClick={() => navigator.clipboard.writeText(copilotUserCode)}
+                            >
+                              Salin Kode
+                            </button>
                           </div>
                           <a
                             href={copilotVerificationUri}
                             target="_blank"
                             rel="noopener noreferrer"
-                            style={{
-                              color: '#60a5fa',
-                              fontSize: '13px',
-                              textDecoration: 'underline',
-                              display: 'inline-block',
-                              marginTop: '6px'
-                            }}
+                            className="copilot-verify-link"
                           >
-                            {copilotVerificationUri}
+                            Buka Halaman Verifikasi GitHub →
                           </a>
-                          <p style={{
-                            color: '#eab308',
-                            fontSize: '12px',
-                            marginTop: '10px',
-                            animation: 'pulse 1.5s ease-in-out infinite'
-                          }}>
-                            ⏳ Menunggu otentikasi selesai...
-                          </p>
                         </div>
-                      )}
-
-                      {copilotAuthenticated && (
-                        <button
-                          className="api-modal__btn api-modal__btn--ghost"
-                          type="button"
-                          onClick={handleCopilotLogout}
-                          style={{ width: '100%', padding: '8px', marginBottom: '8px', color: '#ef4444' }}
-                        >
-                          Logout GitHub
-                        </button>
-                      )}
-
-                      {copilotAuthStatus && (
-                        <span className="api-modal__hint" style={{ display: 'block', marginTop: '4px' }}>
-                          {copilotAuthStatus}
-                        </span>
                       )}
                     </div>
 
                     <div className="api-modal__field">
-                      <label className="api-modal__label" htmlFor="copilot-model-input">Model AI</label>
-                      <input
-                        id="copilot-model-input"
-                        className="api-modal__input"
-                        type="text"
-                        placeholder="Contoh: gpt-4o"
-                        value={copilotModel}
-                        onChange={(event) => setCopilotModel(event.target.value)}
-                      />
-                      <div className="api-modal__hint-block" style={{ marginTop: '8px' }}>
-                        <span><strong>Model populer:</strong> gpt-4.1, gpt-5-mini, gpt-5.4-mini, gpt-5.2, gemini-2.5-pro, gemini-3.1-pro-preview</span>
+                      <label className="api-modal__label">Pilihan Model Copilot</label>
+                      <div className="copilot-models-grid">
+                        {[
+                          { id: 'gpt-4o', name: 'GPT-4o', desc: 'Flagship smart model' },
+                          { id: 'claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', desc: 'Powerful reasoning & roleplay' },
+                          { id: 'o1-mini', name: 'o1-mini', desc: 'Reasoning model' },
+                          { id: 'o1', name: 'o1', desc: 'Full reasoning powerhouse' }
+                        ].map((m) => (
+                          <div
+                            key={m.id}
+                            className={`copilot-model-card ${copilotModel === m.id ? 'copilot-model-card--active' : ''}`}
+                            onClick={() => setCopilotModel(m.id)}
+                          >
+                            <div className="copilot-model-name">{m.name}</div>
+                            <div className="copilot-model-desc">{m.desc}</div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </>
@@ -1106,108 +1183,77 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                 {aiEngine === 'gravity' && (
                   <>
                     <div className="api-modal__field">
-                      <label className="api-modal__label">Proxy URL</label>
-                      <input
-                        className="api-modal__input"
-                        type="text"
-                        placeholder="URL server Antigravity Proxy (Kosongkan jika di server yang sama)"
-                        value={gravityProxyUrl}
-                        onChange={(e) => setGravityProxyUrl(e.target.value)}
-                      />
-                    </div>
-                    <div className="api-modal__field">
-                      <label className="api-modal__label">Status Autentikasi Google</label>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                        <span style={{
-                          display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%',
-                          background: gravityIsLoggedIn ? '#22c55e' : '#ef4444',
-                          boxShadow: gravityIsLoggedIn ? '0 0 8px rgba(34,197,94,0.5)' : '0 0 8px rgba(239,68,68,0.5)',
-                        }} />
-                        {gravityIsLoggedIn && gravityAvailableAccounts.length > 0 ? (
-                          <div style={{ flex: 1, padding: '4px 8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: '4px' }}>
-                            {gravityAccountEmail || gravityAvailableAccounts[0]}
-                          </div>
-                        ) : (
-                          <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>
-                            {gravityIsLoggedIn ? `Terhubung (${gravityAccountEmail})` : 'Belum login'}
+                      <label className="api-modal__label">Akun Antigravity</label>
+                      <div className="copilot-auth-card">
+                        <div className="copilot-auth-status">
+                          <span className={`copilot-status-dot ${gravityIsLoggedIn ? 'copilot-status-dot--active' : ''}`} />
+                          <span className="copilot-status-text">
+                            {gravityIsLoggedIn ? `Login: ${gravityAccountEmail}` : 'Belum Login Akun'}
                           </span>
-                        )}
-                      </div>
-                      <button className="api-modal__btn api-modal__btn--primary" type="button" onClick={handleGravityLogin} style={{ width: '100%', padding: '10px', marginBottom: '8px' }}>
-                        🔗 Ganti Akun Google
-                      </button>
-                      
-                      {isGravityManualCallbackVisible && (
-                        <div style={{
-                          background: 'rgba(139, 92, 246, 0.1)',
-                          border: '1px solid rgba(139, 92, 246, 0.3)',
-                          borderRadius: '10px',
-                          padding: '12px',
-                          marginTop: '8px'
-                        }}>
-                          <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginBottom: '8px' }}>
-                            Jika muncul "ERR_CONNECTION_REFUSED" saat login (biasanya karena VPS/HP), kopi seluruh URL error di browser Anda dan paste di sini:
-                          </p>
-                          <div style={{ display: 'flex', gap: '8px' }}>
-                            <input
-                              className="api-modal__input"
-                              type="text"
-                              placeholder="http://localhost:51121/?state=..."
-                              value={gravityManualCallbackUrl}
-                              onChange={(e) => setGravityManualCallbackUrl(e.target.value)}
-                              style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.2)' }}
-                            />
-                            <button 
-                              className="api-modal__btn api-modal__btn--ghost" 
-                              type="button" 
-                              onClick={handleGravityManualCallback}
-                              style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}
-                            >
-                              Kirim
-                            </button>
-                          </div>
                         </div>
-                      )}
-                    </div>
-                    <div className="api-modal__field">
-                      <label className="api-modal__label">Koneksi Proxy</label>
-                      <button className="api-modal__btn api-modal__btn--ghost" type="button" onClick={handleGravityHealthCheck} style={{ width: '100%', padding: '8px' }}>
-                        🏥 Cek Koneksi Proxy
-                      </button>
-                      {gravityHealthResult && (
-                        <div style={{ marginTop: '8px', padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', fontSize: '13px' }}>
-                          {gravityHealthResult}
-                        </div>
-                      )}
-                    </div>
-                    <div className="api-modal__field">
-                      <label className="api-modal__label">Model AI</label>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <select 
-                          className="api-modal__input" 
-                          style={{ flex: 1, backgroundColor: '#13131a', color: '#ffffff', cursor: 'pointer', border: '1px solid rgba(124, 58, 237, 0.3)' }}
-                          value={gravityModel}
-                          onChange={(e) => setGravityModel(e.target.value)}
+                        <button
+                          type="button"
+                          className="api-modal__btn api-modal__btn--primary"
+                          onClick={handleGravityLogin}
                         >
-                          {gravityModels.length > 0 ? (
-                            gravityModels.map(m => <option key={m} value={m} style={{ backgroundColor: '#13131a', color: '#ffffff' }}>{m}</option>)
-                          ) : (
-                            <>
-                              <optgroup label="Claude Models">
-                                <option value="claude-sonnet-4-6" style={{ backgroundColor: '#13131a', color: '#ffffff' }}>claude-sonnet-4-6</option>
-                                <option value="claude-opus-4-6-thinking" style={{ backgroundColor: '#13131a', color: '#ffffff' }}>claude-opus-4-6-thinking</option>
-                              </optgroup>
-                              <optgroup label="Gemini Models">
-                                <option value="gemini-3.5-flash-low" style={{ backgroundColor: '#13131a', color: '#ffffff' }}>gemini-3.5-flash-low</option>
-                                <option value="gemini-3.1-pro-low" style={{ backgroundColor: '#13131a', color: '#ffffff' }}>gemini-3.1-pro-low</option>
-                                <option value="gemini-3.1-pro-high" style={{ backgroundColor: '#13131a', color: '#ffffff' }}>gemini-3.1-pro-high</option>
-                              </optgroup>
-                            </>
-                          )}
-                        </select>
-                        <button className="api-modal__btn api-modal__btn--ghost" type="button" onClick={handleGravityFetchModels} style={{ whiteSpace: 'nowrap' }}>
-                          🔄 Ambil Model
+                          {gravityIsLoggedIn ? 'Ganti / Re-Login Akun' : 'Login Akun Antigravity'}
                         </button>
+                      </div>
+
+                      {isGravityManualCallbackVisible && (
+                        <div className="gravity-manual-callback-box">
+                          <p>Jika login otomatis tidak merespons, paste URL callback di sini:</p>
+                          <input
+                            type="text"
+                            className="api-modal__input"
+                            placeholder="Paste full URL callback (http://localhost:8080/callback?...)"
+                            value={gravityManualCallbackUrl}
+                            onChange={(e) => setGravityManualCallbackUrl(e.target.value)}
+                          />
+                          <button
+                            type="button"
+                            className="api-modal__btn api-modal__btn--primary"
+                            onClick={handleGravityManualCallback}
+                          >
+                            Selesaikan Login Manual
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="api-modal__field">
+                      <div className="gravity-health-row">
+                        <label className="api-modal__label" style={{ marginBottom: 0 }}>Cek Status Server</label>
+                        <button
+                          type="button"
+                          className="api-modal__btn api-modal__btn--ghost api-modal__btn--small"
+                          onClick={handleGravityHealthCheck}
+                        >
+                          Cek Koneksi
+                        </button>
+                      </div>
+                      {gravityHealthResult && (
+                        <div className="copilot-auth-message">{gravityHealthResult}</div>
+                      )}
+                    </div>
+
+                    <div className="api-modal__field">
+                      <label className="api-modal__label">Model Gravity</label>
+                      <div className="copilot-models-grid">
+                        {[
+                          { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', desc: 'Flagship Claude' },
+                          { id: 'gemini-3.7-flash', name: 'Gemini 3.7 Flash', desc: 'Fast & Versatile' },
+                          { id: 'gpt-4o', name: 'GPT-4o', desc: 'OpenAI Flagship' }
+                        ].map((m) => (
+                          <div
+                            key={m.id}
+                            className={`copilot-model-card ${gravityModel === m.id ? 'copilot-model-card--active' : ''}`}
+                            onClick={() => setGravityModel(m.id)}
+                          >
+                            <div className="copilot-model-name">{m.name}</div>
+                            <div className="copilot-model-desc">{m.desc}</div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </>
@@ -1217,128 +1263,123 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                 {aiEngine === '9router' && (
                   <>
                     <div className="api-modal__field">
-                      <label className="api-modal__label">9Router API Endpoint</label>
+                      <label className="api-modal__label">9Router URL</label>
                       <input
-                        className="api-modal__input"
                         type="text"
-                        placeholder="Contoh: https://supernova-inovategames.me/v1"
+                        className="api-modal__input"
+                        placeholder="https://supernova-inovategames.me/v1"
                         value={ninerouterUrl}
                         onChange={(e) => setNinerouterUrl(e.target.value)}
                       />
                     </div>
+
                     <div className="api-modal__field">
-                      <label className="api-modal__label">API Key 9Router</label>
+                      <label className="api-modal__label">9Router API Key</label>
                       <input
-                        className="api-modal__input"
                         type="password"
-                        placeholder="Masukkan API Key dari dashboard 9Router"
+                        className="api-modal__input"
+                        placeholder="Masukkan API key 9Router (jika ada)"
                         value={ninerouterApiKey}
                         onChange={(e) => setNinerouterApiKey(e.target.value)}
                       />
                     </div>
+
                     <div className="api-modal__field">
-                      <label className="api-modal__label">Nama Combo / Model</label>
+                      <label className="api-modal__label">Model 9Router</label>
                       <input
-                        className="api-modal__input"
                         type="text"
-                        placeholder="Contoh: cc/claude-opus-4-6 atau nama combo Anda"
+                        className="api-modal__input"
+                        placeholder="gemini-3-pro-plus"
                         value={ninerouterModel}
                         onChange={(e) => setNinerouterModel(e.target.value)}
                       />
                     </div>
                   </>
                 )}
+
               </div>
             )}
 
             {activePage === 'model' && (
               <div className="api-modal__section">
                 <div className="api-modal__field">
-                  <label className="api-modal__label" htmlFor="temperature-slider">Temperature (Kreativitas)</label>
-                  <div className="api-modal__range">
-                    <input
-                      id="temperature-slider"
-                      type="range"
-                      min="0"
-                      max="2"
-                      step="0.1"
-                      value={temperature}
-                      onChange={(event) => setTemperature(Number(event.target.value))}
-                    />
-                    <span className="api-modal__range-value">{temperature.toFixed(1)}</span>
+                  <div className="api-modal__field-header">
+                    <label className="api-modal__label">Temperature: {temperature}</label>
+                    <span className="api-modal__hint">Mengontrol kreativitas respon (0 = fokus, 1 = sangat kreatif).</span>
                   </div>
-                  <div className="api-modal__hint-block">
-                    <span>0.0 - 1.0: respons logis, terstruktur, dan stabil.</span>
-                    <span>1.0 - 2.0: respons kreatif, imajinatif, dan lebih beragam.</span>
-                  </div>
+                  <input
+                    className="api-modal__slider"
+                    type="range"
+                    min="0"
+                    max="2"
+                    step="0.05"
+                    value={temperature}
+                    onChange={(event) => setTemperature(parseFloat(event.target.value))}
+                  />
                 </div>
 
                 <div className="api-modal__field">
-                  <label className="api-modal__label" htmlFor="top-p-slider">Top P (Nucleus Sampling)</label>
-                  <div className="api-modal__range">
-                    <input
-                      id="top-p-slider"
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.05"
-                      value={topP}
-                      onChange={(event) => setTopP(Number(event.target.value))}
-                    />
-                    <span className="api-modal__range-value">{topP.toFixed(2)}</span>
+                  <div className="api-modal__field-header">
+                    <label className="api-modal__label">Top P: {topP}</label>
+                    <span className="api-modal__hint">Nucleus sampling (0.1 - 1.0).</span>
                   </div>
-                  <div className="api-modal__hint-block">
-                    <span>Rekomendasi untuk roleplay: 0.9 - 0.95</span>
-                  </div>
+                  <input
+                    className="api-modal__slider"
+                    type="range"
+                    min="0.05"
+                    max="1"
+                    step="0.05"
+                    value={topP}
+                    onChange={(event) => setTopP(parseFloat(event.target.value))}
+                  />
                 </div>
 
-                <div className="api-modal__field" style={{ display: 'flex', gap: '16px' }}>
-                  <div style={{ flex: 1 }}>
-                    <label className="api-modal__label" htmlFor="top-k-input">Top K</label>
-                    <input
-                      id="top-k-input"
-                      className="api-modal__input"
-                      type="number"
-                      min="1"
-                      max="200"
-                      value={topK}
-                      onChange={(event) => setTopK(Number(event.target.value))}
-                    />
-                    <span className="api-modal__hint">Jumlah token teratas (default: 40).</span>
+                <div className="api-modal__field">
+                  <div className="api-modal__field-header">
+                    <label className="api-modal__label">Top K: {topK}</label>
+                    <span className="api-modal__hint">Batasan jumlah kata yang dipertimbangkan.</span>
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <label className="api-modal__label" htmlFor="max-tokens-input">Panjang Maksimal</label>
-                    <input
-                      id="max-tokens-input"
-                      className="api-modal__input"
-                      type="number"
-                      min="1"
-                      max="65536"
-                      placeholder="Rekomendasi: 2048"
-                      value={maxTokens}
-                      onChange={(event) => setMaxTokens(Number(event.target.value))}
-                    />
-                    <span className="api-modal__hint">Batas token saat ini.</span>
-                  </div>
+                  <input
+                    className="api-modal__slider"
+                    type="range"
+                    min="1"
+                    max="100"
+                    step="1"
+                    value={topK}
+                    onChange={(event) => setTopK(parseInt(event.target.value))}
+                  />
                 </div>
 
-                <div className="api-modal__field" style={{ marginTop: '12px' }}>
-                  <label className="api-modal__label" htmlFor="history-limit-slider">Jumlah Riwayat Obrolan (Context History)</label>
-                  <div className="api-modal__range">
-                    <input
-                      id="history-limit-slider"
-                      type="range"
-                      min="4"
-                      max="40"
-                      step="2"
-                      value={historyLimit}
-                      onChange={(event) => setHistoryLimit(Number(event.target.value))}
-                    />
-                    <span className="api-modal__range-value">{historyLimit} pesan</span>
+                <div className="api-modal__field">
+                  <div className="api-modal__field-header">
+                    <label className="api-modal__label">Max Output Tokens: {maxTokens}</label>
+                    <span className="api-modal__hint">Panjang maksimum respon yang dihasilkan.</span>
                   </div>
-                  <div className="api-modal__hint-block">
-                    <span>Rekomendasi roleplay: 12 - 16 pesan (menjaga alur percakapan tetap fokus dan mencegah penolakan filter AI karena akumulasi teks panjang).</span>
+                  <input
+                    className="api-modal__slider"
+                    type="range"
+                    min="256"
+                    max="8192"
+                    step="128"
+                    value={maxTokens}
+                    onChange={(event) => setMaxTokens(parseInt(event.target.value))}
+                  />
+                </div>
+
+                <div className="api-modal__field">
+                  <div className="api-modal__field-header">
+                    <label className="api-modal__label">History Limit: {historyLimit} Pesan</label>
+                    <span className="api-modal__hint">Jumlah pesan sebelumnya yang dikirim ke AI sebagai konteks memori.</span>
                   </div>
+                  <input
+                    className="api-modal__slider"
+                    type="range"
+                    min="4"
+                    max="60"
+                    step="2"
+                    value={historyLimit}
+                    onChange={(event) => setHistoryLimit(parseInt(event.target.value))}
+                  />
                 </div>
               </div>
             )}
@@ -1405,128 +1446,116 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
         </div>
       </section>
 
-      {/* Model Catalog Modal (500+ Models) */}
-      {isModelCatalogOpen && (
-        <div className="catalog-modal__overlay" onClick={() => setIsModelCatalogOpen(false)}>
-          <div className="catalog-modal__panel" onClick={(e) => e.stopPropagation()}>
-            <div className="catalog-modal__header">
-              <div className="catalog-modal__title-group">
-                <h3 className="catalog-modal__title">
-                  <span>✨</span> Katalog Model AI Puter
-                </h3>
-                <span className="catalog-modal__count-badge">
-                  {filteredCatalogModels.length} Model
-                </span>
+      {/* ========================================== */}
+      {/* MODAL: PASTE COOKIE MANAGEMENT */}
+      {/* ========================================== */}
+      {cookieModalService && (
+        <div className="universal-submodal__overlay" onClick={() => setCookieModalService(null)}>
+          <div className="universal-submodal__panel" onClick={(e) => e.stopPropagation()}>
+            <div className="universal-submodal__header">
+              <div className="universal-submodal__title">
+                <span>🍪</span> Update Cookie {cookieModalService === 'gemini' ? 'Google Gemini' : 'Anthropic Claude'}
               </div>
               <button
-                className="catalog-modal__close"
                 type="button"
-                onClick={() => setIsModelCatalogOpen(false)}
+                className="universal-submodal__close"
+                onClick={() => setCookieModalService(null)}
               >
                 ✕
               </button>
             </div>
 
-            {/* Search Input */}
-            <div className="catalog-modal__search-box">
-              <span className="catalog-search-icon">🔍</span>
-              <input
-                type="text"
-                className="catalog-modal__search-input"
-                placeholder="Cari model berdasarkan nama, provider, atau kemampuan (contoh: claude-3-7, deepseek, vision)..."
-                value={catalogSearchQuery}
-                onChange={(e) => setCatalogSearchQuery(e.target.value)}
+            <div className="universal-submodal__body">
+              <div className="universal-guide-box">
+                <h5>Panduan Ekspor Cookie:</h5>
+                <ol>
+                  <li>Buka browser (Firefox/Chrome) dan login ke akun <strong>{cookieModalService === 'gemini' ? 'gemini.google.com' : 'claude.ai'}</strong>.</li>
+                  <li>Gunakan ekstensi <strong>Cookie-Editor</strong> atau <strong>cookies.txt</strong>.</li>
+                  <li>Klik <strong>Export</strong> (format Netscape / Text).</li>
+                  <li>Paste teks cookie lengkap ke dalam kotak di bawah lalu klik Simpan.</li>
+                </ol>
+              </div>
+
+              {cookieFeedback && (
+                <div className={`universal-alert ${cookieFeedback.success ? 'universal-alert--success' : 'universal-alert--error'}`}>
+                  <span>{cookieFeedback.message}</span>
+                </div>
+              )}
+
+              <textarea
+                className="universal-cookie-textarea"
+                placeholder={`Paste konten cookie ${cookieModalService === 'gemini' ? 'cookie.txt' : 'cookie_claude.txt'} di sini...`}
+                value={cookieInput}
+                onChange={(e) => setCookieInput(e.target.value)}
+                rows={10}
                 autoFocus
               />
-              {catalogSearchQuery && (
+            </div>
+
+            <div className="universal-submodal__footer">
+              <button
+                type="button"
+                className="api-modal__btn api-modal__btn--ghost"
+                onClick={() => setCookieModalService(null)}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                className="api-modal__btn api-modal__btn--primary"
+                onClick={handleSaveCookie}
+                disabled={isSavingCookie || !cookieInput.trim()}
+              >
+                {isSavingCookie ? 'Menyimpan & Me-restart...' : 'Simpan & Restart Proxy'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================== */}
+      {/* MODAL: LIVE LOGS VIEWER */}
+      {/* ========================================== */}
+      {logsModalService && (
+        <div className="universal-submodal__overlay" onClick={() => setLogsModalService(null)}>
+          <div className="universal-submodal__panel universal-submodal__panel--wide" onClick={(e) => e.stopPropagation()}>
+            <div className="universal-submodal__header">
+              <div className="universal-submodal__title">
+                <span>📜</span> Log Server Proxy: {logsModalService.toUpperCase()}
+              </div>
+              <div className="universal-submodal__header-actions">
                 <button
-                  className="catalog-search-clear"
                   type="button"
-                  onClick={() => setCatalogSearchQuery('')}
+                  className="universal-action-btn universal-action-btn--test"
+                  onClick={() => handleOpenLogs(logsModalService)}
+                  disabled={isLogsLoading}
+                >
+                  {isLogsLoading ? 'Memuat...' : '🔄 Refresh Log'}
+                </button>
+                <button
+                  type="button"
+                  className="universal-submodal__close"
+                  onClick={() => setLogsModalService(null)}
                 >
                   ✕
                 </button>
-              )}
+              </div>
             </div>
 
-            {/* Provider Filter Tabs */}
-            <div className="catalog-modal__provider-tabs">
-              {[
-                { id: 'all', label: 'Semua' },
-                { id: 'anthropic', label: 'Anthropic' },
-                { id: 'openai', label: 'OpenAI' },
-                { id: 'google', label: 'Google' },
-                { id: 'deepseek', label: 'DeepSeek' },
-                { id: 'xai', label: 'xAI' },
-                { id: 'meta', label: 'Meta AI' },
-                { id: 'mistral', label: 'Mistral' },
-                { id: 'alibaba', label: 'Alibaba' },
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  className={`catalog-tab-btn ${catalogProviderFilter === tab.id ? 'catalog-tab-btn--active' : ''}`}
-                  onClick={() => setCatalogProviderFilter(tab.id)}
-                >
-                  {tab.label}
-                </button>
-              ))}
+            <div className="universal-submodal__body">
+              <pre className="universal-logs-viewer">
+                {isLogsLoading ? 'Memuat baris log terbaru...' : logsContent}
+              </pre>
             </div>
 
-            {/* Model List Grid */}
-            <div className="catalog-modal__list">
-              {isCatalogLoading ? (
-                <div className="catalog-loading">
-                  <span className="catalog-spinner" />
-                  <span>Memuat katalog model dari Puter...</span>
-                </div>
-              ) : filteredCatalogModels.length === 0 ? (
-                <div className="catalog-empty">
-                  <span>Tidak ada model yang cocok dengan pencarian "<strong>{catalogSearchQuery}</strong>"</span>
-                  <button
-                    className="api-modal__btn api-modal__btn--primary"
-                    type="button"
-                    style={{ marginTop: '12px' }}
-                    onClick={() => {
-                      handleSelectPuterModel(catalogSearchQuery);
-                    }}
-                  >
-                    Gunakan "{catalogSearchQuery}" sebagai Custom Model
-                  </button>
-                </div>
-              ) : (
-                <div className="catalog-grid">
-                  {filteredCatalogModels.map((m) => {
-                    const isSelected = m.id === puterModel;
-                    return (
-                      <div
-                        key={m.id}
-                        className={`catalog-card ${isSelected ? 'catalog-card--selected' : ''}`}
-                        onClick={() => handleSelectPuterModel(m.id)}
-                      >
-                        <div className="catalog-card__header">
-                          <div className="catalog-card__title">
-                            <span className="catalog-card__icon">{m.icon || '⚡'}</span>
-                            <span className="catalog-card__name">{m.name}</span>
-                          </div>
-                          <span className="catalog-card__provider">{m.provider}</span>
-                        </div>
-                        <div className="catalog-card__id">{m.id}</div>
-                        <div className="catalog-card__desc">{m.desc}</div>
-                        {m.context && (
-                          <div className="catalog-card__context">📊 {m.context}</div>
-                        )}
-                        <button
-                          className={`catalog-card__btn ${isSelected ? 'catalog-card__btn--selected' : ''}`}
-                          type="button"
-                        >
-                          {isSelected ? '✓ Terpilih' : 'Pilih Model'}
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+            <div className="universal-submodal__footer">
+              <button
+                type="button"
+                className="api-modal__btn api-modal__btn--ghost"
+                onClick={() => setLogsModalService(null)}
+              >
+                Tutup
+              </button>
             </div>
           </div>
         </div>
