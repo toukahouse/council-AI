@@ -1097,5 +1097,7 @@ app.get(/.*/, (req, res) => {
 
 app.listen(port, () => {
   console.log(`🚀 Backend Server running on http://localhost:${port}`);
+  // Check and auto-start Universal Proxy services if configured
+  universalManager.autoStartProxies();
 });
 // Nodemon trigger restart

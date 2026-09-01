@@ -27,6 +27,41 @@ const GEMINI_PORT = 8081;
 const CLAUDE_PORT = 8082;
 const PANEL_PORT = 8083;
 
+// Helper: Resolve best python binary
+function getPythonBin() {
+  if (ON_WINDOWS) return 'python';
+  // Check virtualenv paths on Docker/VPS
+  const venvPython3 = '/app/venv/bin/python3';
+  const venvPython = '/app/venv/bin/python';
+  if (fs.existsSync(venvPython3)) return venvPython3;
+  if (fs.existsSync(venvPython)) return venvPython;
+  return 'python3';
+}
+
+// Helper: Ensure config.json exists
+function ensureConfigFile(service) {
+  const dir = service === 'gemini' ? GEMINI_DIR : (service === 'claude' ? CLAUDE_DIR : WEB2API_DIR);
+  fs.mkdirSync(dir, { recursive: true });
+
+  const configFile = path.join(dir, 'config.json');
+  if (!fs.existsSync(configFile)) {
+    const exampleFile = path.join(dir, service === 'claude' ? 'config.example.json' : 'config.json.example');
+    if (fs.existsSync(exampleFile)) {
+      try {
+        fs.copyFileSync(exampleFile, configFile);
+      } catch (e) {}
+    } else {
+      const defaultCfg = service === 'gemini' 
+        ? { port: GEMINI_PORT, host: "0.0.0.0", default_model: "gemini-3.7-flash", log_requests: true }
+        : { port: CLAUDE_PORT, model: "claude-haiku-4-5-20251001", log_requests: true };
+      try {
+        fs.writeFileSync(configFile, JSON.stringify(defaultCfg, null, 2), 'utf8');
+      } catch (e) {}
+    }
+  }
+  return configFile;
+}
+
 // Helper: Check if a TCP port is open
 export function checkPort(port, host = '127.0.0.1', timeout = 1000) {
   return new Promise((resolve) => {
@@ -130,7 +165,9 @@ export function killPort(port) {
         resolve(false);
       });
     } else {
-      exec(`fuser -k ${port}/tcp`, () => resolve(true));
+      // Linux: Try fuser, lsof, and ss kill fallbacks
+      const cmd = `fuser -k ${port}/tcp 2>/dev/null || (lsof -ti:${port} | xargs -r kill -9) 2>/dev/null || (ss -lptn 'sport = :${port}' | grep -oP 'pid=\\K[0-9]+' | xargs -r kill -9) 2>/dev/null || true`;
+      exec(cmd, () => resolve(true));
     }
   });
 }
@@ -149,25 +186,42 @@ export async function restartProxy(service) {
   const proxyDir = isGemini ? GEMINI_DIR : (isClaude ? CLAUDE_DIR : WEB2API_DIR);
   const logFile = isGemini ? GEMINI_LOG : (isClaude ? CLAUDE_LOG : PANEL_LOG);
 
+  // Ensure directories exist
+  fs.mkdirSync(proxyDir, { recursive: true });
+  fs.mkdirSync(path.dirname(logFile), { recursive: true });
+  ensureConfigFile(service);
+
   // 1. Kill old process on port
   await killPort(port);
   await new Promise((r) => setTimeout(r, 600));
 
   // 2. Spawn python process
-  const pythonCmd = ON_WINDOWS ? 'python' : 'python3';
+  const pythonCmd = getPythonBin();
   let scriptArgs = [];
 
   if (isGemini) {
+    const scriptPath = path.join(GEMINI_DIR, 'gemini_web2api.py');
+    if (!fs.existsSync(scriptPath)) {
+      return { success: false, message: `File ${scriptPath} tidak ditemukan di server.` };
+    }
     const configFile = path.join(GEMINI_DIR, 'config.json');
     scriptArgs = [
-      path.join(GEMINI_DIR, 'gemini_web2api.py'),
+      scriptPath,
       '--config', configFile,
       '--cookie-file', GEMINI_COOKIE_FILE
     ];
   } else if (isClaude) {
-    scriptArgs = [path.join(CLAUDE_DIR, 'claude_web2api.py')];
+    const scriptPath = path.join(CLAUDE_DIR, 'claude_web2api.py');
+    if (!fs.existsSync(scriptPath)) {
+      return { success: false, message: `File ${scriptPath} tidak ditemukan di server.` };
+    }
+    scriptArgs = [scriptPath];
   } else if (isPanel) {
-    scriptArgs = [path.join(WEB2API_DIR, 'panel.py'), '--port', '8083'];
+    const scriptPath = path.join(WEB2API_DIR, 'panel.py');
+    if (!fs.existsSync(scriptPath)) {
+      return { success: false, message: `File ${scriptPath} tidak ditemukan di server.` };
+    }
+    scriptArgs = [scriptPath, '--port', '8083'];
   }
 
   try {
@@ -189,6 +243,34 @@ export async function restartProxy(service) {
     };
   } catch (err) {
     return { success: false, message: `Failed to start ${service}: ${err.message}` };
+  }
+}
+
+// Auto-start proxies on server boot
+export async function autoStartProxies() {
+  try {
+    const [geminiAlive, claudeAlive, panelAlive] = await Promise.all([
+      checkPort(GEMINI_PORT),
+      checkPort(CLAUDE_PORT),
+      checkPort(PANEL_PORT)
+    ]);
+
+    if (!geminiAlive && fs.existsSync(GEMINI_COOKIE_FILE)) {
+      console.log('🤖 Auto-starting Gemini Web Proxy (Port 8081)...');
+      await restartProxy('gemini');
+    }
+
+    if (!claudeAlive && fs.existsSync(CLAUDE_COOKIE_FILE)) {
+      console.log('🤖 Auto-starting Claude Web Proxy (Port 8082)...');
+      await restartProxy('claude');
+    }
+
+    if (!panelAlive && fs.existsSync(path.join(WEB2API_DIR, 'panel.py'))) {
+      console.log('🤖 Auto-starting Universal Panel Router (Port 8083)...');
+      await restartProxy('panel');
+    }
+  } catch (e) {
+    console.warn('Auto start proxies check notice:', e.message);
   }
 }
 
@@ -253,6 +335,21 @@ export async function saveCookies(service, rawCookieText) {
     return { success: false, message: 'Service harus "gemini" atau "claude".' };
   }
 
+  // Cross-service mismatch validation with friendly warnings
+  if (isClaude && (rawCookieText.includes('.google.com') || rawCookieText.includes('SAPISID') || rawCookieText.includes('__Secure-3PSIDTS'))) {
+    return {
+      success: false,
+      message: '⚠️ Cookie yang kamu masukkan adalah cookie Google (Gemini), bukan Claude. Silakan ekspor cookie dari https://claude.ai untuk modal Claude, atau pilih menu "Update Cookie Google Gemini".'
+    };
+  }
+
+  if (isGemini && (rawCookieText.includes('claude.ai') || rawCookieText.includes('sessionKey=sk-ant-sid01-'))) {
+    return {
+      success: false,
+      message: '⚠️ Cookie yang kamu masukkan adalah cookie Anthropic Claude, bukan Google Gemini. Silakan ekspor cookie dari https://gemini.google.com untuk modal Gemini, atau pilih menu "Update Cookie Anthropic Claude".'
+    };
+  }
+
   const targetFile = isGemini ? GEMINI_COOKIE_FILE : CLAUDE_COOKIE_FILE;
 
   // Validate Netscape/tab structure
@@ -273,11 +370,15 @@ export async function saveCookies(service, rawCookieText) {
   }
 
   try {
+    // Ensure destination directory exists on VPS/Docker container
+    fs.mkdirSync(path.dirname(targetFile), { recursive: true });
+    ensureConfigFile(service);
+
     fs.writeFileSync(targetFile, rawCookieText.trim(), 'utf8');
     const restartResult = await restartProxy(service);
     return {
       success: true,
-      message: `Berhasil menyimpan cookie untuk ${service} (${validLines} entri) dan me-restart proxy. ${restartResult.message}`
+      message: `Berhasil menyimpan cookie untuk ${service} (${validLines} entri) dan me-restart proxy. ${restartResult.message || ''}`
     };
   } catch (err) {
     return { success: false, message: `Gagal menulis file cookie: ${err.message}` };
