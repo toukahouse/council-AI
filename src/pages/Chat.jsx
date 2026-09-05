@@ -436,21 +436,52 @@ export default function Chat({ onNavigate, conversationData }) {
     const decoder = new TextDecoder();
     let aiText = '';
     let aiThought = '';
+    let sseBuffer = '';
     
     try {
       while (true) {
         const { value, done } = await reader.read();
         if (done) {
+          // Flush any remaining buffered line
+          if (sseBuffer.trim()) {
+            const lines = [sseBuffer];
+            for (const line of lines) {
+              const trimmed = line.trim();
+              if (trimmed.startsWith('data: ')) {
+                const dataStr = trimmed.substring(6).trim();
+                if (dataStr && dataStr !== '[DONE]') {
+                  try {
+                    const parsed = JSON.parse(dataStr);
+                    if (parsed.type === 'thought') {
+                      aiThought += parsed.chunk;
+                      setMessages((prev) => prev.map(m => m.id === aiMsgId ? { ...m, thoughtProcess: aiThought } : m));
+                    } else if (parsed.type === 'text') {
+                      aiText += (parsed.chunk || '');
+                      setMessages((prev) => prev.map(m => m.id === aiMsgId ? { ...m, content: aiText, isThinking: false } : m));
+                    }
+                  } catch (e) {
+                    // ignore
+                  }
+                }
+              }
+            }
+          }
           setMessages((prev) => prev.map(m => m.id === aiMsgId ? { ...m, isThinking: false, isGenerating: false, endTime: Date.now() } : m));
           setAbortController(null);
           break;
         }
         
-        const chunkStr = decoder.decode(value, { stream: true });
-        const lines = chunkStr.split('\n');
+        sseBuffer += decoder.decode(value, { stream: true });
+        const lines = sseBuffer.split('\n');
+        sseBuffer = lines.pop() || ''; // preserve incomplete line for next iteration
+        
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const dataStr = line.substring(6).trim();
+          const trimmed = line.trim();
+          // Skip SSE heartbeat comments (: keep-alive)
+          if (trimmed.startsWith(':')) continue;
+          
+          if (trimmed.startsWith('data: ')) {
+            const dataStr = trimmed.substring(6).trim();
             if (dataStr === '[DONE]') {
               setSidebarRefreshTrigger(prev => prev + 1);
               continue;
@@ -461,9 +492,11 @@ export default function Chat({ onNavigate, conversationData }) {
                 if (parsed.type === 'thought') {
                   aiThought += parsed.chunk;
                   setMessages((prev) => prev.map(m => m.id === aiMsgId ? { ...m, thoughtProcess: aiThought } : m));
-                } else {
+                } else if (parsed.type === 'text') {
                   aiText += (parsed.chunk || '');
                   setMessages((prev) => prev.map(m => m.id === aiMsgId ? { ...m, content: aiText, isThinking: false } : m));
+                } else if (parsed.type === 'error') {
+                  console.error("AI stream error:", parsed.chunk);
                 }
               } catch (e) {
                 // ignore

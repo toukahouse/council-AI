@@ -683,6 +683,17 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
     res.setHeader('Connection', 'keep-alive');
     res.setHeader('X-Accel-Buffering', 'no'); // Disable Nginx buffering
 
+    // Periodic heartbeat to prevent Cloudflare 100s timeout & Nginx proxy read timeouts
+    const keepAliveTimer = setInterval(() => {
+      if (!res.writableEnded) {
+        res.write(': keep-alive\n\n');
+      }
+    }, 15000);
+
+    const cleanup = () => {
+      clearInterval(keepAliveTimer);
+    };
+
     let childProcess;
     if (apiSettings && (apiSettings.aiEngine === 'universal' || apiSettings.aiEngine === 'puter')) {
       const universalScript = path.join(__dirname, 'universal_proxy.js');
@@ -742,6 +753,7 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
     });
 
     req.on('close', () => {
+      cleanup();
       // If the client aborts the request, kill the child process
       if (childProcess) {
         childProcess.kill();
@@ -749,6 +761,7 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
     });
 
     childProcess.on('close', async (code) => {
+      cleanup();
       // Save the final AI response to DB
       if (aiFullResponse.trim()) {
         await prisma.message.create({
@@ -765,6 +778,7 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
     });
 
     childProcess.on('error', (err) => {
+      cleanup();
       console.error("Failed to start child process:", err);
       res.write(`data: ${JSON.stringify({ error: "AI Engine failed to start" })}\n\n`);
       res.end();

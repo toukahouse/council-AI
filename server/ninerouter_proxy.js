@@ -81,18 +81,41 @@ async function main() {
       { category: "HARM_CATEGORY_CIVIC_INTEGRITY", threshold: "BLOCK_NONE" }
     ];
 
+    // Antigravity supports up to 16,384 tokens output.
+    // Pro models (Gemini Pro) use reasoning/thinking tokens which are deducted from max_tokens.
+    // Ensure sufficient token budget so the final text is never truncated.
+    const isProOrThinkingModel = /pro|thinking/i.test(ninerouterModel);
+    let targetMaxTokens = 16384;
+    if (apiSettings?.maxTokens) {
+      const parsedMax = parseInt(apiSettings.maxTokens);
+      if (!isNaN(parsedMax) && parsedMax > 0) {
+        targetMaxTokens = parsedMax;
+      }
+    }
+    // For Gemini Pro, guarantee at least 8192 tokens so thinking doesn't consume the entire output
+    if (isProOrThinkingModel && targetMaxTokens < 8192) {
+      targetMaxTokens = 8192;
+    }
+
     const requestBody = {
       model: ninerouterModel,
       messages: finalMessages,
-      max_tokens: 8192,
+      max_tokens: Math.min(targetMaxTokens, 16384),
       stream: true,
       safety_settings: safetySettingsList,
       safetySettings: safetySettingsList
     };
 
-    if (apiSettings?.maxTokens) {
-      const parsedMax = parseInt(apiSettings.maxTokens);
-      if (!isNaN(parsedMax) && parsedMax > 0) requestBody.max_tokens = Math.min(parsedMax, 8192);
+    // Forward thinking mode & reasoning effort to 9Router / Antigravity
+    if (apiSettings?.thinkingEnabled === false) {
+      requestBody.thinking = { type: 'disabled' };
+      requestBody.reasoning_effort = 'low';
+    } else if (apiSettings?.thinkingLevel) {
+      // 'low' (1024 budget), 'medium' (8192 budget), 'high' (32768 budget)
+      requestBody.reasoning_effort = apiSettings.thinkingLevel;
+    } else if (isProOrThinkingModel) {
+      // Default Pro models to 'low' reasoning effort (1024 budget) to keep response fast and avoid token exhaustion
+      requestBody.reasoning_effort = 'low';
     }
 
     if (apiSettings?.temperature !== undefined && apiSettings?.temperature !== null && apiSettings?.temperature !== "") {

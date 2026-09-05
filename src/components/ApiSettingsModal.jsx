@@ -117,7 +117,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
   const [temperature, setTemperature] = useState(0.8);
   const [topP, setTopP] = useState(0.95);
   const [topK, setTopK] = useState(40);
-  const [maxTokens, setMaxTokens] = useState(2048);
+  const [maxTokens, setMaxTokens] = useState(8192);
   const [historyLimit, setHistoryLimit] = useState(14);
   const [thinkingEnabled, setThinkingEnabled] = useState(true);
   const [thinkingLevel, setThinkingLevel] = useState('high');
@@ -188,7 +188,10 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
         if (parsed.temperature !== undefined) setTemperature(parsed.temperature);
         if (parsed.topP !== undefined) setTopP(parsed.topP);
         if (parsed.topK !== undefined) setTopK(parsed.topK);
-        if (parsed.maxTokens !== undefined) setMaxTokens(parsed.maxTokens);
+        if (parsed.maxTokens !== undefined) {
+          // If stored maxTokens was old low default (<= 2048), bump to 8192 for Pro reasoning headroom
+          setMaxTokens(parsed.maxTokens <= 2048 ? 8192 : parsed.maxTokens);
+        }
         if (parsed.historyLimit !== undefined) setHistoryLimit(parsed.historyLimit);
         if (parsed.thinkingEnabled !== undefined) setThinkingEnabled(parsed.thinkingEnabled);
         if (parsed.thinkingLevel) setThinkingLevel(parsed.thinkingLevel);
@@ -1358,9 +1361,9 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                   <input
                     className="api-modal__slider"
                     type="range"
-                    min="256"
-                    max="8192"
-                    step="128"
+                    min="512"
+                    max="16384"
+                    step="256"
                     value={maxTokens}
                     onChange={(event) => setMaxTokens(parseInt(event.target.value))}
                   />
