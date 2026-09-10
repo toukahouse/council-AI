@@ -108,6 +108,15 @@ const UNIVERSAL_MODELS = [
   }
 ];
 
+const DEFAULT_NINEROUTER_COMBOS = [
+  'gemini-3-pro-plus',
+  'gemini-2.5-pro',
+  'gemini-2.5-flash',
+  'claude-3-7-sonnet',
+  'claude-3-5-sonnet',
+  'deepseek-r1'
+];
+
 export default function ApiSettingsModal({ isOpen, onClose }) {
   const [activePage, setActivePage] = useState('ai');
   const [apiKey, setApiKey] = useState('');
@@ -122,8 +131,8 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
   const [thinkingEnabled, setThinkingEnabled] = useState(true);
   const [thinkingLevel, setThinkingLevel] = useState('high');
 
-  // AI Engine selector ('api', 'universal', 'copilot', 'gravity', '9router')
-  const [aiEngine, setAiEngine] = useState('universal');
+  // AI Engine selector ('api', 'universal', '9router')
+  const [aiEngine, setAiEngine] = useState('9router');
 
   // Universal Proxy Settings
   const [universalModel, setUniversalModel] = useState('gemini-3.7-flash');
@@ -151,30 +160,12 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
   const [restartingService, setRestartingService] = useState(null);
   const [restartResult, setRestartResult] = useState(null);
 
-  // Gravity Proxy Settings
-  const [gravityProxyUrl, setGravityProxyUrl] = useState('');
-  const [gravityModel, setGravityModel] = useState('claude-sonnet-4-6');
-  const [gravityIsLoggedIn, setGravityIsLoggedIn] = useState(false);
-  const [gravityAccountEmail, setGravityAccountEmail] = useState('');
-  const [gravityAvailableAccounts, setGravityAvailableAccounts] = useState([]);
-  const [gravityHealthResult, setGravityHealthResult] = useState(null);
-  const [gravityModels, setGravityModels] = useState([]);
-  const [gravityManualCallbackUrl, setGravityManualCallbackUrl] = useState('');
-  const [isGravityManualCallbackVisible, setIsGravityManualCallbackVisible] = useState(false);
-
-  // Copilot Proxy Settings
-  const [copilotModel, setCopilotModel] = useState('gpt-4o');
-  const [copilotAuthenticated, setCopilotAuthenticated] = useState(false);
-  const [copilotAuthLoading, setCopilotAuthLoading] = useState(false);
-  const [copilotUserCode, setCopilotUserCode] = useState('');
-  const [copilotVerificationUri, setCopilotVerificationUri] = useState('');
-  const [copilotDeviceCode, setCopilotDeviceCode] = useState('');
-  const [copilotAuthStatus, setCopilotAuthStatus] = useState('');
-
   // 9Router Settings
   const [ninerouterUrl, setNinerouterUrl] = useState('https://supernova-inovategames.me/v1');
   const [ninerouterApiKey, setNinerouterApiKey] = useState('');
-  const [ninerouterModel, setNinerouterModel] = useState('');
+  const [ninerouterModel, setNinerouterModel] = useState('gemini-3-pro-plus');
+  const [ninerouterCombos, setNinerouterCombos] = useState(DEFAULT_NINEROUTER_COMBOS);
+  const [newComboInput, setNewComboInput] = useState('');
 
   // Load settings from localStorage
   useEffect(() => {
@@ -196,9 +187,11 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
         if (parsed.thinkingEnabled !== undefined) setThinkingEnabled(parsed.thinkingEnabled);
         if (parsed.thinkingLevel) setThinkingLevel(parsed.thinkingLevel);
         
-        // Engine selector (Migrate legacy 'puter' or 'proxy' to 'universal')
+        // Engine selector (Migrate legacy 'copilot' / 'gravity' / 'puter' / 'proxy' to '9router' or 'universal')
         if (parsed.aiEngine) {
-          if (parsed.aiEngine === 'puter' || parsed.aiEngine === 'proxy') {
+          if (parsed.aiEngine === 'copilot' || parsed.aiEngine === 'gravity') {
+            setAiEngine('9router');
+          } else if (parsed.aiEngine === 'puter' || parsed.aiEngine === 'proxy') {
             setAiEngine('universal');
           } else {
             setAiEngine(parsed.aiEngine);
@@ -209,20 +202,13 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
         if (parsed.universalModel) setUniversalModel(parsed.universalModel);
         if (parsed.universalProxyUrl) setUniversalProxyUrl(parsed.universalProxyUrl);
 
-        // Copilot settings
-        if (parsed.copilotModel !== undefined) setCopilotModel(parsed.copilotModel);
-
-        // Gravity settings
-        if (parsed.gravityProxyUrl !== undefined) setGravityProxyUrl(parsed.gravityProxyUrl);
-        if (parsed.gravityModel !== undefined) setGravityModel(parsed.gravityModel);
-        if (parsed.gravityIsLoggedIn !== undefined) setGravityIsLoggedIn(parsed.gravityIsLoggedIn);
-        if (parsed.gravityAccountEmail !== undefined) setGravityAccountEmail(parsed.gravityAccountEmail);
-        if (parsed.gravityAvailableAccounts !== undefined) setGravityAvailableAccounts(parsed.gravityAvailableAccounts);
-        
         // 9Router settings
         if (parsed.ninerouterUrl !== undefined) setNinerouterUrl(parsed.ninerouterUrl);
         if (parsed.ninerouterApiKey !== undefined) setNinerouterApiKey(parsed.ninerouterApiKey);
         if (parsed.ninerouterModel !== undefined) setNinerouterModel(parsed.ninerouterModel);
+        if (parsed.ninerouterCombos && Array.isArray(parsed.ninerouterCombos) && parsed.ninerouterCombos.length > 0) {
+          setNinerouterCombos(parsed.ninerouterCombos);
+        }
       }
     } catch (e) {
       console.error("Error loading settings", e);
@@ -251,17 +237,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
     }
   }, [isOpen, activePage]);
 
-  // Check copilot auth status on mount
-  useEffect(() => {
-    if (isOpen) {
-      fetch('/api/copilot/auth/status')
-        .then(res => res.json())
-        .then(data => setCopilotAuthenticated(data.authenticated))
-        .catch(() => setCopilotAuthenticated(false));
-    }
-  }, [isOpen]);
 
-  const pollAbortRef = { current: false };
 
   // ==========================================
   // UNIVERSAL PROXY HANDLERS
@@ -366,238 +342,33 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
   };
 
   // ==========================================
-  // COPILOT HANDLERS
+  // 9ROUTER COMBO HANDLERS
   // ==========================================
-  const handleCopilotLogin = async () => {
-    if (copilotAuthLoading) return;
-    setCopilotAuthLoading(true);
-    setCopilotAuthStatus('Memulai proses login GitHub...');
-    pollAbortRef.current = false;
-    try {
-      const res = await fetch('/api/copilot/auth/start', { method: 'POST' });
-      const data = await res.json();
-      if (data.error) {
-        setCopilotAuthStatus(`Error: ${data.error}`);
-        setCopilotAuthLoading(false);
-        return;
-      }
-      setCopilotUserCode(data.user_code);
-      setCopilotVerificationUri(data.verification_uri);
-      setCopilotDeviceCode(data.device_code);
-      setCopilotAuthStatus('Masukkan kode di browser, lalu tunggu...');
+  const handleAddNinerouterCombo = (e) => {
+    if (e) e.preventDefault();
+    const trimmed = newComboInput.trim();
+    if (!trimmed) return;
+    if (!ninerouterCombos.includes(trimmed)) {
+      const updated = [...ninerouterCombos, trimmed];
+      setNinerouterCombos(updated);
+      setNinerouterModel(trimmed);
+    } else {
+      setNinerouterModel(trimmed);
+    }
+    setNewComboInput('');
+  };
 
-      let waitMs = Math.max((data.interval || 5) * 1000, 6000);
-
-      const poll = async () => {
-        while (!pollAbortRef.current) {
-          await new Promise(r => setTimeout(r, waitMs));
-          if (pollAbortRef.current) break;
-          try {
-            const pollRes = await fetch('/api/copilot/auth/poll', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ device_code: data.device_code })
-            });
-            const pollData = await pollRes.json();
-            if (pollData.success) {
-              setCopilotAuthenticated(true);
-              setCopilotAuthLoading(false);
-              setCopilotAuthStatus('Login berhasil!');
-              setCopilotUserCode('');
-              setCopilotVerificationUri('');
-              return;
-            } else if (pollData.slow_down) {
-              waitMs += 5000;
-            } else if (pollData.error) {
-              setCopilotAuthLoading(false);
-              setCopilotAuthStatus(`Error: ${pollData.error}`);
-              return;
-            }
-          } catch (e) {
-            setCopilotAuthLoading(false);
-            setCopilotAuthStatus('Polling gagal.');
-            return;
-          }
-        }
-      };
-      poll();
-    } catch (e) {
-      setCopilotAuthStatus(`Error: ${e.message}`);
-      setCopilotAuthLoading(false);
+  const handleDeleteNinerouterCombo = (comboToDelete, e) => {
+    if (e) e.stopPropagation();
+    const updated = ninerouterCombos.filter((c) => c !== comboToDelete);
+    setNinerouterCombos(updated);
+    if (ninerouterModel === comboToDelete) {
+      setNinerouterModel(updated[0] || '');
     }
   };
 
-  const handleCopilotLogout = async () => {
-    try {
-      await fetch('/api/copilot/auth/logout', { method: 'POST' });
-      setCopilotAuthenticated(false);
-      setCopilotAuthStatus('Logged out.');
-    } catch (e) {
-      setCopilotAuthStatus('Gagal logout.');
-    }
-  };
-
-  // ==========================================
-  // GRAVITY HANDLERS
-  // ==========================================
-  const handleGravityLogin = async () => {
-    try {
-      const url = gravityProxyUrl ? gravityProxyUrl.replace(/\/+$/, '') : '/proxy';
-      
-      let initialAccounts = [];
-      try {
-        const initRes = await fetch(`${url}/api/accounts`);
-        const initData = await initRes.json();
-        if (initData.accounts) {
-          initialAccounts = initData.accounts.map(a => a.email);
-        }
-      } catch (e) {}
-      
-      const res = await fetch(`${url}/api/auth/url`);
-      if (!res.ok) throw new Error('Gagal mendapatkan auth URL');
-      const data = await res.json();
-      
-      const popup = window.open(data.url, 'oauth-popup', 'width=500,height=700,left=200,top=100');
-      setIsGravityManualCallbackVisible(true);
-      
-      const pollInterval = setInterval(async () => {
-        try {
-          let isClosed = false;
-          try { if (!popup || popup.closed) isClosed = true; } catch(e) {}
-
-          const accRes = await fetch(`${url}/api/accounts`);
-          const accData = await accRes.json();
-          const currentEmails = accData.accounts ? accData.accounts.map(a => a.email) : [];
-          
-          if (currentEmails.length > initialAccounts.length || isClosed) {
-            clearInterval(pollInterval);
-            
-            if (currentEmails.length > 0) {
-              const newestEmail = currentEmails[currentEmails.length - 1];
-              
-              for (const email of currentEmails) {
-                if (email !== newestEmail) {
-                  try {
-                    await fetch(`${url}/api/accounts/${encodeURIComponent(email)}`, { method: 'DELETE' });
-                  } catch (e) {}
-                }
-              }
-              
-              setGravityAvailableAccounts([newestEmail]);
-              setGravityIsLoggedIn(true);
-              setGravityAccountEmail(newestEmail);
-            }
-            
-            try { if (popup && !isClosed) popup.close(); } catch(e) {}
-          }
-        } catch (e) {}
-      }, 2000);
-      
-      setTimeout(() => clearInterval(pollInterval), 120000);
-    } catch (error) {
-      console.error(error);
-      alert(`Login gagal: ${error.message}`);
-    }
-  };
-
-  const handleGravityManualCallback = async () => {
-    if (!gravityManualCallbackUrl) return;
-    try {
-      const url = gravityProxyUrl ? gravityProxyUrl.replace(/\/+$/, '') : '/proxy';
-      
-      let state = '';
-      try {
-        const parsedUrl = new URL(gravityManualCallbackUrl);
-        state = parsedUrl.searchParams.get('state') || '';
-      } catch (e) {
-        throw new Error('Harap masukkan URL yang valid (mengandung parameter state)');
-      }
-
-      if (!state) throw new Error('State tidak ditemukan di URL. Pastikan Anda mengkopi seluruh URL.');
-
-      const res = await fetch(`${url}/api/auth/complete`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ callbackInput: gravityManualCallbackUrl, state })
-      });
-      
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Gagal menyelesaikan login');
-      }
-      
-      const accRes = await fetch(`${url}/api/accounts`);
-      const accData = await accRes.json();
-      if (accData.accounts && accData.accounts.length > 0) {
-        const emails = accData.accounts.map(a => a.email);
-        const newestEmail = emails[emails.length - 1];
-        
-        for (const email of emails) {
-          if (email !== newestEmail) {
-            try { await fetch(`${url}/api/accounts/${encodeURIComponent(email)}`, { method: 'DELETE' }); } catch (e) {}
-          }
-        }
-        
-        setGravityAvailableAccounts([newestEmail]);
-        setGravityIsLoggedIn(true);
-        setGravityAccountEmail(newestEmail);
-        setIsGravityManualCallbackVisible(false);
-        setGravityManualCallbackUrl('');
-        alert('Manual login berhasil!');
-      } else {
-        throw new Error('Akun tidak ditemukan setelah login');
-      }
-    } catch (error) {
-      console.error(error);
-      alert(`Manual login gagal: ${error.message}`);
-    }
-  };
-
-  const handleGravityHealthCheck = async () => {
-    try {
-      setGravityHealthResult('Memeriksa koneksi...');
-      const url = gravityProxyUrl ? gravityProxyUrl.replace(/\/+$/, '') : '/proxy';
-      const res = await fetch(`${url}/health`);
-      if (!res.ok) throw new Error('Koneksi gagal');
-      const data = await res.json();
-      setGravityHealthResult(`✅ Proxy aktif (Total akun: ${data.counts?.total || 0})`);
-      
-      try {
-        const accRes = await fetch(`${url}/api/accounts`);
-        const accData = await accRes.json();
-        if (accData.accounts && accData.accounts.length > 0) {
-          const emails = accData.accounts.map(a => a.email);
-          const newestEmail = emails[emails.length - 1];
-          
-          for (const email of emails) {
-            if (email !== newestEmail) {
-              fetch(`${url}/api/accounts/${encodeURIComponent(email)}`, { method: 'DELETE' }).catch(() => {});
-            }
-          }
-          
-          setGravityAvailableAccounts([newestEmail]);
-          setGravityIsLoggedIn(true);
-          setGravityAccountEmail(newestEmail);
-        }
-      } catch (e) {}
-    } catch (error) {
-      setGravityHealthResult(`❌ Error: ${error.message}`);
-    }
-  };
-
-  const handleGravityFetchModels = async () => {
-    try {
-      const url = gravityProxyUrl ? gravityProxyUrl.replace(/\/+$/, '') : '/proxy';
-      const res = await fetch(`${url}/v1/models`, { headers: { 'x-api-key': 'test' } });
-      if (!res.ok) throw new Error('Gagal mengambil model');
-      const data = await res.json();
-      if (data.data && data.data.length > 0) {
-        setGravityModels(data.data.map(m => m.id));
-      }
-    } catch (error) {
-      console.error(error);
-      alert(`Gagal mengambil model: ${error.message}`);
-    }
+  const handleSelectNinerouterCombo = (combo) => {
+    setNinerouterModel(combo);
   };
 
   const handleSave = () => {
@@ -615,15 +386,10 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
       aiEngine,
       universalModel,
       universalProxyUrl,
-      copilotModel,
-      gravityProxyUrl,
-      gravityModel,
-      gravityIsLoggedIn,
-      gravityAccountEmail,
-      gravityAvailableAccounts,
       ninerouterUrl,
       ninerouterApiKey,
-      ninerouterModel
+      ninerouterModel,
+      ninerouterCombos
     };
     localStorage.setItem('apiSettings', JSON.stringify(settings));
     onClose();
@@ -716,20 +482,6 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                       onClick={() => setAiEngine('api')}
                     >
                       Gemini API
-                    </button>
-                    <button
-                      className={`api-modal__btn ${aiEngine === 'copilot' ? 'api-modal__btn--primary' : 'api-modal__btn--ghost'}`}
-                      type="button"
-                      onClick={() => setAiEngine('copilot')}
-                    >
-                      Copilot Proxy
-                    </button>
-                    <button
-                      className={`api-modal__btn ${aiEngine === 'gravity' ? 'api-modal__btn--primary' : 'api-modal__btn--ghost'}`}
-                      type="button"
-                      onClick={() => setAiEngine('gravity')}
-                    >
-                      Gravity Proxy
                     </button>
                     <button
                       className={`api-modal__btn ${aiEngine === '9router' ? 'api-modal__btn--primary' : 'api-modal__btn--ghost'}`}
@@ -1100,171 +852,9 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                   </>
                 )}
 
-                {/* Copilot Engine */}
-                {aiEngine === 'copilot' && (
-                  <>
-                    <div className="api-modal__field">
-                      <label className="api-modal__label">Status Autentikasi GitHub</label>
-                      <div className="copilot-auth-card">
-                        <div className="copilot-auth-status">
-                          <span className={`copilot-status-dot ${copilotAuthenticated ? 'copilot-status-dot--active' : ''}`} />
-                          <span className="copilot-status-text">
-                            {copilotAuthenticated ? 'Terhubung dengan GitHub Copilot' : 'Belum Terautentikasi'}
-                          </span>
-                        </div>
-                        {copilotAuthenticated ? (
-                          <button
-                            type="button"
-                            className="api-modal__btn api-modal__btn--danger"
-                            onClick={handleCopilotLogout}
-                          >
-                            Logout GitHub
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            className="api-modal__btn api-modal__btn--primary"
-                            onClick={handleCopilotLogin}
-                            disabled={copilotAuthLoading}
-                          >
-                            {copilotAuthLoading ? 'Memproses...' : 'Login dengan GitHub'}
-                          </button>
-                        )}
-                      </div>
-                      {copilotAuthStatus && (
-                        <div className="copilot-auth-message">{copilotAuthStatus}</div>
-                      )}
-                      {copilotUserCode && copilotVerificationUri && (
-                        <div className="copilot-device-code-box">
-                          <p>Buka tautan verifikasi dan masukkan kode berikut:</p>
-                          <div className="copilot-code-display">
-                            <code>{copilotUserCode}</code>
-                            <button
-                              type="button"
-                              className="api-modal__btn api-modal__btn--ghost api-modal__btn--small"
-                              onClick={() => navigator.clipboard.writeText(copilotUserCode)}
-                            >
-                              Salin Kode
-                            </button>
-                          </div>
-                          <a
-                            href={copilotVerificationUri}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="copilot-verify-link"
-                          >
-                            Buka Halaman Verifikasi GitHub →
-                          </a>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="api-modal__field">
-                      <label className="api-modal__label">Pilihan Model Copilot</label>
-                      <div className="copilot-models-grid">
-                        {[
-                          { id: 'gpt-4o', name: 'GPT-4o', desc: 'Flagship smart model' },
-                          { id: 'claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', desc: 'Powerful reasoning & roleplay' },
-                          { id: 'o1-mini', name: 'o1-mini', desc: 'Reasoning model' },
-                          { id: 'o1', name: 'o1', desc: 'Full reasoning powerhouse' }
-                        ].map((m) => (
-                          <div
-                            key={m.id}
-                            className={`copilot-model-card ${copilotModel === m.id ? 'copilot-model-card--active' : ''}`}
-                            onClick={() => setCopilotModel(m.id)}
-                          >
-                            <div className="copilot-model-name">{m.name}</div>
-                            <div className="copilot-model-desc">{m.desc}</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {/* Gravity Engine */}
-                {aiEngine === 'gravity' && (
-                  <>
-                    <div className="api-modal__field">
-                      <label className="api-modal__label">Akun Antigravity</label>
-                      <div className="copilot-auth-card">
-                        <div className="copilot-auth-status">
-                          <span className={`copilot-status-dot ${gravityIsLoggedIn ? 'copilot-status-dot--active' : ''}`} />
-                          <span className="copilot-status-text">
-                            {gravityIsLoggedIn ? `Login: ${gravityAccountEmail}` : 'Belum Login Akun'}
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          className="api-modal__btn api-modal__btn--primary"
-                          onClick={handleGravityLogin}
-                        >
-                          {gravityIsLoggedIn ? 'Ganti / Re-Login Akun' : 'Login Akun Antigravity'}
-                        </button>
-                      </div>
-
-                      {isGravityManualCallbackVisible && (
-                        <div className="gravity-manual-callback-box">
-                          <p>Jika login otomatis tidak merespons, paste URL callback di sini:</p>
-                          <input
-                            type="text"
-                            className="api-modal__input"
-                            placeholder="Paste full URL callback (http://localhost:8080/callback?...)"
-                            value={gravityManualCallbackUrl}
-                            onChange={(e) => setGravityManualCallbackUrl(e.target.value)}
-                          />
-                          <button
-                            type="button"
-                            className="api-modal__btn api-modal__btn--primary"
-                            onClick={handleGravityManualCallback}
-                          >
-                            Selesaikan Login Manual
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="api-modal__field">
-                      <div className="gravity-health-row">
-                        <label className="api-modal__label" style={{ marginBottom: 0 }}>Cek Status Server</label>
-                        <button
-                          type="button"
-                          className="api-modal__btn api-modal__btn--ghost api-modal__btn--small"
-                          onClick={handleGravityHealthCheck}
-                        >
-                          Cek Koneksi
-                        </button>
-                      </div>
-                      {gravityHealthResult && (
-                        <div className="copilot-auth-message">{gravityHealthResult}</div>
-                      )}
-                    </div>
-
-                    <div className="api-modal__field">
-                      <label className="api-modal__label">Model Gravity</label>
-                      <div className="copilot-models-grid">
-                        {[
-                          { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', desc: 'Flagship Claude' },
-                          { id: 'gemini-3.7-flash', name: 'Gemini 3.7 Flash', desc: 'Fast & Versatile' },
-                          { id: 'gpt-4o', name: 'GPT-4o', desc: 'OpenAI Flagship' }
-                        ].map((m) => (
-                          <div
-                            key={m.id}
-                            className={`copilot-model-card ${gravityModel === m.id ? 'copilot-model-card--active' : ''}`}
-                            onClick={() => setGravityModel(m.id)}
-                          >
-                            <div className="copilot-model-name">{m.name}</div>
-                            <div className="copilot-model-desc">{m.desc}</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
-
                 {/* 9Router Engine */}
                 {aiEngine === '9router' && (
-                  <>
+                  <div className="ninerouter-container">
                     <div className="api-modal__field">
                       <label className="api-modal__label">9Router URL</label>
                       <input
@@ -1287,17 +877,99 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                       />
                     </div>
 
+                    {/* Active Selected Model Display */}
                     <div className="api-modal__field">
-                      <label className="api-modal__label">Model 9Router</label>
+                      <div className="api-modal__field-header">
+                        <label className="api-modal__label">Model / Combo 9Router Aktif</label>
+                        {ninerouterModel && (
+                          <span className="ninerouter-active-pill">
+                            <span className="ninerouter-active-dot"></span>
+                            Aktif: <strong>{ninerouterModel}</strong>
+                          </span>
+                        )}
+                      </div>
                       <input
                         type="text"
-                        className="api-modal__input"
-                        placeholder="gemini-3-pro-plus"
+                        className="api-modal__input ninerouter-active-input"
+                        placeholder="Pilih dari daftar combo di bawah atau ketik manual..."
                         value={ninerouterModel}
                         onChange={(e) => setNinerouterModel(e.target.value)}
                       />
                     </div>
-                  </>
+
+                    {/* Add Combo Input */}
+                    <div className="api-modal__field">
+                      <label className="api-modal__label">Tambah Model / Combo Baru</label>
+                      <div className="ninerouter-add-row">
+                        <input
+                          type="text"
+                          className="api-modal__input ninerouter-add-input"
+                          placeholder="Ketik nama combo (contoh: gemini-3-pro-plus, claude-3-7-sonnet)"
+                          value={newComboInput}
+                          onChange={(e) => setNewComboInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAddNinerouterCombo();
+                            }
+                          }}
+                        />
+                        <button
+                          type="button"
+                          className="api-modal__btn api-modal__btn--primary ninerouter-add-btn"
+                          disabled={!newComboInput.trim()}
+                          onClick={handleAddNinerouterCombo}
+                        >
+                          <span>＋</span> Tambah Combo
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Combo List Grid */}
+                    <div className="api-modal__field">
+                      <div className="api-modal__field-header">
+                        <label className="api-modal__label">Daftar Pilihan Combo ({ninerouterCombos.length})</label>
+                        <span className="api-modal__hint">Klik combo untuk memilih, atau klik tombol ✕ untuk menghapus</span>
+                      </div>
+
+                      {ninerouterCombos.length === 0 ? (
+                        <div className="ninerouter-empty">
+                          <p>Belum ada combo di daftar. Tambahkan nama combo di atas.</p>
+                        </div>
+                      ) : (
+                        <div className="ninerouter-combos-grid">
+                          {ninerouterCombos.map((combo) => {
+                            const isSelected = ninerouterModel === combo;
+                            return (
+                              <div
+                                key={combo}
+                                className={`ninerouter-combo-card ${isSelected ? 'ninerouter-combo-card--active' : ''}`}
+                                onClick={() => handleSelectNinerouterCombo(combo)}
+                              >
+                                <div className="ninerouter-combo-card__content">
+                                  <span className="ninerouter-combo-card__icon">{isSelected ? '⚡' : '🔮'}</span>
+                                  <span className="ninerouter-combo-card__name" title={combo}>{combo}</span>
+                                </div>
+                                <div className="ninerouter-combo-card__actions">
+                                  {isSelected && (
+                                    <span className="ninerouter-combo-card__badge">Dipilih</span>
+                                  )}
+                                  <button
+                                    type="button"
+                                    className="ninerouter-combo-card__del-btn"
+                                    title={`Hapus combo "${combo}"`}
+                                    onClick={(e) => handleDeleteNinerouterCombo(combo, e)}
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 )}
 
               </div>

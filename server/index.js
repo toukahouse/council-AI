@@ -16,9 +16,6 @@ dotenv.config();
 // Load Universal Proxy Manager
 import * as universalManager from './universal_manager.js';
 
-// Load Gravity Proxy module
-await import('./antigravity/utils/proxy.js');
-const { default: proxyApp } = await import('./antigravity/server.js');
 
 const connectionString = process.env.DATABASE_URL;
 const pool = new pg.Pool({ 
@@ -397,103 +394,7 @@ app.delete('/api/messages/:id', async (req, res) => {
   }
 });
 
-// ==========================================
-// COPILOT AUTH ROUTES
-// ==========================================
 
-const COPILOT_CLIENT_ID = 'Iv1.b507a08c87ecfe98';
-const COPILOT_DATA_FILE = path.join(__dirname, 'copilot-data.json');
-
-// Start GitHub Device Auth flow
-app.post('/api/copilot/auth/start', async (req, res) => {
-  try {
-    const response = await fetch('https://github.com/login/device/code', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'User-Agent': 'GitHubCopilotChat/0.47.1'
-      },
-      body: JSON.stringify({ client_id: COPILOT_CLIENT_ID, scope: 'read:user' })
-    });
-    const data = await response.json();
-    if (data.error) {
-      return res.status(400).json({ error: data.error_description || data.error });
-    }
-    res.json({
-      user_code: data.user_code,
-      verification_uri: data.verification_uri,
-      device_code: data.device_code,
-      interval: data.interval
-    });
-  } catch (error) {
-    console.error('Copilot auth start error:', error);
-    res.status(500).json({ error: 'Failed to start GitHub auth' });
-  }
-});
-
-// Poll for GitHub OAuth token
-app.post('/api/copilot/auth/poll', async (req, res) => {
-  try {
-    const { device_code } = req.body;
-    const response = await fetch('https://github.com/login/oauth/access_token', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'User-Agent': 'GitHubCopilotChat/0.47.1'
-      },
-      body: JSON.stringify({
-        client_id: COPILOT_CLIENT_ID,
-        device_code: device_code,
-        grant_type: 'urn:ietf:params:oauth:grant-type:device_code'
-      })
-    });
-    const data = await response.json();
-    if (data.access_token) {
-      // Save token to file
-      const fs = await import('fs');
-      fs.writeFileSync(COPILOT_DATA_FILE, JSON.stringify({ githubToken: data.access_token }));
-      return res.json({ success: true, message: 'GitHub authentication successful!' });
-    } else if (data.error === 'authorization_pending') {
-      return res.json({ pending: true });
-    } else if (data.error === 'slow_down') {
-      return res.json({ pending: true, slow_down: true });
-    } else {
-      return res.status(400).json({ error: data.error_description || data.error });
-    }
-  } catch (error) {
-    console.error('Copilot auth poll error:', error);
-    res.status(500).json({ error: 'Failed to poll GitHub auth' });
-  }
-});
-
-// Check if Copilot token exists
-app.get('/api/copilot/auth/status', async (req, res) => {
-  try {
-    const fs = await import('fs');
-    if (fs.existsSync(COPILOT_DATA_FILE)) {
-      const data = JSON.parse(fs.readFileSync(COPILOT_DATA_FILE, 'utf8'));
-      return res.json({ authenticated: !!data.githubToken });
-    }
-    res.json({ authenticated: false });
-  } catch (error) {
-    res.json({ authenticated: false });
-  }
-});
-
-// Logout Copilot
-app.post('/api/copilot/auth/logout', async (req, res) => {
-  try {
-    const fs = await import('fs');
-    if (fs.existsSync(COPILOT_DATA_FILE)) {
-      fs.unlinkSync(COPILOT_DATA_FILE);
-    }
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to logout' });
-  }
-});
 
 // ==========================================
 // UNIVERSAL PROXY (GEMINI & CLAUDE WEB2API) ROUTES
@@ -704,12 +605,6 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
     } else if (apiSettings && apiSettings.aiEngine === '9router') {
       const ninerouterScript = path.join(__dirname, 'ninerouter_proxy.js');
       childProcess = spawn('node', [ninerouterScript]);
-    } else if (apiSettings && apiSettings.aiEngine === 'copilot') {
-      const copilotScript = path.join(__dirname, 'copilot_proxy.js');
-      childProcess = spawn('node', [copilotScript]);
-    } else if (apiSettings && apiSettings.aiEngine === 'gravity') {
-      const gravityScript = path.join(__dirname, 'gravity_proxy.js');
-      childProcess = spawn('node', [gravityScript]);
     } else {
       const pythonScript = path.join(__dirname, 'council_ai.py');
       const pythonCommand = process.platform === 'win32' ? 'python' : 'python3.11';
@@ -990,12 +885,6 @@ ATURAN MUTLAK:
     } else if (apiSettings && apiSettings.aiEngine === '9router') {
       const ninerouterScript = path.join(__dirname, 'ninerouter_proxy.js');
       childProcess = spawn('node', [ninerouterScript]);
-    } else if (apiSettings && apiSettings.aiEngine === 'copilot') {
-      const copilotScript = path.join(__dirname, 'copilot_proxy.js');
-      childProcess = spawn('node', [copilotScript]);
-    } else if (apiSettings && apiSettings.aiEngine === 'gravity') {
-      const gravityScript = path.join(__dirname, 'gravity_proxy.js');
-      childProcess = spawn('node', [gravityScript]);
     } else {
       const pythonScript = path.join(__dirname, 'council_ai.py');
       const pythonCommand = process.platform === 'win32' ? 'python' : 'python3.11';
@@ -1100,9 +989,6 @@ app.put('/api/characters/:characterId/npcs', async (req, res) => {
 // ==========================================
 // SERVE STATIC FRONTEND
 // ==========================================
-
-// Mount Gravity Proxy API routes at /proxy
-app.use('/proxy', proxyApp);
 
 const distPath = path.join(__dirname, '../dist');
 app.use(express.static(distPath));
