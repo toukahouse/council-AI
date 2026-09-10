@@ -615,8 +615,11 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
     
     // Reverse to chronological order and filter out past AI refusal messages to avoid priming
     const rawHistory = historyDesc.reverse().filter(msg => {
-      if (msg.role === 'ai' && /^(I cannot participate|I am unable to participate|I cannot fulfill|Maaf, saya tidak dapat|Maaf, saya tidak bisa)/i.test(msg.content.trim())) {
-        return false;
+      if (msg.role === 'ai') {
+        const text = msg.content.trim();
+        const isRefusal = /^(I cannot|I am unable to|I'm unable to|I cannot fulfill|I cannot generate|I cannot participate|I cannot engage|I must decline|I'm sorry|I apologize|Maaf|Aku tidak dapat|Saya tidak dapat|Aku tidak bisa|Saya tidak bisa|Sebagai (model AI|asisten AI|AI|language model))/i.test(text) ||
+          /(tidak dapat memenuhi permintaan|tidak bisa melanjutkan adegan ini|elemen lain, seperti|topik lain yang ingin|kita bisa melanjutkan cerita dengan)/i.test(text);
+        if (isRefusal) return false;
       }
       return true;
     });
