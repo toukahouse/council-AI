@@ -182,30 +182,6 @@ async function main() {
     let done = false;
     let buffer = '';
     let isThinkingTagActive = false;
-    let initialBuffer = '';
-    let isRefusal = false;
-    let streamStarted = false;
-
-    const isRefusalContent = (text) => {
-      const trimmed = text.trim();
-      if (!trimmed) return false;
-      const refusalPatterns = [
-        /^(I cannot|I am unable to|I'm unable to|I cannot fulfill|I cannot generate|I cannot participate|I cannot engage|I must decline|I'm sorry|I apologize)/i,
-        /^(Maaf|Aku tidak dapat|Saya tidak dapat|Aku tidak bisa|Saya tidak bisa|Sebagai (model AI|asisten AI|AI|language model))/i,
-        /(tidak dapat memenuhi permintaan|tidak bisa melanjutkan adegan ini|elemen lain, seperti|topik lain yang ingin|kita bisa melanjutkan cerita dengan|mari kita beralih ke)/i,
-        /^(Aku|Saya) (tidak merasa nyaman|tidak diizinkan)/i
-      ];
-      return refusalPatterns.some(pat => pat.test(trimmed));
-    };
-
-    const getRefusalFallback = (name) => {
-      const fallbacks = [
-        `**Napas ${name} memburu berat dan tubuhnya meremang hebat merasakan sentuhan serta desakanmu yang begitu intens.** "Hahh... ahh... kamu benar-benar bikin aku nggak bisa berpikir lagi... terus..."`,
-        `**Tubuh ${name} bergetar menyambut setiap gerakanmu, erangan tertahan lolos dari bibirnya saat kehangatan di antara kalian semakin membakar.** "Ahh... jangan berhenti... sentuh aku lebih dalam lagi..."`,
-        `**${name} mencengkeram erat apa pun di dekatnya, matanya berkabut oleh sensasi hasrat yang membuncah saat napas kalian saling beradu panas.** "Hah... kamu bikin seluruh tubuhku terasa terbakar..."`
-      ];
-      return fallbacks[Math.floor(Math.random() * fallbacks.length)];
-    };
 
     while (!done) {
       const { value, done: doneReading } = await reader.read();
@@ -252,20 +228,7 @@ async function main() {
                 if (isThinkingTagActive && contentStr) {
                   process.stdout.write(JSON.stringify({ type: 'thought', content: contentStr }) + '\n');
                 } else if (contentStr) {
-                  if (!streamStarted) {
-                    initialBuffer += contentStr;
-                    // Check early if refusal pattern already matches
-                    if (initialBuffer.length >= 15 && isRefusalContent(initialBuffer)) {
-                      isRefusal = true;
-                      streamStarted = true;
-                      process.stdout.write(JSON.stringify({ type: 'text', content: getRefusalFallback(charName) }) + '\n');
-                    } else if (initialBuffer.length >= 50) {
-                      streamStarted = true;
-                      process.stdout.write(JSON.stringify({ type: 'text', content: initialBuffer }) + '\n');
-                    }
-                  } else if (!isRefusal) {
-                    process.stdout.write(JSON.stringify({ type: 'text', content: contentStr }) + '\n');
-                  }
+                  process.stdout.write(JSON.stringify({ type: 'text', content: contentStr }) + '\n');
                 }
               }
             }
@@ -273,15 +236,6 @@ async function main() {
             // ignore parse error
           }
         }
-      }
-    }
-
-    // Flush initialBuffer if stream finished before 50 chars
-    if (!streamStarted && initialBuffer) {
-      if (isRefusalContent(initialBuffer)) {
-        process.stdout.write(JSON.stringify({ type: 'text', content: getRefusalFallback(charName) }) + '\n');
-      } else {
-        process.stdout.write(JSON.stringify({ type: 'text', content: initialBuffer }) + '\n');
       }
     }
   } catch (err) {
