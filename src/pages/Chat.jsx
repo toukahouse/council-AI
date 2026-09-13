@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import Sidebar from '../components/Sidebar';
 import ChatMessage from '../components/ChatMessage';
 import CharacterProfile from '../components/CharacterProfile';
@@ -14,6 +14,7 @@ import CardPopup from '../components/CardPopup';
 import AvatarPopup from '../components/AvatarPopup';
 import TimeModal from '../components/TimeModal';
 import ChatInput from '../components/ChatInput';
+import { estimateTokens } from '../utils/tokenCounter';
 import '../App.css';
 
 const defaultSettings = {
@@ -24,6 +25,7 @@ const defaultSettings = {
   font: 'Inter',
   fontSize: 14,
   accent: '#7c3aed',
+  showTokenCounter: true,
 };
 
 const backgroundStyles = {
@@ -150,6 +152,74 @@ export default function Chat({ onNavigate, conversationData }) {
   const [isSummarizing, setIsSummarizing] = useState(false);
   const lastSummarizedCount = useRef(0);
   const [toastMessage, setToastMessage] = useState(null);
+  const [memories, setMemories] = useState([]);
+  const [npcs, setNpcs] = useState([]);
+
+  // Fetch memories and npcs for context calculation
+  const fetchContextExtras = useCallback(async (charId) => {
+    if (!charId) return;
+    try {
+      const [memRes, npcRes] = await Promise.all([
+        fetch(`/api/characters/${charId}/memories`).catch(() => null),
+        fetch(`/api/characters/${charId}/npcs`).catch(() => null)
+      ]);
+      if (memRes && memRes.ok) {
+        const memData = await memRes.json();
+        setMemories(memData);
+      }
+      if (npcRes && npcRes.ok) {
+        const npcData = await npcRes.json();
+        setNpcs(npcData);
+      }
+    } catch (e) {
+      console.error("Error fetching context extras:", e);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (conversationData?.characterId) {
+      fetchContextExtras(conversationData.characterId);
+    }
+  }, [conversationData?.characterId, fetchContextExtras]);
+
+  const toggleTokenCounter = () => {
+    setSettings(prev => ({
+      ...prev,
+      showTokenCounter: prev.showTokenCounter !== undefined ? !prev.showTokenCounter : false
+    }));
+  };
+
+  // Calculate output tokens from AI messages
+  const { lastOutputTokens, totalOutputTokens } = useMemo(() => {
+    let total = 0;
+    let last = 0;
+    const aiMessages = messages.filter(m => m.role === 'ai');
+    
+    aiMessages.forEach((msg, idx) => {
+      const contentText = (msg.content || '') + (msg.thoughtProcess ? ' ' + msg.thoughtProcess : '');
+      const count = estimateTokens(contentText);
+      total += count;
+      if (idx === aiMessages.length - 1) {
+        last = count;
+      }
+    });
+
+    return { lastOutputTokens: last, totalOutputTokens: total };
+  }, [messages]);
+
+  const { historyLimit, contextWindowLimit } = useMemo(() => {
+    try {
+      const saved = localStorage.getItem('apiSettings');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          historyLimit: parseInt(parsed.historyLimit) || 30,
+          contextWindowLimit: parseInt(parsed.contextWindow) || 32768
+        };
+      }
+    } catch (e) {}
+    return { historyLimit: 30, contextWindowLimit: 32768 };
+  }, [apiSettingsOpen]);
 
   const showToast = (message, type = 'success') => {
     setToastMessage({ message, type });
@@ -938,6 +1008,19 @@ export default function Chat({ onNavigate, conversationData }) {
           abortController={abortController}
           onStop={handleStop}
           onSend={handleSend}
+          characterData={characterData}
+          activePersona={activePersona}
+          memories={memories}
+          npcs={npcs}
+          messages={messages}
+          historyLimit={historyLimit}
+          roleplayTime={roleplayTime}
+          roleplayDate={roleplayDate}
+          lastOutputTokens={lastOutputTokens}
+          totalOutputTokens={totalOutputTokens}
+          contextWindowLimit={contextWindowLimit}
+          showTokenCounter={settings.showTokenCounter !== false}
+          onToggleTokenCounter={toggleTokenCounter}
         />
       </main>
 
@@ -996,7 +1079,10 @@ export default function Chat({ onNavigate, conversationData }) {
 
       <MemoryModal 
         isOpen={memoryOpen} 
-        onClose={() => setMemoryOpen(false)}
+        onClose={() => {
+          setMemoryOpen(false);
+          if (conversationData?.characterId) fetchContextExtras(conversationData.characterId);
+        }}
         characterId={conversationData?.characterId}
       />
 
@@ -1011,7 +1097,10 @@ export default function Chat({ onNavigate, conversationData }) {
 
       <SideCharactersModal
         isOpen={sideCharactersOpen}
-        onClose={() => setSideCharactersOpen(false)}
+        onClose={() => {
+          setSideCharactersOpen(false);
+          if (conversationData?.characterId) fetchContextExtras(conversationData.characterId);
+        }}
         characterId={conversationData?.characterId}
       />
 

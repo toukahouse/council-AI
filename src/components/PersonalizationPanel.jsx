@@ -89,6 +89,7 @@ export default function PersonalizationPanel({ isOpen, onClose, settings, onSett
     { id: 'bubbles', label: 'Bubbles', icon: '💬' },
     { id: 'typography', label: 'Typography', icon: '✍️' },
     { id: 'accent', label: 'Accent', icon: '🎨' },
+    { id: 'interface', label: 'Tampilan', icon: '⚡' },
   ];
 
   const handleImageUpload = (e) => {
@@ -356,6 +357,52 @@ export default function PersonalizationPanel({ isOpen, onClose, settings, onSett
                     <span className="accent-option__label">{color.label}</span>
                   </button>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Interface / Features Tab */}
+          {activeTab === 'interface' && (
+            <div className="personalization-section">
+              <h4 className="personalization-section__title">Fitur & Indikator Chat</h4>
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: '12px',
+                padding: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '12px',
+                marginTop: '12px'
+              }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: '600', fontSize: '14px', color: 'var(--text-primary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>📊 Token Counter</span>
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                    Tampilkan indikator jumlah token input & output di bawah kolom chat roleplay secara real-time.
+                  </div>
+                </div>
+                <label style={{ position: 'relative', display: 'inline-block', width: '44px', height: '24px', flexShrink: 0 }}>
+                  <input
+                    type="checkbox"
+                    checked={settings.showTokenCounter !== false}
+                    onChange={(e) => onSettingsChange('showTokenCounter', e.target.checked)}
+                    style={{ opacity: 0, width: 0, height: 0, position: 'absolute' }}
+                  />
+                  <span style={{
+                    position: 'absolute', cursor: 'pointer', inset: 0,
+                    backgroundColor: settings.showTokenCounter !== false ? (settings.accent || '#7c3aed') : 'rgba(255,255,255,0.1)',
+                    transition: '0.25s', borderRadius: '24px'
+                  }}>
+                    <span style={{
+                      position: 'absolute', content: '""', height: '18px', width: '18px',
+                      left: settings.showTokenCounter !== false ? '23px' : '3px', bottom: '3px',
+                      backgroundColor: 'white', transition: '0.25s', borderRadius: '50%'
+                    }} />
+                  </span>
+                </label>
               </div>
             </div>
           )}

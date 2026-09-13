@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import TokenCounter from './TokenCounter';
 
 export default function ChatInput({ 
   bubbleTheme, 
@@ -9,7 +10,21 @@ export default function ChatInput({
   fontSize, 
   abortController, 
   onStop, 
-  onSend 
+  onSend,
+  // Token counter props
+  characterData,
+  activePersona,
+  memories = [],
+  npcs = [],
+  messages = [],
+  historyLimit = 30,
+  roleplayTime = '',
+  roleplayDate = '',
+  lastOutputTokens = 0,
+  totalOutputTokens = 0,
+  contextWindowLimit = 32768,
+  showTokenCounter = true,
+  onToggleTokenCounter
 }) {
   const [inputValue, setInputValue] = useState('');
   const inputRef = useRef(null);
@@ -69,8 +84,28 @@ export default function ChatInput({
         )}
       </div>
       <div className="chat-input__note">
-        Gunakan <strong>Shift+Enter</strong> untuk membuat baris baru. Tekan <strong>Enter</strong> untuk mengirim.
+        <span className="chat-input__note-hint">
+          Gunakan <strong>Shift+Enter</strong> untuk baris baru. Tekan <strong>Enter</strong> untuk mengirim.
+        </span>
+
+        <TokenCounter
+          characterData={characterData}
+          activePersona={activePersona}
+          memories={memories}
+          npcs={npcs}
+          history={messages}
+          historyLimit={historyLimit}
+          roleplayTime={roleplayTime}
+          roleplayDate={roleplayDate}
+          draftMessage={inputValue}
+          lastOutputTokens={lastOutputTokens}
+          totalOutputTokens={totalOutputTokens}
+          contextWindowLimit={contextWindowLimit}
+          isVisible={showTokenCounter}
+          onToggleVisibility={onToggleTokenCounter}
+        />
       </div>
     </div>
   );
 }
+
