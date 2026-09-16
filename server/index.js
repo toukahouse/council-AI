@@ -49,7 +49,26 @@ app.get('/api/characters', async (req, res) => {
     const characters = await prisma.character.findMany();
     res.json(characters);
   } catch (error) {
-    console.error("Error fetching characters:", error);
+    console.error("Error fetching characters with default select:", error.message);
+    try {
+      // Resilient fallback: fetch standard fields in case 'traits' column hasn't been migrated yet
+      const fallbackCharacters = await prisma.character.findMany({
+        select: {
+          id: true,
+          name: true,
+          avatar: true,
+          greeting: true,
+          shortDesc: true,
+          systemPrompt: true,
+          personality: true,
+          sampleDialog: true,
+          createdAt: true
+        }
+      });
+      return res.json(fallbackCharacters);
+    } catch (fallbackErr) {
+      console.error("Critical error fetching characters:", fallbackErr.message);
+    }
     res.status(500).json({ error: "Failed to fetch characters" });
   }
 });
@@ -79,7 +98,27 @@ app.get('/api/characters/:id', async (req, res) => {
       res.status(404).json({ error: "Character not found" });
     }
   } catch (error) {
-    console.error("Error fetching character:", error);
+    console.error("Error fetching character:", error.message);
+    try {
+      const fallbackChar = await prisma.character.findUnique({
+        where: { id: req.params.id },
+        select: {
+          id: true,
+          name: true,
+          avatar: true,
+          greeting: true,
+          shortDesc: true,
+          systemPrompt: true,
+          personality: true,
+          sampleDialog: true,
+          createdAt: true
+        }
+      });
+      if (fallbackChar) return res.json(fallbackChar);
+      return res.status(404).json({ error: "Character not found" });
+    } catch (fallbackErr) {
+      console.error("Fallback character detail error:", fallbackErr.message);
+    }
     res.status(500).json({ error: "Failed to fetch character" });
   }
 });
