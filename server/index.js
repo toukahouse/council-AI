@@ -29,6 +29,24 @@ pool.on('error', (err) => {
   console.error('Unexpected idle client error on pg pool:', err.message);
 });
 
+// Auto-migrate missing columns directly in PostgreSQL on startup
+async function autoMigrateDb() {
+  try {
+    await pool.query(`
+      ALTER TABLE "Character" ADD COLUMN IF NOT EXISTS "traits" TEXT;
+      ALTER TABLE "Message" ADD COLUMN IF NOT EXISTS "diceRoll" TEXT;
+      ALTER TABLE "Conversation" ADD COLUMN IF NOT EXISTS "affinity" INTEGER DEFAULT 20;
+      ALTER TABLE "Conversation" ADD COLUMN IF NOT EXISTS "currentMood" TEXT DEFAULT 'neutral';
+      ALTER TABLE "Conversation" ADD COLUMN IF NOT EXISTS "roleplayTime" TEXT DEFAULT '12:00';
+      ALTER TABLE "Conversation" ADD COLUMN IF NOT EXISTS "roleplayDate" TEXT DEFAULT '';
+    `);
+    console.log('[DB Sync] PostgreSQL schema columns checked and up-to-date.');
+  } catch (err) {
+    console.warn('[DB Sync Note]', err.message);
+  }
+}
+autoMigrateDb();
+
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 

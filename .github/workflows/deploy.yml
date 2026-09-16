@@ -85,8 +85,8 @@ jobs:
             sudo docker compose up -d
             
             # Tunggu container siap dan sinkronkan schema Prisma ke database PostgreSQL otomatis
-            sleep 3
-            sudo docker compose exec -T council-ai npx prisma db push --skip-generate || true
+            sleep 4
+            sudo docker compose exec -T council-ai npx prisma db push --accept-data-loss || true
             
             # Bersihkan sisa image lama agar penyimpanan lega
             sudo docker image prune -a -f
