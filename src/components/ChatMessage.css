@@ -509,3 +509,45 @@
 .chat-input::after {
   display: none !important;
 }
+
+/* Mood Badge & Affinity Pill */
+.message__mood-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  line-height: 1.2;
+}
+
+.message__affinity-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  line-height: 1.2;
+}
+
+/* D20 Dice Result Badge in Chat Feed */
+.message__dice-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(30, 27, 75, 0.65);
+  border: 1px solid rgba(129, 140, 248, 0.3);
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 11.5px;
+  color: #c7d2fe;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.message__dice-badge svg {
+  color: #a5b4fc;
+  flex-shrink: 0;
+}
+

@@ -11,6 +11,8 @@ export default function ChatInput({
   abortController, 
   onStop, 
   onSend,
+  onOpenDiceModal,
+  onTriggerEventDirector,
   // Token counter props
   characterData,
   activePersona,
@@ -57,6 +59,39 @@ export default function ChatInput({
           rows="1"
           style={{ fontSize: `${fontSize}px` }}
         />
+
+        {/* Action Button: D20 Dice Modal */}
+        <button
+          type="button"
+          className="chat-input__action-btn"
+          onClick={() => onOpenDiceModal && onOpenDiceModal(inputValue)}
+          title="Lempar Dadu D20 Interaktif (TRPG)"
+          aria-label="Lempar Dadu D20"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect width="18" height="18" x="3" y="3" rx="2" />
+            <path d="M7 7h.01" />
+            <path d="M17 7h.01" />
+            <path d="M7 17h.01" />
+            <path d="M17 17h.01" />
+            <path d="M12 12h.01" />
+          </svg>
+        </button>
+
+        {/* Action Button: Event Director Spontaneous Initiative */}
+        <button
+          type="button"
+          className="chat-input__action-btn chat-input__action-btn--event"
+          onClick={onTriggerEventDirector}
+          disabled={isTyping || isSummarizing || (!hasPersonas && personasLoaded)}
+          title="Biarkan Karakter Mengambil Inisiatif Spontan (Event Director)"
+          aria-label="Inisiatif Karakter"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+          </svg>
+        </button>
+
         {abortController ? (
           <button
             className="chat-input__send chat-input__send--active"

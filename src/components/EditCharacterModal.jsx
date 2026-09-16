@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PersonalityMatrix from './PersonalityMatrix';
 import './EditCharacterModal.css';
 
 const initialFormData = {
@@ -14,6 +15,11 @@ export default function EditCharacterModal({ isOpen, onClose, data, onSave }) {
   const [formData, setFormData] = useState(initialFormData);
   const [avatarPreview, setAvatarPreview] = useState('');
   const [avatarName, setAvatarName] = useState('Belum ada file');
+  const [traits, setTraits] = useState({
+    sliders: { dominance: 50, warmth: 50, patience: 50, libido: 50, morality: 50 },
+    badges: [],
+    customTraits: [],
+  });
 
   useEffect(() => {
     if (data) {
@@ -26,9 +32,35 @@ export default function EditCharacterModal({ isOpen, onClose, data, onSave }) {
         personaStory: data.personality || '',
       });
       setAvatarPreview(data.avatar || '');
+
+      let initialTraits = {
+        sliders: { dominance: 50, warmth: 50, patience: 50, libido: 50, morality: 50 },
+        badges: [],
+        customTraits: [],
+      };
+      if (data.traits) {
+        try {
+          const parsed = typeof data.traits === 'string' ? JSON.parse(data.traits) : data.traits;
+          if (parsed && typeof parsed === 'object') {
+            initialTraits = {
+              sliders: { ...initialTraits.sliders, ...(parsed.sliders || {}) },
+              badges: Array.isArray(parsed.badges) ? parsed.badges : [],
+              customTraits: Array.isArray(parsed.customTraits) ? parsed.customTraits : [],
+            };
+          }
+        } catch (e) {
+          console.error("Failed to parse character traits in EditCharacterModal:", e);
+        }
+      }
+      setTraits(initialTraits);
     } else {
       setFormData(initialFormData);
       setAvatarPreview('');
+      setTraits({
+        sliders: { dominance: 50, warmth: 50, patience: 50, libido: 50, morality: 50 },
+        badges: [],
+        customTraits: [],
+      });
     }
   }, [data]);
 
@@ -66,10 +98,34 @@ export default function EditCharacterModal({ isOpen, onClose, data, onSave }) {
         personaStory: data.personality || '',
       });
       setAvatarPreview(data.avatar || '');
+
+      let initialTraits = {
+        sliders: { dominance: 50, warmth: 50, patience: 50, libido: 50, morality: 50 },
+        badges: [],
+        customTraits: [],
+      };
+      if (data.traits) {
+        try {
+          const parsed = typeof data.traits === 'string' ? JSON.parse(data.traits) : data.traits;
+          if (parsed && typeof parsed === 'object') {
+            initialTraits = {
+              sliders: { ...initialTraits.sliders, ...(parsed.sliders || {}) },
+              badges: Array.isArray(parsed.badges) ? parsed.badges : [],
+              customTraits: Array.isArray(parsed.customTraits) ? parsed.customTraits : [],
+            };
+          }
+        } catch (e) {}
+      }
+      setTraits(initialTraits);
     } else {
       setFormData(initialFormData);
       setAvatarPreview('');
       setAvatarName('Belum ada file');
+      setTraits({
+        sliders: { dominance: 50, warmth: 50, patience: 50, libido: 50, morality: 50 },
+        badges: [],
+        customTraits: [],
+      });
     }
   };
 
@@ -79,7 +135,7 @@ export default function EditCharacterModal({ isOpen, onClose, data, onSave }) {
     if (onSave) {
       try {
         setIsSaving(true);
-        await onSave({ ...formData, avatarPreview });
+        await onSave({ ...formData, avatarPreview, traits: JSON.stringify(traits) });
       } finally {
         setIsSaving(false);
       }
@@ -220,6 +276,9 @@ export default function EditCharacterModal({ isOpen, onClose, data, onSave }) {
                 </div>
               </div>
             </div>
+
+            {/* Personality Matrix: 5 Sliders + Badges + Custom Traits */}
+            <PersonalityMatrix traits={traits} onChange={setTraits} />
           </div>
 
           <div className="edit-modal__footer">

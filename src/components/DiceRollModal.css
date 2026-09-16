@@ -1,0 +1,375 @@
+/* Dice Roll Modal Styling */
+.dice-modal__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: diceModalFadeIn 0.2s ease-out;
+}
+
+@keyframes diceModalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.dice-modal__container {
+  background: #111118;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 18px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(124, 58, 237, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: diceModalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes diceModalPop {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.dice-modal__header {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dice-modal__title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dice-modal__icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(124, 58, 237, 0.18);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  color: #a78bfa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dice-modal__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.dice-modal__subtitle {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.dice-modal__close-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.dice-modal__close-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.dice-modal__body {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dice-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dice-modal__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.dice-modal__dc-val {
+  color: #a78bfa;
+}
+
+.dice-modal__input {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.dice-modal__input:focus {
+  border-color: #8b5cf6;
+}
+
+.dice-modal__textarea {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  resize: vertical;
+  min-height: 56px;
+  line-height: 1.45;
+  transition: border-color 0.2s;
+}
+
+.dice-modal__textarea:focus {
+  border-color: #8b5cf6;
+}
+
+.dice-modal__chips-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dice-modal__chips-label {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.dice-modal__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dice-modal__chip {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.dice-modal__chip:hover {
+  background: rgba(124, 58, 237, 0.15);
+  border-color: rgba(139, 92, 246, 0.3);
+  color: #ddd6fe;
+}
+
+.dice-modal__dc-presets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.dice-modal__dc-btn {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+
+.dice-modal__dc-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.dice-modal__dc-btn--active {
+  background: rgba(124, 58, 237, 0.25);
+  border-color: #8b5cf6;
+  color: #c084fc;
+}
+
+/* Arena & Die */
+.dice-modal__arena {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 140px;
+}
+
+.dice-modal__die {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+  border: 2px solid #6366f1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.dice-modal__die-number {
+  font-size: 26px;
+  font-weight: 800;
+  color: #fff;
+  font-family: monospace;
+}
+
+.dice-modal__die--rolling {
+  animation: dieShake 0.15s infinite;
+}
+
+@keyframes dieShake {
+  0% { transform: rotate(0deg) scale(1.05); }
+  25% { transform: rotate(-10deg) scale(0.95); }
+  50% { transform: rotate(10deg) scale(1.08); }
+  75% { transform: rotate(-8deg) scale(0.98); }
+  100% { transform: rotate(0deg) scale(1.05); }
+}
+
+.dice-modal__die--success {
+  background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+  border-color: #34d399;
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.5);
+}
+
+.dice-modal__die--fail {
+  background: linear-gradient(135deg, #4c0519 0%, #881337 100%);
+  border-color: #f43f5e;
+  box-shadow: 0 8px 30px rgba(225, 29, 72, 0.5);
+}
+
+.dice-modal__outcome {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  animation: outcomePop 0.2s ease-out;
+}
+
+@keyframes outcomePop {
+  from { transform: translateY(4px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.dice-modal__outcome--success {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  color: #6ee7b7;
+}
+
+.dice-modal__outcome--fail {
+  background: rgba(225, 29, 72, 0.15);
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  color: #fda4af;
+}
+
+.dice-modal__footer {
+  padding: 14px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  gap: 10px;
+}
+
+.dice-modal__btn {
+  flex: 1;
+  padding: 11px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.dice-modal__btn--roll {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.dice-modal__btn--roll:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.dice-modal__btn--apply {
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+}
+
+.dice-modal__btn--apply:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.dice-modal__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: none;
+}
+
+@media (max-width: 480px) {
+  .dice-modal__overlay {
+    padding: 8px;
+  }
+
+  .dice-modal__container {
+    max-width: calc(100vw - 16px);
+    border-radius: 16px;
+  }
+
+  .dice-modal__header {
+    padding: 12px 16px;
+  }
+
+  .dice-modal__body {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+
+  .dice-modal__dc-presets {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .dice-modal__dc-btn {
+    padding: 8px 6px;
+    font-size: 11.5px;
+  }
+
+  .dice-modal__footer {
+    padding: 12px 16px;
+  }
+}

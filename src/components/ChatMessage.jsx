@@ -1,12 +1,27 @@
 import { useState, useEffect } from 'react';
 import './ChatMessage.css';
 
+const MOOD_MAP = {
+  neutral: { emoji: '😐', label: 'Netral', color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.12)', border: 'rgba(148, 163, 184, 0.25)' },
+  happy: { emoji: '😊', label: 'Senang', color: '#34d399', bg: 'rgba(16, 185, 129, 0.12)', border: 'rgba(52, 211, 153, 0.25)' },
+  thoughtful: { emoji: '🤔', label: 'Berpikir', color: '#38bdf8', bg: 'rgba(14, 165, 233, 0.12)', border: 'rgba(56, 189, 248, 0.25)' },
+  serious: { emoji: '🧐', label: 'Serius', color: '#fbbf24', bg: 'rgba(245, 158, 11, 0.12)', border: 'rgba(251, 191, 36, 0.25)' },
+  flustered: { emoji: '😳', label: 'Tersipu', color: '#fb7185', bg: 'rgba(244, 63, 94, 0.12)', border: 'rgba(251, 113, 133, 0.25)' },
+  angry: { emoji: '😠', label: 'Kesal', color: '#f87171', bg: 'rgba(239, 68, 68, 0.12)', border: 'rgba(248, 113, 113, 0.25)' },
+  smirk: { emoji: '😏', label: 'Menyeringai', color: '#c084fc', bg: 'rgba(168, 85, 247, 0.12)', border: 'rgba(192, 132, 252, 0.25)' },
+  surprised: { emoji: '😲', label: 'Terkejut', color: '#fde047', bg: 'rgba(234, 179, 8, 0.12)', border: 'rgba(253, 224, 71, 0.25)' },
+};
+
 const ChatMessageComponent = ({ message, seqId, isTyping, animate, charName, charAvatar, userName, userAvatar, onEdit, onDelete, onRegenerate, bubbleTheme, onAvatarClick }) => {
   const [showThoughts, setShowThoughts] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState('');
   const isUser = message.role === 'user';
+
+  const diceData = typeof message.diceRoll === 'string'
+    ? (() => { try { return JSON.parse(message.diceRoll); } catch { return null; } })()
+    : message.diceRoll;
   const [elapsedMs, setElapsedMs] = useState(() => {
     if (message.endTime && message.startTime) return message.endTime - message.startTime;
     if (message.startTime) return Math.max(0, Date.now() - message.startTime);
@@ -72,8 +87,33 @@ const ChatMessageComponent = ({ message, seqId, isTyping, animate, charName, cha
 
       <div className="message__content-wrap">
         {!isUser ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             <span className="message__name">{aiName}</span>
+            {message.mood && MOOD_MAP[message.mood] && (
+              <span
+                className="message__mood-badge"
+                style={{
+                  color: MOOD_MAP[message.mood].color,
+                  background: MOOD_MAP[message.mood].bg,
+                  border: `1px solid ${MOOD_MAP[message.mood].border}`,
+                }}
+              >
+                <span>{MOOD_MAP[message.mood].emoji}</span>
+                <span>{MOOD_MAP[message.mood].label}</span>
+              </span>
+            )}
+            {message.affinityChange && message.affinityChange !== 0 && (
+              <span
+                className="message__affinity-pill"
+                style={{
+                  color: message.affinityChange > 0 ? '#fda4af' : '#94a3b8',
+                  background: message.affinityChange > 0 ? 'rgba(244, 63, 94, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                  border: `1px solid ${message.affinityChange > 0 ? 'rgba(244, 63, 94, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
+                }}
+              >
+                {message.affinityChange > 0 ? `+${message.affinityChange}` : message.affinityChange} Afinitas
+              </span>
+            )}
             {(message.thoughtProcess || message.isThinking) && (
               <div style={{ position: 'relative' }}>
                 <button 
@@ -114,6 +154,29 @@ const ChatMessageComponent = ({ message, seqId, isTyping, animate, charName, cha
           </div>
         ) : (
           <span className="message__name" style={{ alignSelf: 'flex-end' }}>{displayUserName}</span>
+        )}
+
+        {/* Dice roll card if attached */}
+        {diceData && (
+          <div
+            className="message__dice-badge"
+            style={{
+              alignSelf: isUser ? 'flex-end' : 'flex-start',
+              marginBottom: '6px',
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect width="18" height="18" x="3" y="3" rx="2" />
+              <path d="M7 7h.01" /><path d="M17 7h.01" /><path d="M7 17h.01" /><path d="M17 17h.01" /><path d="M12 12h.01" />
+            </svg>
+            <span>
+              Dadu D20: <strong>{diceData.total}</strong> vs DC {diceData.dc} —{' '}
+              <strong style={{ color: diceData.isSuccess ? '#34d399' : '#f43f5e' }}>
+                {diceData.isSuccess ? 'Berhasil' : 'Gagal'}
+              </strong>{' '}
+              <span style={{ opacity: 0.8 }}>({diceData.action})</span>
+            </span>
+          </div>
         )}
 
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '8px', flexDirection: isUser ? 'row-reverse' : 'row' }}>
@@ -212,6 +275,9 @@ export default React.memo(ChatMessageComponent, (prevProps, nextProps) => {
   return (
     prevProps.message.id === nextProps.message.id &&
     prevProps.message.content === nextProps.message.content &&
+    prevProps.message.mood === nextProps.message.mood &&
+    prevProps.message.affinityChange === nextProps.message.affinityChange &&
+    prevProps.message.diceRoll === nextProps.message.diceRoll &&
     prevProps.message.isThinking === nextProps.message.isThinking &&
     prevProps.message.isGenerating === nextProps.message.isGenerating &&
     prevProps.message.thoughtProcess === nextProps.message.thoughtProcess &&

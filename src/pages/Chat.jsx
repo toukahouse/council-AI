@@ -14,8 +14,30 @@ import CardPopup from '../components/CardPopup';
 import AvatarPopup from '../components/AvatarPopup';
 import TimeModal from '../components/TimeModal';
 import ChatInput from '../components/ChatInput';
+import DiceRollModal from '../components/DiceRollModal';
+import AffinityModal from '../components/AffinityModal';
 import { estimateTokens } from '../utils/tokenCounter';
 import '../App.css';
+
+const MOOD_MAP = {
+  neutral: { emoji: '😐', label: 'Netral', color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.12)', border: 'rgba(148, 163, 184, 0.25)' },
+  happy: { emoji: '😊', label: 'Senang', color: '#34d399', bg: 'rgba(16, 185, 129, 0.12)', border: 'rgba(52, 211, 153, 0.25)' },
+  thoughtful: { emoji: '🤔', label: 'Berpikir', color: '#38bdf8', bg: 'rgba(14, 165, 233, 0.12)', border: 'rgba(56, 189, 248, 0.25)' },
+  serious: { emoji: '🧐', label: 'Serius', color: '#fbbf24', bg: 'rgba(245, 158, 11, 0.12)', border: 'rgba(251, 191, 36, 0.25)' },
+  flustered: { emoji: '😳', label: 'Tersipu', color: '#fb7185', bg: 'rgba(244, 63, 94, 0.12)', border: 'rgba(251, 113, 133, 0.25)' },
+  angry: { emoji: '😠', label: 'Kesal', color: '#f87171', bg: 'rgba(239, 68, 68, 0.12)', border: 'rgba(248, 113, 113, 0.25)' },
+  smirk: { emoji: '😏', label: 'Menyeringai', color: '#c084fc', bg: 'rgba(168, 85, 247, 0.12)', border: 'rgba(192, 132, 252, 0.25)' },
+  surprised: { emoji: '😲', label: 'Terkejut', color: '#fde047', bg: 'rgba(234, 179, 8, 0.12)', border: 'rgba(253, 224, 71, 0.25)' },
+};
+
+const getAffinityTier = (val) => {
+  if (val >= 85) return { label: 'Sahabat Sejati / Intim', color: '#f43f5e' };
+  if (val >= 60) return { label: 'Teman Dekat', color: '#c084fc' };
+  if (val >= 40) return { label: 'Rekan Baik', color: '#818cf8' };
+  if (val >= 20) return { label: 'Kenalan Biasa', color: '#38bdf8' };
+  return { label: 'Asing / Berjarak', color: '#94a3b8' };
+};
+
 
 const defaultSettings = {
   background: 'default',
@@ -105,9 +127,51 @@ export default function Chat({ onNavigate, conversationData }) {
   const [activePersona, setActivePersona] = useState(null);
   const [avatarPopup, setAvatarPopup] = useState(null);
   const [timeModalOpen, setTimeModalOpen] = useState(false);
+  const [isDiceModalOpen, setIsDiceModalOpen] = useState(false);
+  const [diceInitialDialogue, setDiceInitialDialogue] = useState('');
+  const [affinityModalOpen, setAffinityModalOpen] = useState(false);
+
+  const [affinity, setAffinity] = useState(conversationData?.affinity ?? 20);
+  const [currentMood, setCurrentMood] = useState(conversationData?.currentMood || 'neutral');
   
   const [roleplayTime, setRoleplayTime] = useState(conversationData?.roleplayTime || '12:00');
   const [roleplayDate, setRoleplayDate] = useState(conversationData?.roleplayDate || '');
+
+  useEffect(() => {
+    if (conversationData) {
+      if (conversationData.affinity !== undefined && conversationData.affinity !== null) {
+        setAffinity(conversationData.affinity);
+      }
+      if (conversationData.currentMood) {
+        setCurrentMood(conversationData.currentMood);
+      }
+    }
+  }, [conversationData?.id, conversationData?.affinity, conversationData?.currentMood]);
+
+  const handleSaveAffinity = async (newAffinity, newMood) => {
+    setAffinity(newAffinity);
+    setCurrentMood(newMood);
+    if (conversationData?.id) {
+      try {
+        await fetch(`/api/conversations/${conversationData.id}/affinity`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ affinity: newAffinity, currentMood: newMood })
+        });
+        const saved = sessionStorage.getItem('chatbot_viewData');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.id === conversationData.id) {
+            parsed.affinity = newAffinity;
+            parsed.currentMood = newMood;
+            sessionStorage.setItem('chatbot_viewData', JSON.stringify(parsed));
+          }
+        }
+      } catch (err) {
+        console.error('Failed to save affinity to db:', err);
+      }
+    }
+  };
 
   const saveTimeToDb = async (time, date) => {
     if (!conversationData?.id) return;
@@ -528,6 +592,10 @@ export default function Chat({ onNavigate, conversationData }) {
                     } else if (parsed.type === 'text') {
                       aiText += (parsed.chunk || '');
                       setMessages((prev) => prev.map(m => m.id === aiMsgId ? { ...m, content: aiText, isThinking: false } : m));
+                    } else if (parsed.type === 'metadata') {
+                      if (parsed.affinity !== undefined) setAffinity(parsed.affinity);
+                      if (parsed.mood) setCurrentMood(parsed.mood);
+                      setMessages((prev) => prev.map(m => m.id === aiMsgId ? { ...m, mood: parsed.mood, affinityChange: parsed.affinityChange } : m));
                     }
                   } catch (e) {
                     // ignore
@@ -565,6 +633,10 @@ export default function Chat({ onNavigate, conversationData }) {
                 } else if (parsed.type === 'text') {
                   aiText += (parsed.chunk || '');
                   setMessages((prev) => prev.map(m => m.id === aiMsgId ? { ...m, content: aiText, isThinking: false } : m));
+                } else if (parsed.type === 'metadata') {
+                  if (parsed.affinity !== undefined) setAffinity(parsed.affinity);
+                  if (parsed.mood) setCurrentMood(parsed.mood);
+                  setMessages((prev) => prev.map(m => m.id === aiMsgId ? { ...m, mood: parsed.mood, affinityChange: parsed.affinityChange } : m));
                 } else if (parsed.type === 'error') {
                   console.error("AI stream error:", parsed.chunk);
                 }
@@ -587,18 +659,22 @@ export default function Chat({ onNavigate, conversationData }) {
     }
   };
 
-  const handleSend = async (content) => {
-    if (!content || !content.trim()) return;
+  const handleSend = async (content, diceRollData = null, isEventTrigger = false) => {
+    if (!content && !diceRollData && !isEventTrigger) return;
 
-    content = content.trim();
-    const userMsg = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: content,
-      time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
-    };
+    const userText = content ? content.trim() : (diceRollData ? `*Melakukan aksi: "${diceRollData.action}" (Dadu D20: ${diceRollData.total} vs DC ${diceRollData.dc} -> ${diceRollData.isSuccess ? 'BERHASIL' : 'GAGAL'})*` : '');
 
-    setMessages((prev) => [...prev, userMsg]);
+    if (!isEventTrigger) {
+      const userMsg = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: userText,
+        diceRoll: diceRollData,
+        time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+      };
+      setMessages((prev) => [...prev, userMsg]);
+    }
+
     setIsTyping(true);
 
     if (!conversationData?.id) return;
@@ -626,11 +702,13 @@ export default function Chat({ onNavigate, conversationData }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          message: content, 
+          message: content ? content.trim() : '', 
           activePersona, 
           apiSettings,
           timeContext: roleplayTime,
-          dateContext: roleplayDate
+          dateContext: roleplayDate,
+          diceRoll: diceRollData,
+          isEventTrigger: Boolean(isEventTrigger),
         }),
         signal: controller.signal
       });
@@ -675,6 +753,14 @@ export default function Chat({ onNavigate, conversationData }) {
       setAbortController(null);
       setIsTyping(false);
     }
+  };
+
+  const handleDiceRollComplete = (diceResult) => {
+    handleSend(diceResult.dialogue || '', diceResult, false);
+  };
+
+  const handleTriggerEventDirector = () => {
+    handleSend('', null, true);
   };
 
   const triggerAiResponse = async () => {
@@ -938,6 +1024,48 @@ export default function Chat({ onNavigate, conversationData }) {
           </div>
 
           <div className="chat-header__right">
+            {/* Affinity Heart Meter */}
+            <div
+              className="chat-header__affinity"
+              title={`Tingkat Afinitas: ${affinity}/100 (${getAffinityTier(affinity).label}) - Klik untuk ubah`}
+              onClick={() => setAffinityModalOpen(true)}
+              style={{ cursor: 'pointer' }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none" style={{ color: getAffinityTier(affinity).color, flexShrink: 0 }}>
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+              <div className="chat-header__affinity-track">
+                <div
+                  className="chat-header__affinity-fill"
+                  style={{
+                    width: `${affinity}%`,
+                    background: `linear-gradient(90deg, #7c3aed, ${getAffinityTier(affinity).color})`
+                  }}
+                />
+              </div>
+              <span className="chat-header__affinity-pct" style={{ color: getAffinityTier(affinity).color }}>
+                {affinity}%
+              </span>
+            </div>
+
+            {/* Current Mood Badge */}
+            {currentMood && MOOD_MAP[currentMood] && (
+              <span
+                className="chat-header__mood-badge"
+                title={`Suasana Hati: ${MOOD_MAP[currentMood].label} - Klik untuk ubah`}
+                onClick={() => setAffinityModalOpen(true)}
+                style={{
+                  cursor: 'pointer',
+                  color: MOOD_MAP[currentMood].color,
+                  background: MOOD_MAP[currentMood].bg,
+                  border: `1px solid ${MOOD_MAP[currentMood].border}`
+                }}
+              >
+                <span>{MOOD_MAP[currentMood].emoji}</span>
+                <span className="chat-header__mood-label">{MOOD_MAP[currentMood].label}</span>
+              </span>
+            )}
+
             <button 
               className="chat-header__action" 
               id="btn-time" 
@@ -1021,6 +1149,11 @@ export default function Chat({ onNavigate, conversationData }) {
           contextWindowLimit={contextWindowLimit}
           showTokenCounter={settings.showTokenCounter !== false}
           onToggleTokenCounter={toggleTokenCounter}
+          onOpenDiceModal={(text) => {
+            setDiceInitialDialogue(text || '');
+            setIsDiceModalOpen(true);
+          }}
+          onTriggerEventDirector={handleTriggerEventDirector}
         />
       </main>
 
@@ -1032,6 +1165,10 @@ export default function Chat({ onNavigate, conversationData }) {
         onClose={() => setRightSidebarOpen(false)}
         onEditCharacterOpen={() => {
           setEditCharacterOpen(true);
+          setRightSidebarOpen(false);
+        }}
+        onEditAffinityOpen={() => {
+          setAffinityModalOpen(true);
           setRightSidebarOpen(false);
         }}
         onChoosePersonaOpen={() => {
@@ -1126,6 +1263,22 @@ export default function Chat({ onNavigate, conversationData }) {
           setRoleplayDate(data.date);
           saveTimeToDb(data.time, data.date);
         }}
+      />
+
+      <DiceRollModal
+        isOpen={isDiceModalOpen}
+        onClose={() => setIsDiceModalOpen(false)}
+        onRollComplete={handleDiceRollComplete}
+        initialDialogue={diceInitialDialogue}
+      />
+
+      <AffinityModal
+        isOpen={affinityModalOpen}
+        onClose={() => setAffinityModalOpen(false)}
+        currentAffinity={affinity}
+        currentMood={currentMood}
+        charName={charName}
+        onSave={handleSaveAffinity}
       />
 
     {toastMessage && (

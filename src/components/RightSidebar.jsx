@@ -14,6 +14,17 @@ const menuItems = [
     gradient: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
   },
   {
+    id: 'edit-affinity',
+    label: 'Afinitas & Hubungan',
+    desc: 'Atur status cinta, intimacy & mood',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+      </svg>
+    ),
+    gradient: 'linear-gradient(135deg, #f43f5e 0%, #fb7185 100%)',
+  },
+  {
     id: 'choose-persona',
     label: 'Pilih Persona',
     desc: 'Ganti gaya bicara karakter',
@@ -83,6 +94,7 @@ export default function RightSidebar({
   isOpen,
   onClose,
   onEditCharacterOpen,
+  onEditAffinityOpen,
   onChoosePersonaOpen,
   onEditMemoryOpen,
   onScenarioOpen,
@@ -94,6 +106,9 @@ export default function RightSidebar({
     setActiveMenu(itemId);
     if (itemId === 'edit-character' && onEditCharacterOpen) {
       onEditCharacterOpen();
+    }
+    if (itemId === 'edit-affinity' && onEditAffinityOpen) {
+      onEditAffinityOpen();
     }
     if (itemId === 'choose-persona' && onChoosePersonaOpen) {
       onChoosePersonaOpen();

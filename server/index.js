@@ -203,6 +203,26 @@ app.put('/api/conversations/:id/time', async (req, res) => {
   }
 });
 
+// Update conversation affinity and mood manually
+app.put('/api/conversations/:id/affinity', async (req, res) => {
+  try {
+    const { affinity, currentMood } = req.body;
+    const dataToUpdate = {};
+    if (affinity !== undefined) dataToUpdate.affinity = parseInt(affinity, 10);
+    if (currentMood !== undefined) dataToUpdate.currentMood = currentMood;
+
+    const conversation = await prisma.conversation.update({
+      where: { id: req.params.id },
+      data: dataToUpdate
+    });
+    res.json(conversation);
+  } catch (error) {
+    console.error("Error updating conversation affinity:", error);
+    res.status(500).json({ error: "Failed to update conversation affinity" });
+  }
+});
+
+
 
 // ==========================================
 // PERSONA ROUTES
@@ -478,15 +498,17 @@ app.get('/api/universal/logs/:service', async (req, res) => {
 // Stream AI response
 app.post('/api/chat/:conversationId/stream', async (req, res) => {
   try {
-    const { message, activePersona, apiSettings, timeContext, dateContext } = req.body;
+    const { message, activePersona, apiSettings, timeContext, dateContext, diceRoll, isEventTrigger } = req.body;
     const conversationId = req.params.conversationId;
 
     // Save the user's message only if it's provided (not a regeneration)
-    if (message) {
+    if (message || diceRoll) {
+      const diceRollStr = diceRoll ? (typeof diceRoll === 'string' ? diceRoll : JSON.stringify(diceRoll)) : null;
       await prisma.message.create({
         data: {
           role: 'user',
-          content: message,
+          content: message || (diceRoll ? `*Melakukan aksi: "${diceRoll.action}" (Dadu D20: ${diceRoll.total} vs DC ${diceRoll.dc} -> ${diceRoll.isSuccess ? 'BERHASIL' : 'GAGAL'})*` : ''),
+          diceRoll: diceRollStr,
           conversationId
         }
       });
@@ -505,6 +527,9 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
     });
     
     if (!conversation) return res.status(404).json({ error: "Conversation not found" });
+
+    const currentAffinity = conversation.affinity ?? 20;
+    const currentMood = conversation.currentMood || 'neutral';
 
     const limit = Math.min(Math.max(parseInt(apiSettings?.historyLimit) || 30, 4), 100);
 
@@ -554,6 +579,68 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
         .replace(/100%\s*tanpa\s*sensor\s*\(uncensored\)/gi, 'ekspresif dan natural')
         .replace(/DILARANG KERAS menolak adegan.*?WAJIB ditulis secara penuh dan natural\./gi, 'Tuliskan setiap adegan romantis dan keintiman secara mengalir, berani, dan ekspresif.')
         .replace(/Gunakan HANYA kata "penis", "vagina" dan "seks" untuk aktivitas seksual saat adegan benar-benar memanas \(hindari kiasan\)\./gi, 'Tunjukkan kehangatan fisik, pelukan, ciuman, dan interaksi ragawi secara mendalam dan nyata tanpa kiasan yang membingungkan.');
+    }
+
+    // Inject Character Traits (Personality Matrix)
+    if (conversation.character?.traits) {
+      try {
+        const parsedTraits = typeof conversation.character.traits === 'string'
+          ? JSON.parse(conversation.character.traits)
+          : conversation.character.traits;
+        const { sliders = {}, badges = [], customTraits = [] } = parsedTraits;
+
+        const traitLines = [];
+        if (sliders.dominance !== undefined) traitLines.push(`Tingkat Kendali: ${sliders.dominance >= 65 ? 'Dominan & Mengontrol (' + sliders.dominance + '%)' : sliders.dominance <= 35 ? 'Submisif & Penurut (' + sliders.dominance + '%)' : 'Setara & Fleksibel (' + sliders.dominance + '%)'}`);
+        if (sliders.warmth !== undefined) traitLines.push(`Kehangatan: ${sliders.warmth >= 65 ? 'Hangat & Ramah (' + sliders.warmth + '%)' : sliders.warmth <= 35 ? 'Dingin & Apatis/Kuudere (' + sliders.warmth + '%)' : 'Rasional & Tenang (' + sliders.warmth + '%)'}`);
+        if (sliders.patience !== undefined) traitLines.push(`Temperamen: ${sliders.patience >= 65 ? 'Pemarah/Sumbu Pendek/Tsundere (' + sliders.patience + '%)' : sliders.patience <= 35 ? 'Penyabar/Stoic (' + sliders.patience + '%)' : 'Wajar (' + sliders.patience + '%)'}`);
+        if (sliders.libido !== undefined) traitLines.push(`Hasrat Sensual (18+): ${sliders.libido >= 65 ? 'Liar & Sensual/Ecchi (' + sliders.libido + '%)' : sliders.libido <= 35 ? 'Polos & Menjaga Jarak (' + sliders.libido + '%)' : 'Romantis Normal (' + sliders.libido + '%)'}`);
+        if (sliders.morality !== undefined) traitLines.push(`Moralitas & Taktik: ${sliders.morality >= 65 ? 'Manipulatif/Sadis/Jahat (' + sliders.morality + '%)' : sliders.morality <= 35 ? 'Lurus & Berhati Mulia (' + sliders.morality + '%)' : 'Pragmatis (' + sliders.morality + '%)'}`);
+
+        if (Array.isArray(badges) && badges.length > 0) traitLines.push(`Arketip Khas: ${badges.join(', ')}`);
+        if (Array.isArray(customTraits) && customTraits.length > 0) traitLines.push(`Ciri Khusus: ${customTraits.join(', ')}`);
+
+        if (traitLines.length > 0) {
+          finalSystemPrompt += `\n\n[DNA & PARAMETER PSIKOLOGI KARAKTER]:\n${traitLines.join('\n')}\n(Instruksi Perilaku: Terapkan parameter ini secara konsisten dan hidup dalam setiap dialog, ekspresi, serta tindakan fisikmu!)`;
+        }
+      } catch (e) {
+        console.error("Failed to parse character traits:", e);
+      }
+    }
+
+    // Inject Affinity & Mood guidelines
+    const getAffinityStatus = (val) => {
+      if (val >= 85) return 'Sahabat Sejati / Ikatan Sangat Kuat & Intim';
+      if (val >= 60) return 'Teman Dekat / Sangat Percaya';
+      if (val >= 40) return 'Rekan Baik / Mulai Terbuka';
+      if (val >= 20) return 'Kenalan Biasa';
+      return 'Asing / Berjarak & Waspada';
+    };
+
+    finalSystemPrompt += `\n\n[STATUS HUBUNGAN & EMOSI SAAT INI]:\n` +
+      `- Nilai Afinitas Hubungan: ${currentAffinity}/100 (${getAffinityStatus(currentAffinity)})\n` +
+      `- Suasana Hati Terkini: ${currentMood}\n` +
+      `- Panduan Sikap: Sikapmu terhadap user WAJIB mencerminkan nilai afinitas ini (jangan langsung akrab/terbuka jika afinitas masih rendah, dan bersikap hangat/protektif jika afinitas tinggi).\n` +
+      `- TUGAS WAJIB DI AKHIR RESPONS (wajib letakkan di baris paling akhir untuk diproses sistem):\n` +
+      `  [MOOD: neutral|happy|thoughtful|serious|flustered|angry|smirk|surprised]\n` +
+      `  [AFFINITY: +1|+2|-1|0]`;
+
+    // Inject D20 Dice instructions if roll was made
+    if (diceRoll) {
+      finalSystemPrompt += `\n\n[SISTEM DADU D20 AKTIF]:\n` +
+        `Pemain baru saja melempar dadu D20 untuk aksi: "${diceRoll.action}".\n` +
+        `Hasil Dadu: ${diceRoll.total} vs Target DC ${diceRoll.dc} -> ${diceRoll.isSuccess ? 'BERHASIL' : 'GAGAL'}.\n` +
+        `Instruksi: Narasi kamu WAJIB mengintegrasikan hasil ${diceRoll.isSuccess ? 'KEBERHASILAN' : 'KEGAGALAN'} aksi ini secara dramatis ke dalam adegan!`;
+    }
+
+    // Inject Context-Aware Event Director
+    if (isEventTrigger) {
+      finalSystemPrompt += `\n\n[SISTEM EVENT DIRECTOR - SPONTANEOUS INITIATIVE TRIGGER]:\n` +
+        `Alur cerita saat ini membutuhkan inisiatif mandiri dari karaktermu! JANGAN PASIF ATAU HANYA MENJAWAB.\n` +
+        `Analisis situasi saat ini (apakah sedang bahaya/bertarung, santai/eksplorasi, atau berduaan/intim):\n` +
+        `1. Jika BAHAYA / BERTARUNG: Karakter melakukan manuver tak terduga, melindungimu, menjebak lawan, atau memicu bahaya baru.\n` +
+        `2. Jika SANTAI / EKSPLORASI: Karakter mengajak berpindah lokasi, mengungkit rahasia masa lalu, atau membuat interaksi spontan.\n` +
+        `3. Jika INTIM / ROMANTIS / MEMANAS: Karakter mengambil kendali penuh, jangan menahan diri, dan goda/pimpin adegan fisik secara frontal tanpa meminta izin.\n` +
+        `Pastikan inisiatifmu 100% konsisten dengan lokasi dan tensi cerita saat ini!`;
     }
 
     if (timeContext || dateContext) {
@@ -660,16 +747,60 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
 
     childProcess.on('close', async (code) => {
       cleanup();
-      // Save the final AI response to DB
-      if (aiFullResponse.trim()) {
-        await prisma.message.create({
+      
+      let cleanedResponse = aiFullResponse;
+      let newMood = currentMood;
+      let affinityChange = 0;
+
+      const moodMatch = aiFullResponse.match(/\[MOOD:\s*([a-zA-Z]+)\]/i);
+      if (moodMatch) {
+        newMood = moodMatch[1].toLowerCase();
+        cleanedResponse = cleanedResponse.replace(/\[MOOD:\s*[a-zA-Z]+\]/gi, '');
+      }
+
+      const affMatch = aiFullResponse.match(/\[AFFINITY:\s*([+\-]?\d+)\]/i);
+      if (affMatch) {
+        affinityChange = parseInt(affMatch[1], 10) || 0;
+        cleanedResponse = cleanedResponse.replace(/\[AFFINITY:\s*[+\-]?\d+\]/gi, '');
+      }
+
+      cleanedResponse = cleanedResponse.trim();
+      const updatedAffinity = Math.min(100, Math.max(0, currentAffinity + affinityChange));
+
+      // Update conversation in database
+      try {
+        await prisma.conversation.update({
+          where: { id: conversationId },
           data: {
-            role: 'ai',
-            content: aiFullResponse,
-            conversationId
-            // Optional: you can add a field in your schema for 'thoughtProcess' if you want to save it permanently
+            affinity: updatedAffinity,
+            currentMood: newMood,
           }
         });
+      } catch (err) {
+        console.error("Failed to update conversation affinity/mood in DB:", err);
+      }
+
+      // Send metadata SSE event so UI updates instantly
+      res.write(`data: ${JSON.stringify({
+        type: 'metadata',
+        affinity: updatedAffinity,
+        mood: newMood,
+        affinityChange
+      })}\n\n`);
+
+      // Save the cleaned final AI response to DB
+      if (cleanedResponse) {
+        try {
+          await prisma.message.create({
+            data: {
+              role: 'ai',
+              content: cleanedResponse,
+              conversationId
+            }
+          });
+        } catch (err) {
+          console.error("Failed to save AI message to DB:", err);
+        }
       }
       res.write('data: [DONE]\n\n');
       res.end();

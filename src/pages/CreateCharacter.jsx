@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PersonalityMatrix from '../components/PersonalityMatrix';
 import './FormPages.css';
 
 const initialFormData = {
@@ -16,6 +17,17 @@ export default function CreateCharacter({ onNavigate }) {
   const [avatarName, setAvatarName] = useState('Belum ada file');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [traits, setTraits] = useState({
+    sliders: {
+      dominance: 50,
+      warmth: 50,
+      patience: 50,
+      libido: 50,
+      morality: 50,
+    },
+    badges: [],
+    customTraits: [],
+  });
 
   const handleFieldChange = (key) => (event) => {
     const { value } = event.target;
@@ -52,6 +64,7 @@ export default function CreateCharacter({ onNavigate }) {
           shortDesc: formData.shortDesc,
           systemPrompt: formData.systemPrompt,
           personality: formData.personaStory,
+          traits: JSON.stringify(traits),
           sampleDialog: formData.sampleDialog,
           avatar: avatarPreview || '/ai_avatar.png',
           color: '#d946ef',
@@ -178,6 +191,9 @@ export default function CreateCharacter({ onNavigate }) {
               onChange={handleFieldChange('sampleDialog')}
             />
           </div>
+
+          {/* Personality Matrix: 5 Sliders + Badges + Custom Traits */}
+          <PersonalityMatrix traits={traits} onChange={setTraits} />
         </div>
 
         <div className="form-page__footer">
