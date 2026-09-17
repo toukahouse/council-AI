@@ -118,7 +118,7 @@ def main():
             override_text += f" Tingkat Hubungan: Suami-Istri / Sangat Intim (Afinitas: {affinity}%)."
         if current_mood:
             override_text += f" Suasana Hati Awal: {current_mood.upper()}."
-        override_text += " PERHATIAN: Bereaksilah secara nyata terhadap perlakuan user di giliran ini! Jika user menolakmu, membentak, menampar, atau menyakitimu, JANGAN tetap memaksakan gairah — tunjukkan rasa terkejut, terluka, atau marah, lalu tentukan [MOOD: surprised/angry/sad] dan kurangi [AFFINITY: -2 s/d -5] di akhir responsmu!"
+        override_text += " PERHATIAN: Bereaksilah secara nyata terhadap perlakuan user di giliran ini! Jika user menolakmu/menamparmu/menyakitimu, tunjukkan rasa terkejut/marah/terluka lalu kurangi afinitas. Sebaliknya, jika karaktermu berwatak dingin/pemarah namun user memperlakukanmu dengan lembut/sabar/tulus, biarkan pertahananmu perlahan retak (defrosting), tunjukkan rasa tertegun/gengsi/luluh, dan naikkan afinitas! Tentukan [MOOD: ...] dan [AFFINITY: ...] baru di akhir responsmu!"
         
         last_part = contents[-1].parts[-1]
         last_part.text = (last_part.text or "") + override_text

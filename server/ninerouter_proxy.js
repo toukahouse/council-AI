@@ -96,7 +96,7 @@ async function main() {
       if (currentMood && MOOD_SHORT_CUES[currentMood]) {
         reminder += ` Suasana Hati Awal: ${currentMood.toUpperCase()} -> ${MOOD_SHORT_CUES[currentMood]}`;
       }
-      reminder += `\n[ATURAN REAKSI WAJIB]: Bereaksilah secara nyata terhadap perlakuan user di giliran ini! Jika user menolakmu, membentak, menampar, atau menyakitimu, JANGAN tetap memaksakan gairah/senyuman — tunjukkan rasa terkejut, terluka, atau marah, lalu tentukan [MOOD: surprised/angry/sad] dan kurangi [AFFINITY: -2 s/d -5] di 2 baris paling akhir responsmu!`;
+      reminder += `\n[ATURAN REAKSI WAJIB]: Bereaksilah secara nyata terhadap perlakuan user di giliran ini! Jika user menolakmu/menamparmu/menyakitimu, tunjukkan rasa terkejut/marah/terluka lalu kurangi afinitas. Sebaliknya, jika karaktermu berwatak dingin/pemarah namun user memperlakukanmu dengan lembut/sabar/tulus, biarkan pertahananmu perlahan retak (defrosting), tunjukkan rasa tertegun/gengsi/luluh, dan naikkan afinitas! Tentukan [MOOD: ...] dan [AFFINITY: ...] baru di 2 baris paling akhir responsmu.`;
     }
     
     return reminder;

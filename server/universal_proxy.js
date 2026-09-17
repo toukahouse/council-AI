@@ -95,7 +95,7 @@ async function main() {
     if (currentMood) {
       cue += ` Suasana Hati Awal: ${currentMood.toUpperCase()}.`;
     }
-    cue += ` PERHATIAN: Bereaksilah secara nyata terhadap perlakuan user di giliran ini! Jika user menolakmu, membentak, menampar, atau menyakitimu, JANGAN tetap memaksakan gairah — tunjukkan rasa terkejut, terluka, atau marah, lalu tentukan [MOOD: surprised/angry/sad] dan kurangi [AFFINITY: -2 s/d -5] di akhir responsmu!`;
+    cue += ` PERHATIAN: Bereaksilah secara nyata terhadap perlakuan user di giliran ini! Jika user menolakmu/menamparmu/menyakitimu, tunjukkan rasa terkejut/marah/terluka lalu kurangi afinitas. Sebaliknya, jika karaktermu berwatak dingin/pemarah namun user memperlakukanmu dengan lembut/sabar/tulus, biarkan pertahananmu perlahan retak (defrosting), tunjukkan rasa tertegun/gengsi/luluh, dan naikkan afinitas! Tentukan [MOOD: ...] dan [AFFINITY: ...] baru di akhir responsmu!`;
     lastUserTurn.content += cue;
   }
 
