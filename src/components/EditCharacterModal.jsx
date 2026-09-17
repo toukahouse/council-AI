@@ -62,7 +62,7 @@ export default function EditCharacterModal({ isOpen, onClose, data, onSave }) {
         customTraits: [],
       });
     }
-  }, [data]);
+  }, [data, isOpen]);
 
   const handleFieldChange = (key) => (event) => {
     const { value } = event.target;

@@ -121,7 +121,14 @@ const initialMessages = [
 ];
 
 export default function Chat({ onNavigate, conversationData }) {
-  const characterData = conversationData?.character;
+  const [characterData, setCharacterData] = useState(conversationData?.character);
+
+  useEffect(() => {
+    if (conversationData?.character) {
+      setCharacterData(conversationData.character);
+    }
+  }, [conversationData?.character]);
+
   const isDesktop = window.innerWidth > 1100;
   const [sidebarOpen, setSidebarOpen] = useState(isDesktop);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(isDesktop);
@@ -498,17 +505,27 @@ export default function Chat({ onNavigate, conversationData }) {
           personality: updatedData.personaStory,
           sampleDialog: updatedData.sampleDialog,
           avatar: updatedData.avatarPreview || characterData.avatar,
+          traits: typeof updatedData.traits === 'object' ? JSON.stringify(updatedData.traits) : updatedData.traits,
         })
       });
       if (response.ok) {
         const updatedCharacter = await response.json();
+        setCharacterData(updatedCharacter);
         setEditCharacterOpen(false);
         showToast("Karakter berhasil disimpan!", "success");
+        const updatedConversation = {
+          ...conversationData,
+          character: updatedCharacter
+        };
+        const saved = sessionStorage.getItem('chatbot_viewData');
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            parsed.character = updatedCharacter;
+            sessionStorage.setItem('chatbot_viewData', JSON.stringify(parsed));
+          } catch (e) {}
+        }
         if (onNavigate) {
-          const updatedConversation = {
-            ...conversationData,
-            character: updatedCharacter
-          };
           onNavigate('chat', updatedConversation);
         }
       } else {

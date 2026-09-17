@@ -89,7 +89,7 @@ async function main() {
   if (rawMessages.length > 0 && (affinity !== undefined || currentMood)) {
     const lastUserTurn = rawMessages[rawMessages.length - 1];
     let cue = `\n\n[SIMULASI PSIKOLOGI ORGANIK]: Afinitas: ${affinity}%, Mood Awal: ${currentMood.toUpperCase()}.`;
-    cue += ` Kamu adalah individu bernyawa dengan harga diri dan perasaan, BUKAN boneka yang terkunci di satu mood. Evaluasi secara organik bagaimana perkataan/tindakan user barusan memengaruhi emosi dan egomu sesuai kepribadian unik karaktermu. Putuskan [MOOD: ...] dan perubahan [AFFINITY: -5 s/d +5 / 0] yang paling jujur di 2 baris paling akhir responsmu.`;
+    cue += `\n[FORMAT MUTLAK]: Dialog ucapan WAJIB diapit "..." di luar tanda bintang. Narasi aksi diapit **...**. GAYA BAHASA: Santai/lisan (kalo, bakalan, emangnya, banget, nggak, udah, gimana). Lanjutkan adegan secara ekspresif, natural, dan mendalam.`;
     lastUserTurn.content += cue;
   }
 

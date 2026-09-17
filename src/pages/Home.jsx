@@ -76,6 +76,7 @@ export default function Home({ onNavigate }) {
           personality: updatedData.personaStory,
           sampleDialog: updatedData.sampleDialog,
           avatar: updatedData.avatarPreview || popupData.avatar,
+          traits: typeof updatedData.traits === 'object' ? JSON.stringify(updatedData.traits) : updatedData.traits,
         })
       });
       if (response.ok) {

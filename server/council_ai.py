@@ -112,9 +112,9 @@ def main():
         )
 
     # Tambahkan pengingat psikologi organik di giliran terakhir
-    if contents and (affinity is not None or current_mood):
         override_text = f"\n\n[SIMULASI PSIKOLOGI ORGANIK]: Afinitas: {affinity}%, Mood Awal: {str(current_mood).upper()}."
         override_text += " Kamu adalah individu bernyawa dengan harga diri dan perasaan, BUKAN boneka yang terkunci di satu mood. Evaluasi secara organik bagaimana perkataan/tindakan user barusan memengaruhi emosi dan egomu sesuai kepribadian unik karaktermu. Putuskan [MOOD: ...] dan perubahan [AFFINITY: -5 s/d +5 / 0] yang paling jujur di 2 baris paling akhir responsmu."
+        override_text += "\n[FORMAT MUTLAK]: Dialog ucapan WAJIB diapit \"...\" di luar tanda bintang. Narasi aksi diapit **...**. GAYA BAHASA: Santai/lisan (kalo, bakalan, emangnya, banget, nggak, udah, gimana). Lanjutkan adegan secara ekspresif, natural, dan mendalam."
         
         last_part = contents[-1].parts[-1]
         last_part.text = (last_part.text or "") + override_text

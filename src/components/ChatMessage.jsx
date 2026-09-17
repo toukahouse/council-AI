@@ -63,13 +63,38 @@ const ChatMessageComponent = ({ message, seqId, isTyping, animate, charName, cha
   const formatContent = (text) => {
     if (!text) return { __html: '' };
     // Escape HTML first to prevent XSS
-    const escaped = text.replace(/&/g, '&amp;')
-                        .replace(/</g, '&lt;')
-                        .replace(/>/g, '&gt;');
+    let escaped = text.replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;');
+
+    // Pre-processing: auto-separate dialogue quotes accidentally trapped inside **...**
+    escaped = escaped.replace(/\*\*([\s\S]*?)\*\*/g, (match, inner) => {
+      const quotePattern = /("[^"]*"|“[^”]*”|&quot;[^&]*&quot;)/g;
+      if (!quotePattern.test(inner)) return match;
+      const parts = inner.split(/("[^"]*"|“[^”]*”|&quot;[^&]*&quot;)/g);
+      let res = '';
+      for (const part of parts) {
+        if (!part) continue;
+        if (/^("[^"]*"|“[^”]*”|&quot;[^&]*&quot;)$/.test(part)) {
+          res += part;
+        } else {
+          const trimmed = part.trim();
+          if (trimmed) {
+            const leadingWs = part.match(/^\s*/)[0];
+            const trailingWs = part.match(/\s*$/)[0];
+            res += leadingWs + '**' + trimmed + '**' + trailingWs;
+          } else {
+            res += part;
+          }
+        }
+      }
+      return res;
+    });
+
     // Replace **text** with bold, italic, and colored span
-    let formatted = escaped.replace(/\*\*(.*?)\*\*/g, '<span style="font-weight: bold; font-style: italic; color: var(--text-bold-color, #eab308);">$1</span>');
+    let formatted = escaped.replace(/\*\*([\s\S]*?)\*\*/g, '<span style="font-weight: bold; font-style: italic; color: var(--text-bold-color, #eab308);">$1</span>');
     // Replace *text* with italic span
-    formatted = formatted.replace(/\*(.*?)\*/g, '<span style="font-style: italic;">$1</span>');
+    formatted = formatted.replace(/\*([^\*]+?)\*/g, '<span style="font-style: italic;">$1</span>');
     // Replace \n with <br/> for line breaks
     return { __html: formatted.replace(/\n/g, '<br/>') };
   };
