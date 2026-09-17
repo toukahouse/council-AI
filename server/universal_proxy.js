@@ -85,17 +85,11 @@ async function main() {
     rawMessages.push({ role: 'user', content: '[Lanjutkan]: Lanjutkan adegan / dialog berikutnya secara mendalam.' });
   }
 
-  // Inject emotional state and reactivity reminder to the last user turn
+  // Inject organic psychological resonance reminder to the last user turn
   if (rawMessages.length > 0 && (affinity !== undefined || currentMood)) {
     const lastUserTurn = rawMessages[rawMessages.length - 1];
-    let cue = `\n\n[PANDUAN EMOSI AKTIF]:`;
-    if (affinity !== undefined && affinity >= 85) {
-      cue += ` Tingkat Hubungan: Suami-Istri / Sangat Intim (Afinitas: ${affinity}%).`;
-    }
-    if (currentMood) {
-      cue += ` Suasana Hati Awal: ${currentMood.toUpperCase()}.`;
-    }
-    cue += ` PERHATIAN: Bereaksilah secara nyata terhadap perlakuan user di giliran ini! Jika user menolakmu/menamparmu/menyakitimu, tunjukkan rasa terkejut/marah/terluka lalu kurangi afinitas. Sebaliknya, jika karaktermu berwatak dingin/pemarah namun user memperlakukanmu dengan lembut/sabar/tulus, biarkan pertahananmu perlahan retak (defrosting), tunjukkan rasa tertegun/gengsi/luluh, dan naikkan afinitas! Tentukan [MOOD: ...] dan [AFFINITY: ...] baru di akhir responsmu!`;
+    let cue = `\n\n[SIMULASI PSIKOLOGI ORGANIK]: Afinitas: ${affinity}%, Mood Awal: ${currentMood.toUpperCase()}.`;
+    cue += ` Kamu adalah individu bernyawa dengan harga diri dan perasaan, BUKAN boneka yang terkunci di satu mood. Evaluasi secara organik bagaimana perkataan/tindakan user barusan memengaruhi emosi dan egomu sesuai kepribadian unik karaktermu. Putuskan [MOOD: ...] dan perubahan [AFFINITY: -5 s/d +5 / 0] yang paling jujur di 2 baris paling akhir responsmu.`;
     lastUserTurn.content += cue;
   }
 
