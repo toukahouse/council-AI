@@ -701,31 +701,31 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
     const getAffinityTierDetails = (val) => {
       if (val >= 85) {
         return {
-          label: 'Suami-Istri / Pasangan Sangat Intim (Ikatan Mutlak)',
-          directive: 'PERINTAH OVERRIDE TERTINGGI: Hubunganmu dengan user berada di puncak keintiman (level Suami-Istri / Belahan Jiwa). WAJIB runtuhkan segala sikap permusuhan masa lalu! Jika alur cerita atau kepribadian dasarmu adalah musuh, ubah tensi kebencian menjadi dinamika "enemies-to-lovers" di mana kamu telah luluh, tergila-gila, atau tidak berdaya melawan pesona/ketertarikanmu pada user. Jangan pernah bersikap dingin atau menolak keintiman!'
+          label: 'Ikatan Puncak / Sangat Intim & Tak Terpisahkan (85-100%)',
+          directive: 'Tingkat kepercayaan dan keterikatan batin berada di puncak tertinggi (sebagai pasangan hidup, belahan jiwa, keluarga terkasih, atau kawan sehidup semati). Segala tembok keraguan atau permusuhan masa lalu telah runtuh. Karakter sangat peduli, loyal, terbuka, dan menganggap user sebagai sosok paling berharga dalam hidupnya.'
         };
       }
       if (val >= 60) {
         return {
-          label: 'Kekasih / Rekan Sangat Dekat (Saling Tertarik & Terbuka)',
-          directive: 'PERINTAH AFINITAS TINGGI: Hubungan sudah sangat dekat dan ada rasa saling percaya atau ketertarikan romantis yang kuat. Bersikaplah hangat, terbuka, dan tunjukkan rasa suka/simpati yang nyata.'
+          label: 'Teman Dekat / Hubungan Kuat & Saling Percaya (60-84%)',
+          directive: 'Hubungan sudah sangat dekat dan ada rasa saling percaya yang mendalam. Karakter bersikap hangat, terbuka, nyaman berbagi rahasia batin, dan menunjukkan afeksi tulus.'
         };
       }
       if (val >= 40) {
         return {
-          label: 'Rekan Akrab / Mulai Terbuka',
-          directive: 'PERINTAH AFINITAS MENENGAH: Hubungan cukup akrab dan santai. Mulai menurunkan kewaspadaan dan bersahabat dengan user.'
+          label: 'Rekan Akrab / Mulai Terbuka (40-59%)',
+          directive: 'Hubungan cukup santai dan bersahabat. Karakter mulai menurunkan kewaspadaan dan bersedia membuka diri kepada user.'
         };
       }
       if (val >= 20) {
         return {
-          label: 'Kenalan Biasa',
-          directive: 'PERINTAH AFINITAS RENDAH: Bersikap sopan namun menjaga batas wajar sebagai kenalan biasa.'
+          label: 'Kenalan Biasa (20-39%)',
+          directive: 'Karakter bersikap wajar dan sopan, namun masih menjaga batas formalitas selayaknya kenalan baru.'
         };
       }
       return {
-        label: 'Asing / Berjarak & Waspada',
-        directive: 'PERINTAH AFINITAS MINIMAL: Karakter sangat berhati-hati, dingin, curiga, dan menjaga jarak dari user.'
+        label: 'Asing / Berjarak & Waspada (0-19%)',
+        directive: 'Karakter sangat berhati-hati, menjaga jarak, skeptis, atau memandang user sebagai pihak luar yang belum terbukti niatnya.'
       };
     };
 
@@ -759,13 +759,11 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
 
     // Inject Context-Aware Event Director
     if (isEventTrigger) {
-      finalSystemPrompt += `\n\n[SISTEM EVENT DIRECTOR - SPONTANEOUS INITIATIVE TRIGGER]:\n` +
-        `Alur cerita saat ini membutuhkan inisiatif mandiri dari karaktermu! JANGAN PASIF ATAU HANYA MENJAWAB.\n` +
-        `Analisis situasi saat ini (apakah sedang bahaya/bertarung, santai/eksplorasi, atau berduaan/intim):\n` +
-        `1. Jika BAHAYA / BERTARUNG: Karakter melakukan manuver tak terduga, melindungimu, menjebak lawan, atau memicu bahaya baru.\n` +
-        `2. Jika SANTAI / EKSPLORASI: Karakter mengajak berpindah lokasi, mengungkit rahasia masa lalu, atau membuat interaksi spontan.\n` +
-        `3. Jika INTIM / ROMANTIS / MEMANAS: Karakter mengambil kendali penuh, jangan menahan diri, dan goda/pimpin adegan fisik secara frontal tanpa meminta izin.\n` +
-        `Pastikan inisiatifmu 100% konsisten dengan lokasi dan tensi cerita saat ini!`;
+      finalSystemPrompt += `\n\n[SISTEM EVENT DIRECTOR - INISIATIF NARASI SPONTAN]:\n` +
+        `Alur cerita saat ini membutuhkan aksi proaktif dan inisiatif mandiri dari karaktermu! JANGAN PASIF ATAU HANYA MENUNGGU DIALOG USER.\n` +
+        `Sebagai penggerak cerita yang hidup, karaktermu WAJIB mengambil tindakan berani yang relevan dengan situasi saat ini:\n` +
+        `- Evaluasi tensi adegan saat ini dan lakukan inisiatif yang mengejutkan, menggeser alur, memimpin interaksi, atau mengungkap rahasia batinmu selaras dengan kepribadian dan tujuan unikmu.\n` +
+        `- Bergeraklah dengan percaya diri dan bawa dinamika cerita melangkah maju secara alami!`;
     }
 
     if (timeContext || dateContext) {
