@@ -100,6 +100,15 @@ def main():
             )
         )
 
+    # Pastikan turn terakhir selalu dari role user (syarat mutlak Google Gemini API)
+    if not contents or contents[-1].role != "user":
+        contents.append(
+            types.Content(
+                role="user",
+                parts=[types.Part.from_text(text="[Lanjutkan adegan / berikan inisiatif tindakanmu]")]
+            )
+        )
+
     temperature = float(api_settings.get('temperature', 0.8))
     top_p = float(api_settings.get('topP', 0.95))
     top_k = int(api_settings.get('topK', 40))

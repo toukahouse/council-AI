@@ -22,12 +22,20 @@ import '../App.css';
 const MOOD_MAP = {
   neutral: { emoji: '😐', label: 'Netral', color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.12)', border: 'rgba(148, 163, 184, 0.25)' },
   happy: { emoji: '😊', label: 'Senang', color: '#34d399', bg: 'rgba(16, 185, 129, 0.12)', border: 'rgba(52, 211, 153, 0.25)' },
+  loving: { emoji: '💕', label: 'Sayang', color: '#f43f5e', bg: 'rgba(244, 63, 94, 0.14)', border: 'rgba(244, 63, 94, 0.28)' },
+  passionate: { emoji: '🔥', label: 'Bergairah', color: '#ff4757', bg: 'rgba(255, 71, 87, 0.14)', border: 'rgba(255, 71, 87, 0.28)' },
+  flustered: { emoji: '😳', label: 'Tersipu', color: '#fb7185', bg: 'rgba(244, 63, 94, 0.12)', border: 'rgba(251, 113, 133, 0.25)' },
+  clingy: { emoji: '🥺', label: 'Manja', color: '#ec4899', bg: 'rgba(236, 72, 153, 0.14)', border: 'rgba(236, 72, 153, 0.28)' },
+  smirk: { emoji: '😏', label: 'Menyeringai', color: '#c084fc', bg: 'rgba(168, 85, 247, 0.12)', border: 'rgba(192, 132, 252, 0.25)' },
+  playful: { emoji: '😜', label: 'Menggoda', color: '#06b6d4', bg: 'rgba(6, 182, 212, 0.14)', border: 'rgba(6, 182, 212, 0.28)' },
+  dominant: { emoji: '👑', label: 'Dominan', color: '#a855f7', bg: 'rgba(168, 85, 247, 0.14)', border: 'rgba(168, 85, 247, 0.28)' },
+  tsundere: { emoji: '😣', label: 'Gengsi', color: '#f97316', bg: 'rgba(249, 115, 22, 0.14)', border: 'rgba(249, 115, 22, 0.28)' },
+  jealous: { emoji: '😤', label: 'Cemburu', color: '#e11d48', bg: 'rgba(225, 29, 72, 0.14)', border: 'rgba(225, 29, 72, 0.28)' },
+  angry: { emoji: '😠', label: 'Kesal', color: '#f87171', bg: 'rgba(239, 68, 68, 0.12)', border: 'rgba(248, 113, 113, 0.25)' },
   thoughtful: { emoji: '🤔', label: 'Berpikir', color: '#38bdf8', bg: 'rgba(14, 165, 233, 0.12)', border: 'rgba(56, 189, 248, 0.25)' },
   serious: { emoji: '🧐', label: 'Serius', color: '#fbbf24', bg: 'rgba(245, 158, 11, 0.12)', border: 'rgba(251, 191, 36, 0.25)' },
-  flustered: { emoji: '😳', label: 'Tersipu', color: '#fb7185', bg: 'rgba(244, 63, 94, 0.12)', border: 'rgba(251, 113, 133, 0.25)' },
-  angry: { emoji: '😠', label: 'Kesal', color: '#f87171', bg: 'rgba(239, 68, 68, 0.12)', border: 'rgba(248, 113, 113, 0.25)' },
-  smirk: { emoji: '😏', label: 'Menyeringai', color: '#c084fc', bg: 'rgba(168, 85, 247, 0.12)', border: 'rgba(192, 132, 252, 0.25)' },
   surprised: { emoji: '😲', label: 'Terkejut', color: '#fde047', bg: 'rgba(234, 179, 8, 0.12)', border: 'rgba(253, 224, 71, 0.25)' },
+  sad: { emoji: '😢', label: 'Sedih', color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.14)', border: 'rgba(148, 163, 184, 0.28)' },
 };
 
 const getAffinityTier = (val) => {

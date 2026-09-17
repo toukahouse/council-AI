@@ -617,6 +617,20 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
       }
     }
 
+    // Ensure conversation history sent to AI ALWAYS ends with a user turn
+    // (Prevents Gemini/9Router 400 "Requests ending with a model turn are not supported")
+    if (isEventTrigger) {
+      history.push({
+        role: 'user',
+        content: '[DIRECTOR EVENT - INISIATIF MANDIRI]: Ambil inisiatif mandiri sekarang! Karaktermu bergerak maju, bertindak spontan, atau membuka dialog/adegan baru sesuai tensi emosi dan situasi cerita saat ini.'
+      });
+    } else if (history.length === 0 || history[history.length - 1].role === 'ai') {
+      history.push({
+        role: 'user',
+        content: '[Lanjutkan]: Lanjutkan percakapan / adegan berikutnya secara mendalam dan ekspresif.'
+      });
+    }
+
     const memories = await prisma.memory.findMany({
       where: { characterId: conversation.characterId },
       orderBy: { createdAt: 'asc' }
@@ -678,7 +692,7 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
       `- Suasana Hati Terkini: ${currentMood}\n` +
       `- Panduan Sikap: Sikapmu terhadap user WAJIB mencerminkan nilai afinitas ini (jangan langsung akrab/terbuka jika afinitas masih rendah, dan bersikap hangat/protektif jika afinitas tinggi).\n` +
       `- TUGAS WAJIB DI AKHIR RESPONS (wajib letakkan di baris paling akhir untuk diproses sistem):\n` +
-      `  [MOOD: neutral|happy|thoughtful|serious|flustered|angry|smirk|surprised]\n` +
+      `  [MOOD: neutral|happy|loving|passionate|flustered|clingy|smirk|playful|dominant|tsundere|jealous|angry|thoughtful|serious|surprised|sad]\n` +
       `  [AFFINITY: +1|+2|-1|0]`;
 
     // Inject D20 Dice instructions if roll was made

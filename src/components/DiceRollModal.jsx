@@ -47,15 +47,6 @@ export default function DiceRollModal({ isOpen, onClose, onRollComplete, initial
     onClose();
   };
 
-  const quickActionIdeas = [
-    'Menyelinap tanpa suara',
-    'Membujuk dengan kata-kata manis',
-    'Memeriksa petunjuk tersembunyi',
-    'Menangkis serangan mendadak',
-    'Membuka kunci kuno',
-    'Mendekat dan menggoda secara fisik',
-  ];
-
   const isSuccess = rollResult !== null ? rollResult >= difficultyClass : null;
 
   return (
@@ -118,23 +109,6 @@ export default function DiceRollModal({ isOpen, onClose, onRollComplete, initial
               placeholder='Contoh: "Jangan cemberut begitu sayang..." atau "Menyerahlah sekarang!"'
               rows="2"
             />
-          </div>
-
-          {/* Quick Idea Chips */}
-          <div className="dice-modal__chips-wrap">
-            <span className="dice-modal__chips-label">Ide cepat:</span>
-            <div className="dice-modal__chips">
-              {quickActionIdeas.map((idea, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  className="dice-modal__chip"
-                  onClick={() => setActionDescription(idea)}
-                >
-                  {idea}
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Difficulty Class (DC) Selector */}

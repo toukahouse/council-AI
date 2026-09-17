@@ -161,41 +161,6 @@
   border-color: #8b5cf6;
 }
 
-.dice-modal__chips-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.dice-modal__chips-label {
-  font-size: 11px;
-  color: #64748b;
-  font-weight: 500;
-}
-
-.dice-modal__chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.dice-modal__chip {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  padding: 4px 10px;
-  font-size: 11px;
-  color: #94a3b8;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.dice-modal__chip:hover {
-  background: rgba(124, 58, 237, 0.15);
-  border-color: rgba(139, 92, 246, 0.3);
-  color: #ddd6fe;
-}
-
 .dice-modal__dc-presets {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

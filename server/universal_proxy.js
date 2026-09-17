@@ -80,6 +80,11 @@ async function main() {
     rawMessages.push({ role: 'user', content: newMessage });
   }
 
+  // Ensure rawMessages ends with a user turn
+  if (rawMessages.length === 0 || rawMessages[rawMessages.length - 1].role !== 'user') {
+    rawMessages.push({ role: 'user', content: '[Lanjutkan]: Lanjutkan adegan / dialog berikutnya secara mendalam.' });
+  }
+
   // Normalize consecutive same-role messages for APIs that require alternating roles
   const finalMessages = [];
   for (const msg of rawMessages) {

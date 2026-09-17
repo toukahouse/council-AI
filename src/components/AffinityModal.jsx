@@ -4,12 +4,20 @@ import './AffinityModal.css';
 const MOOD_OPTIONS = [
   { id: 'neutral', emoji: '😐', label: 'Netral' },
   { id: 'happy', emoji: '😊', label: 'Senang' },
+  { id: 'loving', emoji: '💕', label: 'Sayang' },
+  { id: 'passionate', emoji: '🔥', label: 'Bergairah' },
   { id: 'flustered', emoji: '😳', label: 'Tersipu' },
+  { id: 'clingy', emoji: '🥺', label: 'Manja' },
   { id: 'smirk', emoji: '😏', label: 'Menyeringai' },
+  { id: 'playful', emoji: '😜', label: 'Menggoda' },
+  { id: 'dominant', emoji: '👑', label: 'Dominan' },
+  { id: 'tsundere', emoji: '😣', label: 'Gengsi' },
+  { id: 'jealous', emoji: '😤', label: 'Cemburu' },
+  { id: 'angry', emoji: '😠', label: 'Kesal' },
   { id: 'thoughtful', emoji: '🤔', label: 'Berpikir' },
   { id: 'serious', emoji: '🧐', label: 'Serius' },
-  { id: 'angry', emoji: '😠', label: 'Kesal' },
   { id: 'surprised', emoji: '😲', label: 'Terkejut' },
+  { id: 'sad', emoji: '😢', label: 'Sedih' },
 ];
 
 const PRESETS = [

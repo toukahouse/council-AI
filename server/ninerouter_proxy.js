@@ -88,15 +88,29 @@ async function main() {
   // Add new message if present, reinforcing narrative directive on the last user turn
   if (newMessage) {
     finalMessages.push({ role: 'user', content: newMessage + buildSystemReminder() });
+  }
+
+  // Ensure finalMessages ALWAYS ends with a user turn (strictly required by Gemini / 9Router API)
+  if (finalMessages.length === 0 || finalMessages[finalMessages.length - 1].role !== 'user') {
+    finalMessages.push({
+      role: 'user',
+      content: '[Lanjutkan adegan / berikan inisiatif tindakanmu]' + buildSystemReminder()
+    });
   } else {
-    // If newMessage is empty (history contains all messages), reinforce on the last user message
-    for (let i = finalMessages.length - 1; i >= 0; i--) {
-      if (finalMessages[i].role === 'user') {
-        if (!finalMessages[i].content.includes('[SISTEM NARASI')) {
-          finalMessages[i].content += buildSystemReminder();
-        }
-        break;
-      }
+    // Reinforce system reminder on the final user turn
+    const lastUserMsg = finalMessages[finalMessages.length - 1];
+    if (!lastUserMsg.content.includes('[SISTEM NARASI')) {
+      lastUserMsg.content += buildSystemReminder();
+    }
+  }
+
+  // Merge any consecutive same-role messages (excluding system) to ensure valid turn alternation
+  const normalizedMessages = [];
+  for (const msg of finalMessages) {
+    if (normalizedMessages.length > 0 && normalizedMessages[normalizedMessages.length - 1].role === msg.role && msg.role !== 'system') {
+      normalizedMessages[normalizedMessages.length - 1].content += `\n\n${msg.content}`;
+    } else {
+      normalizedMessages.push(msg);
     }
   }
 
@@ -127,7 +141,7 @@ async function main() {
 
     const requestBody = {
       model: ninerouterModel,
-      messages: finalMessages,
+      messages: normalizedMessages,
       max_tokens: Math.min(targetMaxTokens, 16384),
       stream: true,
       safety_settings: safetySettingsList,
