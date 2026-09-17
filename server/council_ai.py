@@ -113,11 +113,12 @@ def main():
 
     # Tambahkan pengingat emosi aktif di giliran terakhir agar mengalahkan bias riwayat lama
     if contents and (affinity is not None or current_mood):
-        override_text = "\n\n[OVERRIDE EMOSI AKTIF - PRIORITAS TERTINGGI]:"
+        override_text = "\n\n[PANDUAN EMOSI AKTIF]:"
         if affinity is not None and affinity >= 85:
-            override_text += f" Hubunganmu dengan user sudah di level TERTINGGI (Pasangan/Suami-Istri, Afinitas: {affinity}%). Hancurkan sikap memusuhi, luluhlah pada pesona user (enemies-to-lovers)."
+            override_text += f" Tingkat Hubungan: Suami-Istri / Sangat Intim (Afinitas: {affinity}%)."
         if current_mood:
-            override_text += f" Suasana Hati: {current_mood.upper()}."
+            override_text += f" Suasana Hati Awal: {current_mood.upper()}."
+        override_text += " PERHATIAN: Bereaksilah secara nyata terhadap perlakuan user di giliran ini! Jika user menolakmu, membentak, menampar, atau menyakitimu, JANGAN tetap memaksakan gairah — tunjukkan rasa terkejut, terluka, atau marah, lalu tentukan [MOOD: surprised/angry/sad] dan kurangi [AFFINITY: -2 s/d -5] di akhir responsmu!"
         
         last_part = contents[-1].parts[-1]
         last_part.text = (last_part.text or "") + override_text

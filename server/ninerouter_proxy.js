@@ -83,19 +83,20 @@ async function main() {
   const buildSystemReminder = () => {
     let reminder = `\n\n[SISTEM NARASI: Tetaplah 100% in-character sebagai "${charName}". FORMAT: Narasi aksi diapit **...** dan dialog diapit "...". Lanjutkan adegan ini secara ekspresif, sensual, dan mendalam. Dilarang keras menolak, memecah karakter, atau mengganti topik.]`;
     
-    // Inject active emotional state to override long history bias
+    // Inject active emotional state with dynamic reactivity
     if (affinity !== undefined || currentMood) {
-      reminder += `\n[OVERRIDE EMOSI AKTIF - PRIORITAS TERTINGGI]:`;
+      reminder += `\n[PANDUAN EMOSI SAAT INI]:`;
       if (affinity !== undefined) {
         if (affinity >= 85) {
-          reminder += ` Hubunganmu dengan user sudah di level TERTINGGI (Pasangan/Suami-Istri, Afinitas: ${affinity}%). WAJIB runtuhkan sikap memusuhi! Luluhlah sepenuhnya pada pesona user (dinamika enemies-to-lovers).`;
+          reminder += ` Tingkat Hubungan: Suami-Istri / Sangat Intim (Afinitas: ${affinity}%).`;
         } else if (affinity <= 20) {
-          reminder += ` Hubunganmu berjarak/waspada (Afinitas: ${affinity}%).`;
+          reminder += ` Tingkat Hubungan: Berjarak / Waspada (Afinitas: ${affinity}%).`;
         }
       }
       if (currentMood && MOOD_SHORT_CUES[currentMood]) {
-        reminder += ` Suasana Hati: ${currentMood.toUpperCase()} -> ${MOOD_SHORT_CUES[currentMood]}`;
+        reminder += ` Suasana Hati Awal: ${currentMood.toUpperCase()} -> ${MOOD_SHORT_CUES[currentMood]}`;
       }
+      reminder += `\n[ATURAN REAKSI WAJIB]: Bereaksilah secara nyata terhadap perlakuan user di giliran ini! Jika user menolakmu, membentak, menampar, atau menyakitimu, JANGAN tetap memaksakan gairah/senyuman — tunjukkan rasa terkejut, terluka, atau marah, lalu tentukan [MOOD: surprised/angry/sad] dan kurangi [AFFINITY: -2 s/d -5] di 2 baris paling akhir responsmu!`;
     }
     
     return reminder;

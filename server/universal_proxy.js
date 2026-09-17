@@ -85,16 +85,17 @@ async function main() {
     rawMessages.push({ role: 'user', content: '[Lanjutkan]: Lanjutkan adegan / dialog berikutnya secara mendalam.' });
   }
 
-  // Inject emotional override reminder to the last user turn
+  // Inject emotional state and reactivity reminder to the last user turn
   if (rawMessages.length > 0 && (affinity !== undefined || currentMood)) {
     const lastUserTurn = rawMessages[rawMessages.length - 1];
-    let cue = `\n\n[OVERRIDE EMOSI AKTIF - PRIORITAS TERTINGGI]:`;
+    let cue = `\n\n[PANDUAN EMOSI AKTIF]:`;
     if (affinity !== undefined && affinity >= 85) {
-      cue += ` Hubunganmu dengan user berada di tingkat TERTINGGI (Pasangan/Suami-Istri, Afinitas: ${affinity}%). Hancurkan permusuhan lama, luluhlah pada pesona user (dinamika enemies-to-lovers).`;
+      cue += ` Tingkat Hubungan: Suami-Istri / Sangat Intim (Afinitas: ${affinity}%).`;
     }
     if (currentMood) {
-      cue += ` Suasana Hati Saat Ini: ${currentMood.toUpperCase()}.`;
+      cue += ` Suasana Hati Awal: ${currentMood.toUpperCase()}.`;
     }
+    cue += ` PERHATIAN: Bereaksilah secara nyata terhadap perlakuan user di giliran ini! Jika user menolakmu, membentak, menampar, atau menyakitimu, JANGAN tetap memaksakan gairah — tunjukkan rasa terkejut, terluka, atau marah, lalu tentukan [MOOD: surprised/angry/sad] dan kurangi [AFFINITY: -2 s/d -5] di akhir responsmu!`;
     lastUserTurn.content += cue;
   }
 
