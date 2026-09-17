@@ -26,6 +26,8 @@ def main():
     history = payload.get('history', [])
     new_message = payload.get('newMessage', '')
     api_settings = payload.get('apiSettings', {})
+    affinity = payload.get('affinity')
+    current_mood = payload.get('currentMood')
 
     # 1. System Prompt karakter, persona, dan contoh dialog
     system_parts = []
@@ -108,6 +110,17 @@ def main():
                 parts=[types.Part.from_text(text="[Lanjutkan adegan / berikan inisiatif tindakanmu]")]
             )
         )
+
+    # Tambahkan pengingat emosi aktif di giliran terakhir agar mengalahkan bias riwayat lama
+    if contents and (affinity is not None or current_mood):
+        override_text = "\n\n[OVERRIDE EMOSI AKTIF - PRIORITAS TERTINGGI]:"
+        if affinity is not None and affinity >= 85:
+            override_text += f" Hubunganmu dengan user sudah di level TERTINGGI (Pasangan/Suami-Istri, Afinitas: {affinity}%). Hancurkan sikap memusuhi, luluhlah pada pesona user (enemies-to-lovers)."
+        if current_mood:
+            override_text += f" Suasana Hati: {current_mood.upper()}."
+        
+        last_part = contents[-1].parts[-1]
+        last_part.text = (last_part.text or "") + override_text
 
     temperature = float(api_settings.get('temperature', 0.8))
     top_p = float(api_settings.get('topP', 0.95))

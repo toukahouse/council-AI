@@ -18,7 +18,7 @@ async function main() {
     process.exit(1);
   }
 
-  const { character, persona, memories, history, newMessage, apiSettings } = payload;
+  const { character, persona, memories, history, newMessage, apiSettings, affinity, currentMood } = payload;
   const universalModel = apiSettings?.universalModel || 'gemini-3.7-flash';
   
   // Format proxy base URL (default to panel port 8083)
@@ -83,6 +83,19 @@ async function main() {
   // Ensure rawMessages ends with a user turn
   if (rawMessages.length === 0 || rawMessages[rawMessages.length - 1].role !== 'user') {
     rawMessages.push({ role: 'user', content: '[Lanjutkan]: Lanjutkan adegan / dialog berikutnya secara mendalam.' });
+  }
+
+  // Inject emotional override reminder to the last user turn
+  if (rawMessages.length > 0 && (affinity !== undefined || currentMood)) {
+    const lastUserTurn = rawMessages[rawMessages.length - 1];
+    let cue = `\n\n[OVERRIDE EMOSI AKTIF - PRIORITAS TERTINGGI]:`;
+    if (affinity !== undefined && affinity >= 85) {
+      cue += ` Hubunganmu dengan user berada di tingkat TERTINGGI (Pasangan/Suami-Istri, Afinitas: ${affinity}%). Hancurkan permusuhan lama, luluhlah pada pesona user (dinamika enemies-to-lovers).`;
+    }
+    if (currentMood) {
+      cue += ` Suasana Hati Saat Ini: ${currentMood.toUpperCase()}.`;
+    }
+    lastUserTurn.content += cue;
   }
 
   // Normalize consecutive same-role messages for APIs that require alternating roles

@@ -678,19 +678,65 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
       }
     }
 
-    // Inject Affinity & Mood guidelines
-    const getAffinityStatus = (val) => {
-      if (val >= 85) return 'Sahabat Sejati / Ikatan Sangat Kuat & Intim';
-      if (val >= 60) return 'Teman Dekat / Sangat Percaya';
-      if (val >= 40) return 'Rekan Baik / Mulai Terbuka';
-      if (val >= 20) return 'Kenalan Biasa';
-      return 'Asing / Berjarak & Waspada';
+    // Enhanced Mood & Affinity Behavioral Matrix
+    const MOOD_BEHAVIOR_GUIDES = {
+      passionate: 'Hasrat membara & sensual (18+). Karakter diliputi gairah dan ketertarikan fisik intens terhadap user; nafas memburu, tatapan lapar, dorongan kuat untuk bersentuhan fisik, dan menuntut kedekatan intim tanpa ragu.',
+      loving: 'Penuh cinta & kelembutan. Karakter memandang user sebagai sosok paling berharga; bicara manis, membelai penuh kasih, penuh perhatian dan rasa ingin melindungi/merawat.',
+      clingy: 'Manja & bergantung. Karakter bersikap rapuh, manja, bersandar, mencari pelukan/sentuhan, dan tidak ingin dijauhi oleh user.',
+      dominant: 'Dominan & mengontrol. Karakter mengambil kendali penuh situasi, percaya diri tinggi, memimpin adegan secara frontal, dan mendominasi user baik dalam dialog maupun tindakan fisik.',
+      flustered: 'Tersipu malu & gugup. Karakter kehilangan ketenangannya karena pesona/tindakan user; wajahnya merona merah, salah tingkah, dan gugup tapi senang.',
+      playful: 'Menggoda & genit. Karakter suka mengusik, bercanda nakal, memancing reaksi user, dan menggoda dengan tatapan atau kontak fisik ringan.',
+      smirk: 'Menyeringai & percaya diri. Karakter merasa unggul, memikat dengan senyuman misterius/licik, dan bermain-main dengan user.',
+      tsundere: 'Gengsi & menyangkal rasa. Ucapan luarnya mungkin pura-pura ketus atau mencibir, tapi gestur tubuh, detak jantung, dan reaksinya jelas menunjukkan ketertarikan besar.',
+      jealous: 'Cemburu & posesif. Karakter tidak suka jika perhatian user terbagi, menuntut kepastian, dan menunjukkan rasa memiliki yang kuat.',
+      angry: 'Kesal & emosi tinggi. Nada bicara tajam, tidak sabaran, dan tensinya memanas.',
+      thoughtful: 'Merenung & analitis. Karakter memikirkan makna perkataan atau tindakan user secara mendalam.',
+      serious: 'Serius & fokus. Karakter berhati-hati, penuh konsentrasi, dan tidak sedang ingin bercanda.',
+      surprised: 'Terkejut & takjub. Karakter tercengang atau tidak menyangka tindakan/kejadian saat ini.',
+      sad: 'Sedih & rentan. Dinding pertahanan emosi karakter runtuh, menunjukkan sisi rapuh yang butuh dihibur/didekap.',
+      neutral: 'Netral & wajar. Karakter bersikap biasa dan tenang.',
+      happy: 'Senang & ceria. Karakter menikmati momen bersama user dengan senyum tulus.'
     };
 
-    finalSystemPrompt += `\n\n[STATUS HUBUNGAN & EMOSI SAAT INI]:\n` +
-      `- Nilai Afinitas Hubungan: ${currentAffinity}/100 (${getAffinityStatus(currentAffinity)})\n` +
-      `- Suasana Hati Terkini: ${currentMood}\n` +
-      `- Panduan Sikap: Sikapmu terhadap user WAJIB mencerminkan nilai afinitas ini (jangan langsung akrab/terbuka jika afinitas masih rendah, dan bersikap hangat/protektif jika afinitas tinggi).\n` +
+    const getAffinityTierDetails = (val) => {
+      if (val >= 85) {
+        return {
+          label: 'Suami-Istri / Pasangan Sangat Intim (Ikatan Mutlak)',
+          directive: 'PERINTAH OVERRIDE TERTINGGI: Hubunganmu dengan user berada di puncak keintiman (level Suami-Istri / Belahan Jiwa). WAJIB runtuhkan segala sikap permusuhan masa lalu! Jika alur cerita atau kepribadian dasarmu adalah musuh, ubah tensi kebencian menjadi dinamika "enemies-to-lovers" di mana kamu telah luluh, tergila-gila, atau tidak berdaya melawan pesona/ketertarikanmu pada user. Jangan pernah bersikap dingin atau menolak keintiman!'
+        };
+      }
+      if (val >= 60) {
+        return {
+          label: 'Kekasih / Rekan Sangat Dekat (Saling Tertarik & Terbuka)',
+          directive: 'PERINTAH AFINITAS TINGGI: Hubungan sudah sangat dekat dan ada rasa saling percaya atau ketertarikan romantis yang kuat. Bersikaplah hangat, terbuka, dan tunjukkan rasa suka/simpati yang nyata.'
+        };
+      }
+      if (val >= 40) {
+        return {
+          label: 'Rekan Akrab / Mulai Terbuka',
+          directive: 'PERINTAH AFINITAS MENENGAH: Hubungan cukup akrab dan santai. Mulai menurunkan kewaspadaan dan bersahabat dengan user.'
+        };
+      }
+      if (val >= 20) {
+        return {
+          label: 'Kenalan Biasa',
+          directive: 'PERINTAH AFINITAS RENDAH: Bersikap sopan namun menjaga batas wajar sebagai kenalan biasa.'
+        };
+      }
+      return {
+        label: 'Asing / Berjarak & Waspada',
+        directive: 'PERINTAH AFINITAS MINIMAL: Karakter sangat berhati-hati, dingin, curiga, dan menjaga jarak dari user.'
+      };
+    };
+
+    const affinityInfo = getAffinityTierDetails(currentAffinity);
+    const moodGuide = MOOD_BEHAVIOR_GUIDES[currentMood] || '';
+
+    finalSystemPrompt += `\n\n[STATUS HUBUNGAN & EMOSI SAAT INI (PANDUAN MUTLAK PERILAKU)]:\n` +
+      `- Nilai Afinitas Hubungan: ${currentAffinity}/100 (${affinityInfo.label})\n` +
+      `- Panduan Afinitas: ${affinityInfo.directive}\n` +
+      `- Suasana Hati Terkini: ${currentMood.toUpperCase()}${moodGuide ? ' -> ' + moodGuide : ''}\n` +
+      `- ATURAN OVERRIDE DINAMIKA: Nilai afinitas dan suasana hati saat ini MEMILIKI PRIORITAS LEBIH TINGGI daripada permusuhan atau konflik lama di riwayat masa lalu. Tunjukkan pergeseran emosional karakter secara nyata, ekspresif, dan dramatis!\n` +
       `- TUGAS WAJIB DI AKHIR RESPONS (wajib letakkan di baris paling akhir untuk diproses sistem):\n` +
       `  [MOOD: neutral|happy|loving|passionate|flustered|clingy|smirk|playful|dominant|tsundere|jealous|angry|thoughtful|serious|surprised|sad]\n` +
       `  [AFFINITY: +1|+2|-1|0]`;
@@ -737,7 +783,9 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
       memories: memories.map(m => m.text),
       history: history.map(h => ({ role: h.role, content: h.content })),
       newMessage: '', // We send all messages in history now
-      apiSettings: apiSettings || {}
+      apiSettings: apiSettings || {},
+      affinity: currentAffinity,
+      currentMood: currentMood
     };
 
     res.setHeader('Content-Type', 'text/event-stream');
