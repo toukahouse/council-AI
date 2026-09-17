@@ -87,8 +87,8 @@ async function main() {
 
   // Inject organic psychological resonance reminder to the last user turn
   if (rawMessages.length > 0 && (affinity !== undefined || currentMood)) {
-    const lastUserTurn = rawMessages[rawMessages.length - 1];
     let cue = `\n\n[SIMULASI PSIKOLOGI ORGANIK]: Afinitas: ${affinity}%, Mood Awal: ${currentMood.toUpperCase()}.`;
+    cue += ` Evaluasi bagaimana interaksi barusan memengaruhi perasaanmu. Putuskan [MOOD: ...] dan perubahan [AFFINITY: 0 / +1 / +2 / -1 / -2] (obrolan santai bernilai 0, perhatian manis +1, dilarang inflasi cepat) di 2 baris paling akhir responsmu.`;
     cue += `\n[FORMAT MUTLAK]: Dialog ucapan WAJIB diapit "..." di luar tanda bintang. Narasi aksi diapit **...**. GAYA BAHASA: Santai/lisan (kalo, bakalan, emangnya, banget, nggak, udah, gimana). Lanjutkan adegan secara ekspresif, natural, dan mendalam.`;
     lastUserTurn.content += cue;
   }

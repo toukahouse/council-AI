@@ -39,11 +39,12 @@ const MOOD_MAP = {
 };
 
 const getAffinityTier = (val) => {
-  if (val >= 85) return { label: 'Sahabat Sejati / Intim', color: '#f43f5e' };
-  if (val >= 60) return { label: 'Teman Dekat', color: '#c084fc' };
-  if (val >= 40) return { label: 'Rekan Baik', color: '#818cf8' };
+  if (val >= 95) return { label: 'Suami-Istri / Ikatan Abadi', color: '#f43f5e' };
+  if (val >= 80) return { label: 'Belahan Jiwa / Tunangan', color: '#ec4899' };
+  if (val >= 60) return { label: 'Kekasih / Pacaran', color: '#c084fc' };
+  if (val >= 40) return { label: 'Teman Dekat / Rekan Akrab', color: '#818cf8' };
   if (val >= 20) return { label: 'Kenalan Biasa', color: '#38bdf8' };
-  return { label: 'Asing / Berjarak', color: '#94a3b8' };
+  return { label: 'Asing / Berjarak & Waspada', color: '#94a3b8' };
 };
 
 

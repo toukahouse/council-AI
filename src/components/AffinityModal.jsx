@@ -21,18 +21,20 @@ const MOOD_OPTIONS = [
 ];
 
 const PRESETS = [
-  { label: 'Kenalan Biasa', value: 20 },
-  { label: 'Rekan Akrab', value: 50 },
-  { label: 'Kekasih / Pacar', value: 80 },
-  { label: 'Suami / Istri', value: 100 },
+  { label: 'Kenalan Biasa', value: 25 },
+  { label: 'Teman Dekat', value: 50 },
+  { label: 'Kekasih / Pacar', value: 65 },
+  { label: 'Belahan Jiwa / Tunangan', value: 85 },
+  { label: 'Suami / Istri', value: 95 },
 ];
 
 const getAffinityTier = (val) => {
-  if (val >= 85) return { label: 'Suami-Istri / Sangat Intim', color: '#f43f5e' };
-  if (val >= 60) return { label: 'Teman Dekat / Kekasih', color: '#c084fc' };
-  if (val >= 40) return { label: 'Rekan Baik / Akrab', color: '#818cf8' };
-  if (val >= 20) return { label: 'Kenalan Biasa', color: '#38bdf8' };
-  return { label: 'Asing / Berjarak', color: '#94a3b8' };
+  if (val >= 95) return { label: 'Suami-Istri / Ikatan Abadi (95-100%)', color: '#f43f5e' };
+  if (val >= 80) return { label: 'Belahan Jiwa / Tunangan (80-94%)', color: '#ec4899' };
+  if (val >= 60) return { label: 'Kekasih / Pacaran (60-79%)', color: '#c084fc' };
+  if (val >= 40) return { label: 'Teman Dekat / Rekan Akrab (40-59%)', color: '#818cf8' };
+  if (val >= 20) return { label: 'Kenalan Biasa (20-39%)', color: '#38bdf8' };
+  return { label: 'Asing / Berjarak & Waspada (0-19%)', color: '#94a3b8' };
 };
 
 export default function AffinityModal({

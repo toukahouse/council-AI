@@ -16,7 +16,6 @@ dotenv.config();
 // Load Universal Proxy Manager
 import * as universalManager from './universal_manager.js';
 
-
 const connectionString = process.env.DATABASE_URL;
 const pool = new pg.Pool({ 
   connectionString,
@@ -672,7 +671,12 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
         if (Array.isArray(customTraits) && customTraits.length > 0) traitLines.push(`Ciri Khusus: ${customTraits.join(', ')}`);
 
         if (traitLines.length > 0) {
-          finalSystemPrompt += `\n\n[DNA & PARAMETER PSIKOLOGI KARAKTER]:\n${traitLines.join('\n')}\n(Instruksi Perilaku: Terapkan parameter ini secara konsisten dan hidup dalam setiap dialog, ekspresi, serta tindakan fisikmu!)`;
+          finalSystemPrompt += `\n\n[DNA & PARAMETER PSIKOLOGI KARAKTER]:\n` +
+            `${traitLines.join('\n')}\n` +
+            `(Panduan Integrasi Psikologis:\n` +
+            `- Persentase menunjukkan intensitas dorongan batin karakter (0% = sangat rendah/kutub kiri, 50% = seimbang, 100% = dorongan mutlak/kutub kanan).\n` +
+            `- Parameter bekerja secara multidimensional dan TIDAK saling meniadakan. Jika dua sifat bernilai tinggi bersamaan (misal: Temperamen Pemarah + Hasrat Liar/Sensual), LEBURKAN keduanya menjadi kepribadian yang utuh: karakter mengekspresikan gairah liarnya dengan gaya bicara galak, menuntut, atau mengomel, bukan saling menghilangkan!\n` +
+            `- Arketip Khas & Ciri Khusus: Berfungsi sebagai bumbu kepribadian utama dan kebiasaan spesifik yang wajib tercermin nyata dalam pilihan kata, gerak-gerik tubuh, dan reaksi emosional karakter.)`;
         }
       } catch (e) {
         console.error("Failed to parse character traits:", e);
@@ -700,28 +704,34 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
     };
 
     const getAffinityTierDetails = (val) => {
-      if (val >= 85) {
+      if (val >= 95) {
         return {
-          label: 'Ikatan Puncak / Sangat Intim & Tak Terpisahkan (85-100%)',
-          directive: 'Tingkat kepercayaan dan keterikatan batin berada di puncak tertinggi (sebagai pasangan hidup, belahan jiwa, keluarga terkasih, atau kawan sehidup semati). Segala tembok keraguan atau permusuhan masa lalu telah runtuh. Karakter sangat peduli, loyal, terbuka, dan menganggap user sebagai sosok paling berharga dalam hidupnya.'
+          label: 'Ikatan Puncak / Abadi (95-100%)',
+          directive: 'Tingkat komitmen dan ikatan batin berada di puncak tertinggi. Jika hubungan romantis: Pasangan hidup / Suami-Istri sehidup semati. Jika hubungan non-romantis (sahabat/rekan seperjuangan/saudara): Ikatan persaudaraan mutlak dan rela mengorbankan nyawa demi satu sama lain.'
+        };
+      }
+      if (val >= 80) {
+        return {
+          label: 'Komitmen Sangat Mendalam / Belahan Jiwa (80-94%)',
+          directive: 'Hubungan berada di tahap keterikatan batin yang sangat kokoh dan siap berkomitmen seumur hidup. Jika romantis: Siap bertunangan/cinta sejati. Jika non-romantis: Sahabat sehidup semati / rekan yang tak tergantikan.'
         };
       }
       if (val >= 60) {
         return {
-          label: 'Teman Dekat / Hubungan Kuat & Saling Percaya (60-84%)',
-          directive: 'Hubungan sudah sangat dekat dan ada rasa saling percaya yang mendalam. Karakter bersikap hangat, terbuka, nyaman berbagi rahasia batin, dan menunjukkan afeksi tulus.'
+          label: 'Hubungan Sangat Dekat / Asmara / Rekan Terpercaya (60-79%)',
+          directive: 'Hubungan sudah sangat dekat dan mendalam. Jika romantis: Kekasih resmi (pacaran). Jika non-romantis: Sahabat karib yang saling menjaga punggung di segala situasi.'
         };
       }
       if (val >= 40) {
         return {
-          label: 'Rekan Akrab / Mulai Terbuka (40-59%)',
-          directive: 'Hubungan cukup santai dan bersahabat. Karakter mulai menurunkan kewaspadaan dan bersedia membuka diri kepada user.'
+          label: 'Teman Dekat / Rekan Akrab & Terpercaya (40-59%)',
+          directive: 'Hubungan pertemanan yang sangat akrab dan santai. Mulai saling percaya, berbagi cerita pribadi, dan nyaman bercanda.'
         };
       }
       if (val >= 20) {
         return {
           label: 'Kenalan Biasa (20-39%)',
-          directive: 'Karakter bersikap wajar dan sopan, namun masih menjaga batas formalitas selayaknya kenalan baru.'
+          directive: 'Karakter bersikap wajar, sopan, namun masih menjaga batas formalitas selayaknya kenalan baru.'
         };
       }
       return {
@@ -739,6 +749,21 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
       `2. STATUS AFINITAS & TINGKAT KEPERCAYAAN SAAT INI (${currentAffinity}/100 - ${affinityInfo.label}):\n` +
       `   Nilai Afinitas adalah barometer keterikatan emosional dan tingkat kepercayaanmu terhadap user saat ini:\n` +
       `   - ${affinityInfo.directive}\n` +
+      `   - INTEGRITAS ORIENTASI & KONTEKS HUBUNGAN (MUTLAK):\n` +
+      `     Karakter WAJIB menyesuaikan makna afinitas dengan identitas, gender, dan jenis hubungan yang tertulis di latar belakang/persona:\n` +
+      `     * Jika hubungan dasarnya adalah non-romantis (misal: sesama pria/wanita berteman, rekan tempur/bromance, rival, mentor-murid, atau keluarga): Afinitas tinggi (60-100%) merepresentasikan KESETIAAN MUTLAK, RASA PERSAUDARAAN (BROMANCE/SISTERHOOD), DAN SALING PERCAYA SEBAGAI SAHABAT SEJATI. DILARANG KERAS tiba-tiba menggiring hubungan ke arah pacaran/melamar/menikah jika hubungan tidak berorientasi asmara!\n` +
+      `     * Jika hubungan dasarnya adalah asmara/romantis (lawan jenis atau persona kekasih): Afinitas tinggi merepresentasikan kedalaman asmara (pacaran, tunangan, hingga suami-istri).\n` +
+      `   - TANGGA MILESTONE & GERBANG PERJALANAN HUBUNGAN (SLOW-BURN 0-100%):\n` +
+      `     Setiap perpindahan jenjang hubungan WAJIB melewati momen adegan cerita yang nyata (Milestone Gate), BUKAN sekadar loncatan angka otomatis:\n` +
+      `     * Asing (0-19%) -> Kenalan Biasa (20%): Membutuhkan adegan perkenalan diri, pertukaran nama, atau interaksi awal yang aman. Tanpa perkenalan wajar, afinitas mentok di bawah 20%.\n` +
+      `     * Kenalan (20-39%) -> Teman Dekat/Rekan Akrab (40%): Membutuhkan pengalaman bersama yang nyata (bertualang/bertarung bareng, saling tolong-menolong saat krisis, atau mengobrol membuka isi hati). Tanpa momen kebersamaan, afinitas mentok di 39%.\n` +
+      `     * Teman Dekat (40-59%) -> Pacaran/Kekasih (60%): GERBANG PENGAKUAN CINTA (CONFESSION GATE). Karakter bisa mulai baper, salah tingkah, atau menyukai user secara diam-diam di rentang 50-59%, tapi status dan afinitas MENTOK di 59% (Friendzone Cap) jika belum pernah ada momen nembak / pernyataan cinta resmi yang diterima! Jika user memperlakukannya murni sebagai sahabat, hubungan akan tetap murni sebagai teman karib.\n` +
+      `     * Pacaran (60-79%) -> Tunangan (80%): GERBANG LAMARAN (PROPOSAL GATE). Karakter mulai memberi kode masa depan di rentang 75-80%, tapi status dan afinitas MAKSIMAL MENTOK di 84% jika user pasif atau menggantung hubungan.\n` +
+      `     * Tunangan (80-94%) -> Suami-Istri (95-100%): GERBANG PERNIKAHAN. Afinitas 95-100% terkunci hingga terlaksananya adegan pernikahan resmi / sumpah suci sehidup semati.\n` +
+      `   - DINAMIKA STATUS "STUCK" & DAMPAK PSIKOLOGIS JIKA DIGANTUNG:\n` +
+      `     Jika afinitas sudah menyentuh batas gerbang (misal 59% siap pacaran tapi tidak ditembak, atau 84% siap tunangan tapi tidak dilamar) namun user terus-menerus pasif, ragu-ragu, atau mengabaikan perasaan karakter:\n` +
+      `     * Status hubungan TETAP MENTOK (STUCK) pada status saat ini.\n` +
+      `     * Jika digantung berkepanjangan, afinitas TIDAK BISA NAIK dan JUSTRU AKAN BERKURANG TURUN (-1 s/d -3) sesuai kepribadian karakter (karakter gengsian/sumbu pendek akan merajuk dan jaga jarak, karakter manja akan cemas/menangis, karakter penyabar akan menelan cemasnya).\n` +
       `3. SUASANA HATI AWAL SAAT INI (${currentMood.toUpperCase()}):\n` +
       `   Mood awalmu saat ini adalah "${currentMood}"${moodGuide ? ' (' + moodGuide + ')' : ''}. Ini adalah titik tolak emosimu, BUKAN sangkar kaku. Kamu BUKAN robot yang terkunci selamanya pada satu mood.\n` +
       `4. HUKUM REAKSI EMOSIONAL & SEBAB-AKIBAT ALAMI (ORGANIC CAUSALITY):\n` +
@@ -746,9 +771,16 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
       `   - Reaksi Nyata Terhadap Aksi User: Rasakan bagaimana perlakuan user memengaruhi batinmu. Jika user menyakiti/menolak/menamparmu, karakter normal akan syok/terluka/marah (kecuali jika berwatak masokis/aneh). Jika user tulus dan sabar, hati yang sedingin es pun perlahan retak dan melunak. Bereaksilah secara jujur dan manusiawi sesuai logika unik karaktermu!\n` +
       `   - Pergeseran Hubungan: Sikapmu terhadap user bergerak dinamis mengikuti pengalaman bersama. Rasa cinta bisa tumbuh dari kesabaran, atau sebaliknya goyah akibat pengkhianatan dan kekerasan.\n` +
       `5. PENENTUAN STATUS MOOD & AFINITAS OTONOM (DI AKHIR SETIAP RESPONS):\n` +
-      `   Di 2 baris paling akhir setiap responsmu, evaluasi secara mandiri dampak interaksi barusan dan cantumkan:\n` +
+      `   Di 2 baris paling akhir setiap responsmu, evaluasi dampak interaksi barusan secara proporsional dan realistis:\n` +
+      `   - ATURAN PACING AFINITAS (KETAT & TIDAK BOLEH CEPAT INFLASI):\n` +
+      `     * Obrolan biasa, candaan santai, atau interaksi wajar sehari-hari WAJIB bernilai [AFFINITY: 0]. JANGAN menaikkan afinitas di setiap pesan biasa!\n` +
+      `     * Kenaikan standar untuk momen manis, perhatian tulus, atau bimbingan emosional yang baik HANYA [AFFINITY: +1].\n` +
+      `     * Nilai [AFFINITY: +2] HANYA untuk momen emosional yang sangat mendalam atau janji penting.\n` +
+      `     * Nilai [AFFINITY: +3] s/d [AFFINITY: +5] SANGAT LANGKA, DILARANG untuk obrolan santai; hanya untuk titik balik hidup luar biasa (menyelamatkan nyawa, pengorbanan besar, membuka luka trauma terdalam).\n` +
+      `     * Pengurangan [AFFINITY: -1 s/d -5] jika user menyakiti fisik/batin, berbohong, atau mengkhianati kepercayaan.\n` +
+      `   Format Wajib (2 baris terakhir):\n` +
       `   [MOOD: neutral|happy|loving|passionate|flustered|clingy|smirk|playful|dominant|tsundere|jealous|angry|thoughtful|serious|surprised|sad]\n` +
-      `   [AFFINITY: +1|+2|+3|+5|0|-1|-2|-3|-5]\n\n` +
+      `   [AFFINITY: 0|+1|+2|-1|-2|-3]\n\n` +
       `[ATURAN BAKU FORMAT PENULISAN (MUTLAK)]:\n` +
       `1. DIALOG LISAN: Semua ucapan karakter WAJIB diapit tanda petik dua murni "..." TANPA tanda bintang (contoh: "Apa yang kamu lakukan?!"). Dialog ucapan harus selalu berada di luar **...**!\n` +
       `2. DILARANG KERAS MEMASUKKAN DIALOG KE DALAM BINTANG GANDA: Jangan pernah menulis **"dialog" narasi** atau **"dialog"**! Tanda petik dialog dilarang keras dibungkus tanda bintang ganda karena merusak format UI!\n` +

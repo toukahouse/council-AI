@@ -70,7 +70,7 @@ async function main() {
     // Universal organic psychology reminder
     if (affinity !== undefined || currentMood) {
       reminder += `\n[SIMULASI PSIKOLOGI ORGANIK]: Afinitas: ${affinity}%, Mood Awal: ${currentMood.toUpperCase()}.`;
-      reminder += ` Kamu adalah individu bernyawa dengan harga diri dan perasaan, BUKAN boneka yang terkunci di satu mood. Evaluasi secara organik bagaimana perkataan/tindakan user barusan memengaruhi emosi dan egomu sesuai kepribadian unik "${charName}". Putuskan [MOOD: ...] dan perubahan [AFFINITY: -5 s/d +5 / 0] yang paling jujur di 2 baris paling akhir responsmu.`;
+      reminder += ` Kamu adalah individu bernyawa dengan harga diri dan perasaan, BUKAN boneka yang terkunci di satu mood. Evaluasi secara organik bagaimana perkataan/tindakan user barusan memengaruhi emosi dan egomu sesuai kepribadian unik "${charName}". Putuskan [MOOD: ...] dan perubahan [AFFINITY: 0 / +1 / +2 / -1 / -2] (obrolan santai bernilai 0, perhatian manis +1, dilarang inflasi cepat) di 2 baris paling akhir responsmu.`;
     }
     
     return reminder;
