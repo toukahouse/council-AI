@@ -415,9 +415,9 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
   };
 
   const pages = [
-    { id: 'ai', label: 'AI Settings' },
-    { id: 'model', label: 'Model Settings' },
-    { id: 'thinking', label: 'Thinking Settings' },
+    { id: 'ai', label: 'AI Settings', shortLabel: 'AI Engine' },
+    { id: 'model', label: 'Model Settings', shortLabel: 'Model' },
+    { id: 'thinking', label: 'Thinking Settings', shortLabel: 'Thinking' },
   ];
 
   return (
@@ -457,7 +457,8 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                 onClick={() => setActivePage(page.id)}
                 type="button"
               >
-                {page.label}
+                <span className="api-modal__tab-full">{page.label}</span>
+                <span className="api-modal__tab-short">{page.shortLabel}</span>
               </button>
             ))}
           </div>
