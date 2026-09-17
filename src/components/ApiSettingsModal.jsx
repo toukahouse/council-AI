@@ -433,13 +433,16 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
         aria-labelledby="api-modal-title"
       >
         <div className="api-modal__panel" onClick={(event) => event.stopPropagation()}>
+          {/* HEADER */}
           <div className="api-modal__header">
-            <div>
-              <span className="api-modal__eyebrow">API Settings</span>
-              <h2 className="api-modal__title" id="api-modal-title">Pengaturan Model AI</h2>
-              <p className="api-modal__subtitle">
-                Kelola provider AI, Universal Proxy (Gemini & Claude Web2API), model pilihan, dan parameter generasi untuk roleplay.
-              </p>
+            <div className="api-modal__header-left">
+              <div className="api-modal__header-badge">
+                <span>⚡</span>
+              </div>
+              <div>
+                <h2 className="api-modal__title" id="api-modal-title">Pengaturan AI & Model</h2>
+                <p className="api-modal__subtitle">Konfigurasi engine provider, model pilihan, dan parameter roleplay</p>
+              </div>
             </div>
             <button className="api-modal__close" onClick={onClose} type="button" aria-label="Tutup">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -449,58 +452,248 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
             </button>
           </div>
 
-          <div className="api-modal__tabs">
-            {pages.map((page) => (
+          {/* SEGMENTED TAB BAR */}
+          <div className="api-modal__nav-wrapper">
+            <div className="api-modal__segmented-control">
               <button
-                key={page.id}
-                className={`api-modal__tab ${activePage === page.id ? 'api-modal__tab--active' : ''}`}
-                onClick={() => setActivePage(page.id)}
                 type="button"
+                className={`api-segment-btn ${activePage === 'ai' ? 'api-segment-btn--active' : ''}`}
+                onClick={() => setActivePage('ai')}
               >
-                <span className="api-modal__tab-full">{page.label}</span>
-                <span className="api-modal__tab-short">{page.shortLabel}</span>
+                <span className="api-segment-icon">🚀</span>
+                <span className="api-segment-text">AI Engine</span>
               </button>
-            ))}
+              <button
+                type="button"
+                className={`api-segment-btn ${activePage === 'model' ? 'api-segment-btn--active' : ''}`}
+                onClick={() => setActivePage('model')}
+              >
+                <span className="api-segment-icon">🎛️</span>
+                <span className="api-segment-text">Parameter</span>
+              </button>
+              <button
+                type="button"
+                className={`api-segment-btn ${activePage === 'thinking' ? 'api-segment-btn--active' : ''}`}
+                onClick={() => setActivePage('thinking')}
+              >
+                <span className="api-segment-icon">🧠</span>
+                <span className="api-segment-text">Reasoning</span>
+              </button>
+            </div>
           </div>
 
+          {/* CONTENT BODY */}
           <div className="api-modal__content">
             {activePage === 'ai' && (
               <div className="api-modal__section">
                 
-                <div className="api-modal__field api-modal__field--row">
-                  <label className="api-modal__label">AI Engine</label>
-                  <div className="api-modal__engine-toggle">
-                    <button
-                      className={`api-modal__btn ${aiEngine === 'universal' ? 'api-modal__btn--primary' : 'api-modal__btn--ghost'}`}
-                      type="button"
-                      onClick={() => setAiEngine('universal')}
-                    >
-                      Universal Proxy
-                    </button>
-                    <button
-                      className={`api-modal__btn ${aiEngine === 'api' ? 'api-modal__btn--primary' : 'api-modal__btn--ghost'}`}
-                      type="button"
-                      onClick={() => setAiEngine('api')}
-                    >
-                      Gemini API
-                    </button>
-                    <button
-                      className={`api-modal__btn ${aiEngine === '9router' ? 'api-modal__btn--primary' : 'api-modal__btn--ghost'}`}
-                      type="button"
+                {/* Engine Selector Cards */}
+                <div className="api-card-group">
+                  <div className="api-group-title">
+                    <span>Pilih Provider AI Engine</span>
+                  </div>
+                  <div className="api-engine-selector-grid">
+                    {/* 9Router Card */}
+                    <div
+                      className={`api-engine-card ${aiEngine === '9router' ? 'api-engine-card--active' : ''}`}
                       onClick={() => setAiEngine('9router')}
                     >
-                      9Router
-                    </button>
+                      <div className="api-engine-card__header">
+                        <span className="api-engine-card__icon">🚀</span>
+                        <span className="api-engine-card__tag api-engine-card__tag--hot">Rekomendasi</span>
+                      </div>
+                      <div className="api-engine-card__name">9Router Gateway</div>
+                      <div className="api-engine-card__desc">Multi-Model AI Proxy (Gemini, Claude, DeepSeek)</div>
+                      <div className="api-engine-card__indicator">
+                        <span className={`api-radio-dot ${aiEngine === '9router' ? 'api-radio-dot--active' : ''}`} />
+                        <span>{aiEngine === '9router' ? 'Sedang Aktif' : 'Gunakan'}</span>
+                      </div>
+                    </div>
+
+                    {/* Universal Proxy Card */}
+                    <div
+                      className={`api-engine-card ${aiEngine === 'universal' ? 'api-engine-card--active' : ''}`}
+                      onClick={() => setAiEngine('universal')}
+                    >
+                      <div className="api-engine-card__header">
+                        <span className="api-engine-card__icon">🌐</span>
+                        <span className="api-engine-card__tag">Web Reverse</span>
+                      </div>
+                      <div className="api-engine-card__name">Universal Proxy</div>
+                      <div className="api-engine-card__desc">Gemini & Claude Web2API via Cookie VPS</div>
+                      <div className="api-engine-card__indicator">
+                        <span className={`api-radio-dot ${aiEngine === 'universal' ? 'api-radio-dot--active' : ''}`} />
+                        <span>{aiEngine === 'universal' ? 'Sedang Aktif' : 'Gunakan'}</span>
+                      </div>
+                    </div>
+
+                    {/* Official Gemini API Card */}
+                    <div
+                      className={`api-engine-card ${aiEngine === 'api' ? 'api-engine-card--active' : ''}`}
+                      onClick={() => setAiEngine('api')}
+                    >
+                      <div className="api-engine-card__header">
+                        <span className="api-engine-card__icon">🔑</span>
+                        <span className="api-engine-card__tag">Official Key</span>
+                      </div>
+                      <div className="api-engine-card__name">Gemini API</div>
+                      <div className="api-engine-card__desc">Kunci API Resmi Google AI Studio</div>
+                      <div className="api-engine-card__indicator">
+                        <span className={`api-radio-dot ${aiEngine === 'api' ? 'api-radio-dot--active' : ''}`} />
+                        <span>{aiEngine === 'api' ? 'Sedang Aktif' : 'Gunakan'}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {/* ========================================== */}
-                {/* UNIVERSAL PROXY ENGINE (GEMINI & CLAUDE) */}
-                {/* ========================================== */}
+                {/* 9ROUTER DETAIL SECTION */}
+                {aiEngine === '9router' && (
+                  <div className="api-subengine-panel">
+                    {/* Box 1: Koneksi Gateway */}
+                    <div className="api-section-card">
+                      <div className="api-section-card__header">
+                        <div className="api-section-card__title">
+                          <span>🌐</span> Koneksi Endpoint 9Router
+                        </div>
+                        <span className="api-section-card__badge">Gateway API</span>
+                      </div>
+
+                      <div className="api-form-grid">
+                        <div className="api-form-field">
+                          <label className="api-form-label">
+                            <span className="api-label-icon">🔗</span> URL Endpoint
+                          </label>
+                          <input
+                            type="text"
+                            className="api-modal__input"
+                            placeholder="https://supernova-inovategames.me/v1"
+                            value={ninerouterUrl}
+                            onChange={(e) => setNinerouterUrl(e.target.value)}
+                          />
+                          <span className="api-input-hint">URL endpoint gateway 9Router kompatibel format OpenAI /v1.</span>
+                        </div>
+
+                        <div className="api-form-field">
+                          <label className="api-form-label">
+                            <span className="api-label-icon">🔑</span> API Key 9Router
+                          </label>
+                          <input
+                            type="password"
+                            className="api-modal__input"
+                            placeholder="Masukkan API key 9Router (opsional jika endpoint publik)"
+                            value={ninerouterApiKey}
+                            onChange={(e) => setNinerouterApiKey(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Box 2: Model & Combos */}
+                    <div className="api-section-card">
+                      <div className="api-section-card__header">
+                        <div className="api-section-card__title">
+                          <span>⚡</span> Model / Combo Pilihan
+                        </div>
+                        {ninerouterModel && (
+                          <span className="api-active-model-pill">
+                            <span className="api-pulse-dot" />
+                            Aktif: <strong>{ninerouterModel}</strong>
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Active Model Display Bar */}
+                      <div className="api-form-field">
+                        <label className="api-form-label">Model yang Sedang Digunakan</label>
+                        <div className="api-model-active-bar">
+                          <span className="api-model-active-icon">🤖</span>
+                          <input
+                            type="text"
+                            className="api-modal__input api-model-input-highlight"
+                            placeholder="Pilih dari daftar combo di bawah atau ketik manual..."
+                            value={ninerouterModel}
+                            onChange={(e) => setNinerouterModel(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Add Combo Input */}
+                      <div className="api-form-field" style={{ marginTop: '14px' }}>
+                        <label className="api-form-label">Tambah Pilihan Combo Baru</label>
+                        <div className="api-input-group">
+                          <input
+                            type="text"
+                            className="api-modal__input api-input-group__input"
+                            placeholder="Ketik nama combo (contoh: gemini-3-pro-plus, claude-3-7-sonnet)"
+                            value={newComboInput}
+                            onChange={(e) => setNewComboInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleAddNinerouterCombo();
+                              }
+                            }}
+                          />
+                          <button
+                            type="button"
+                            className="api-btn-primary api-input-group__btn"
+                            disabled={!newComboInput.trim()}
+                            onClick={handleAddNinerouterCombo}
+                          >
+                            ＋ Tambah
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Combos Grid */}
+                      <div className="api-combos-container">
+                        <div className="api-combos-header">
+                          <span className="api-combos-label">Daftar Pilihan Cepat ({ninerouterCombos.length})</span>
+                          <span className="api-combos-hint">Klik kartu untuk langsung mengaktifkan combo</span>
+                        </div>
+                        {ninerouterCombos.length === 0 ? (
+                          <div className="ninerouter-empty">
+                            <p>Belum ada combo di daftar. Tambahkan nama combo di atas.</p>
+                          </div>
+                        ) : (
+                          <div className="api-combos-grid">
+                            {ninerouterCombos.map((combo) => {
+                              const isSelected = ninerouterModel === combo;
+                              return (
+                                <div
+                                  key={combo}
+                                  className={`api-combo-item ${isSelected ? 'api-combo-item--selected' : ''}`}
+                                  onClick={() => handleSelectNinerouterCombo(combo)}
+                                >
+                                  <div className="api-combo-item__main">
+                                    <span className="api-combo-item__icon">{isSelected ? '⚡' : '🔮'}</span>
+                                    <span className="api-combo-item__name" title={combo}>{combo}</span>
+                                  </div>
+                                  <div className="api-combo-item__right">
+                                    {isSelected && <span className="api-combo-item__badge">Aktif</span>}
+                                    <button
+                                      type="button"
+                                      className="api-combo-item__delete-btn"
+                                      title={`Hapus combo "${combo}"`}
+                                      onClick={(e) => handleDeleteNinerouterCombo(combo, e)}
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* UNIVERSAL PROXY DETAIL SECTION */}
                 {aiEngine === 'universal' && (
                   <div className="universal-proxy-container">
-                    
-                    {/* Status Feedback / Notifications */}
+                    {/* Status Feedback Banner */}
                     {testResult && (
                       <div className={`universal-alert ${testResult.success ? 'universal-alert--success' : 'universal-alert--error'}`}>
                         <div className="universal-alert__header">
@@ -529,12 +722,10 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                               <span className="universal-card__port">Port: 8081</span>
                             </div>
                           </div>
-                          <div className="universal-card__badge-wrapper">
-                            <span className={`universal-status-pill ${universalStatus?.gemini?.alive ? 'universal-status-pill--online' : 'universal-status-pill--offline'}`}>
-                              <span className="universal-dot" />
-                              {universalStatus?.gemini?.alive ? 'Online' : 'Offline'}
-                            </span>
-                          </div>
+                          <span className={`universal-status-pill ${universalStatus?.gemini?.alive ? 'universal-status-pill--online' : 'universal-status-pill--offline'}`}>
+                            <span className="universal-dot" />
+                            {universalStatus?.gemini?.alive ? 'Online' : 'Offline'}
+                          </span>
                         </div>
 
                         <div className="universal-card__meta">
@@ -554,7 +745,6 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                             className="universal-action-btn universal-action-btn--test"
                             onClick={() => handleTestHealth('gemini')}
                             disabled={testRunningService === 'gemini'}
-                            title="Tes chat respons"
                           >
                             {testRunningService === 'gemini' ? '⏳ Menguji...' : '⚡ Test Health'}
                           </button>
@@ -562,16 +752,14 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                             type="button"
                             className="universal-action-btn universal-action-btn--cookie"
                             onClick={() => handleOpenCookieModal('gemini')}
-                            title="Update Cookie Firefox"
                           >
-                            🍪 Update Cookie
+                            🍪 Cookie
                           </button>
                           <button
                             type="button"
                             className="universal-action-btn universal-action-btn--restart"
                             onClick={() => handleRestartProxy('gemini')}
                             disabled={restartingService === 'gemini'}
-                            title="Restart service proxy"
                           >
                             {restartingService === 'gemini' ? '🔄...' : '🔄 Restart'}
                           </button>
@@ -579,7 +767,6 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                             type="button"
                             className="universal-action-btn universal-action-btn--logs"
                             onClick={() => handleOpenLogs('gemini')}
-                            title="Lihat Log Server"
                           >
                             📜 Logs
                           </button>
@@ -596,12 +783,10 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                               <span className="universal-card__port">Port: 8082</span>
                             </div>
                           </div>
-                          <div className="universal-card__badge-wrapper">
-                            <span className={`universal-status-pill ${universalStatus?.claude?.alive ? 'universal-status-pill--online' : 'universal-status-pill--offline'}`}>
-                              <span className="universal-dot" />
-                              {universalStatus?.claude?.alive ? 'Online' : 'Offline'}
-                            </span>
-                          </div>
+                          <span className={`universal-status-pill ${universalStatus?.claude?.alive ? 'universal-status-pill--online' : 'universal-status-pill--offline'}`}>
+                            <span className="universal-dot" />
+                            {universalStatus?.claude?.alive ? 'Online' : 'Offline'}
+                          </span>
                         </div>
 
                         <div className="universal-card__meta">
@@ -613,12 +798,6 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                                 : (universalStatus?.claude?.cookie_exists ? 'Cookie Tersimpan' : 'Belum Ada Cookie')}
                             </span>
                           </div>
-                          {universalStatus?.claude?.usage && (
-                            <div className="universal-meta-row">
-                              <span className="universal-meta-label">Completions:</span>
-                              <span className="universal-meta-val">{universalStatus.claude.usage.completions || 0} reqs</span>
-                            </div>
-                          )}
                         </div>
 
                         <div className="universal-card__actions">
@@ -627,7 +806,6 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                             className="universal-action-btn universal-action-btn--test"
                             onClick={() => handleTestHealth('claude')}
                             disabled={testRunningService === 'claude'}
-                            title="Tes chat respons"
                           >
                             {testRunningService === 'claude' ? '⏳ Menguji...' : '⚡ Test Health'}
                           </button>
@@ -635,16 +813,14 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                             type="button"
                             className="universal-action-btn universal-action-btn--cookie"
                             onClick={() => handleOpenCookieModal('claude')}
-                            title="Update Cookie Claude"
                           >
-                            🍪 Update Cookie
+                            🍪 Cookie
                           </button>
                           <button
                             type="button"
                             className="universal-action-btn universal-action-btn--restart"
                             onClick={() => handleRestartProxy('claude')}
                             disabled={restartingService === 'claude'}
-                            title="Restart service proxy"
                           >
                             {restartingService === 'claude' ? '🔄...' : '🔄 Restart'}
                           </button>
@@ -652,7 +828,6 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                             type="button"
                             className="universal-action-btn universal-action-btn--logs"
                             onClick={() => handleOpenLogs('claude')}
-                            title="Lihat Log Server"
                           >
                             📜 Logs
                           </button>
@@ -661,21 +836,22 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                     </div>
 
                     {/* Model Selection Group */}
-                    <div className="api-modal__field">
-                      <div className="universal-section-header">
-                        <label className="api-modal__label">Pilihan Model AI Universal (Web Reverse Proxy)</label>
+                    <div className="api-section-card">
+                      <div className="api-section-card__header">
+                        <div className="api-section-card__title">
+                          <span>📦</span> Model AI Universal (Web Reverse Proxy)
+                        </div>
                         <button
                           type="button"
                           className="universal-refresh-status-btn"
                           onClick={fetchUniversalStatus}
                           disabled={isUniversalStatusLoading}
-                          title="Refresh status proxy"
                         >
-                          {isUniversalStatusLoading ? '🔄 Memeriksa...' : '🔄 Cek Status Proxy'}
+                          {isUniversalStatusLoading ? '🔄...' : '🔄 Cek Status'}
                         </button>
                       </div>
 
-                      {/* Google Gemini Models Category */}
+                      {/* Gemini Category */}
                       <div className="universal-model-category">
                         <div className="universal-model-category__title">
                           <span>💎</span> Google Gemini (Free Web Proxy)
@@ -710,8 +886,8 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                         </div>
                       </div>
 
-                      {/* Anthropic Claude Models Category */}
-                      <div className="universal-model-category">
+                      {/* Claude Category */}
+                      <div className="universal-model-category" style={{ marginTop: '16px' }}>
                         <div className="universal-model-category__title">
                           <span>🧠</span> Anthropic Claude (Free Web Proxy)
                         </div>
@@ -745,12 +921,12 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                         </div>
                       </div>
 
-                      {/* Custom Model ID Input */}
-                      <div className="universal-custom-model-row">
+                      {/* Custom Model Input */}
+                      <div className="universal-custom-model-row" style={{ marginTop: '14px' }}>
                         <input
                           type="text"
                           className="api-modal__input"
-                          placeholder="Atau masukkan Model ID custom (contoh: gemini-3.7-flash, claude-haiku-4-5-20251001)..."
+                          placeholder="Atau ketik ID Model custom (contoh: gemini-3.7-flash, claude-haiku-4-5)..."
                           value={customUniversalModel}
                           onChange={(e) => setCustomUniversalModel(e.target.value)}
                           onKeyDown={(e) => {
@@ -762,7 +938,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                         />
                         <button
                           type="button"
-                          className="api-modal__btn api-modal__btn--ghost"
+                          className="api-btn-primary"
                           onClick={handleApplyCustomUniversalModel}
                         >
                           Terapkan
@@ -770,7 +946,7 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                       </div>
                     </div>
 
-                    {/* Advanced Configuration (Proxy URL) */}
+                    {/* Advanced Proxy URL */}
                     <div className="universal-advanced-box">
                       <div className="universal-advanced-header">
                         <span className="universal-advanced-icon">⚙️</span>
@@ -785,337 +961,308 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                           onChange={(e) => setUniversalProxyUrl(e.target.value)}
                         />
                         <span className="api-modal__hint">
-                          Default: <code>http://127.0.0.1:8083</code> (Universal Control Panel Router). Semua request akan di-route secara otomatis ke Gemini (8081) atau Claude (8082).
+                          Default: <code>http://127.0.0.1:8083</code> (Universal Control Panel Router).
                         </span>
                       </div>
                     </div>
-
                   </div>
                 )}
 
-                {/* Gemini API Engine */}
+                {/* OFFICIAL GEMINI API DETAIL SECTION */}
                 {aiEngine === 'api' && (
-                  <>
-                    <div className="api-modal__field">
-                      <label className="api-modal__label" htmlFor="api-key-input">API Key</label>
-                      <input
-                        id="api-key-input"
-                        className="api-modal__input"
-                        type="password"
-                        placeholder="Masukkan API key kamu"
-                        value={apiKey}
-                        onChange={(event) => setApiKey(event.target.value)}
-                      />
-                      <span className="api-modal__hint">API key disimpan lokal untuk menjalankan model.</span>
-                    </div>
+                  <div className="api-subengine-panel">
+                    <div className="api-section-card">
+                      <div className="api-section-card__header">
+                        <div className="api-section-card__title">
+                          <span>🔑</span> Kunci API Resmi Google
+                        </div>
+                        <span className="api-section-card__badge">Official API</span>
+                      </div>
 
-                    <div className="api-modal__field">
-                      <label className="api-modal__label">Model AI</label>
-                      <div className="api-modal__models">
-                        {models.map((model) => (
-                          <div
-                            key={model.id}
-                            className={`api-model ${activeModelId === model.id ? 'api-model--active' : ''}`}
+                      <div className="api-form-field">
+                        <label className="api-form-label" htmlFor="api-key-input">Gemini API Key</label>
+                        <input
+                          id="api-key-input"
+                          className="api-modal__input"
+                          type="password"
+                          placeholder="Masukkan API key Google AI Studio kamu (AIzaSy...)"
+                          value={apiKey}
+                          onChange={(event) => setApiKey(event.target.value)}
+                        />
+                        <span className="api-input-hint">API key disimpan aman secara lokal di browser kamu.</span>
+                      </div>
+
+                      <div className="api-form-field" style={{ marginTop: '16px' }}>
+                        <label className="api-form-label">Daftar Model Tersedia</label>
+                        <div className="api-modal__models">
+                          {models.map((model) => (
+                            <div
+                              key={model.id}
+                              className={`api-model ${activeModelId === model.id ? 'api-model--active' : ''}`}
+                            >
+                              <button
+                                className="api-model__select"
+                                type="button"
+                                onClick={() => setActiveModelId(model.id)}
+                              >
+                                <span className="api-model__radio" />
+                                <span className="api-model__name">{model.label}</span>
+                              </button>
+                              <button
+                                className="api-model__delete"
+                                type="button"
+                                onClick={() => handleDeleteModel(model.id)}
+                                aria-label={`Hapus model ${model.label}`}
+                              >
+                                Hapus
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="api-input-group" style={{ marginTop: '12px' }}>
+                          <input
+                            className="api-modal__input api-input-group__input"
+                            type="text"
+                            placeholder="Tambah model baru, contoh: gemini-2.5-pro"
+                            value={newModelId}
+                            onChange={(event) => setNewModelId(event.target.value)}
+                          />
+                          <button className="api-btn-primary api-input-group__btn" type="button" onClick={handleAddModel}>
+                            ＋ Tambah
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+              </div>
+            )}
+
+            {/* TAB 2: PARAMETER MODEL */}
+            {activePage === 'model' && (
+              <div className="api-section-card">
+                <div className="api-section-card__header">
+                  <div className="api-section-card__title">
+                    <span>🎛️</span> Parameter Generasi AI
+                  </div>
+                  <span className="api-section-card__badge">Tuning Parameter</span>
+                </div>
+
+                <div className="api-params-list">
+                  {/* Temperature Card */}
+                  <div className="api-param-row">
+                    <div className="api-param-info">
+                      <div className="api-param-title-wrap">
+                        <span className="api-param-name">🌡️ Temperature (Kreativitas)</span>
+                        <span className="api-param-badge">{temperature}</span>
+                      </div>
+                      <p className="api-param-desc">Mengatur tingkat variasi & imajinasi respon (0 = fokus/kaku, 0.8 = ideal roleplay, 1.5+ = sangat kreatif).</p>
+                    </div>
+                    <div className="api-slider-wrapper">
+                      <input
+                        className="api-custom-slider"
+                        type="range"
+                        min="0"
+                        max="2"
+                        step="0.05"
+                        value={temperature}
+                        onChange={(event) => setTemperature(parseFloat(event.target.value))}
+                      />
+                      <div className="api-slider-labels">
+                        <span>Fokus (0.0)</span>
+                        <span>Seimbang (0.8)</span>
+                        <span>Kreatif (2.0)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Top P Card */}
+                  <div className="api-param-row">
+                    <div className="api-param-info">
+                      <div className="api-param-title-wrap">
+                        <span className="api-param-name">🎯 Top P (Nucleus Sampling)</span>
+                        <span className="api-param-badge">{topP}</span>
+                      </div>
+                      <p className="api-param-desc">Membatasi pemilihan kata hanya pada kelompok kata dengan probabilitas kumulatif tertinggi.</p>
+                    </div>
+                    <div className="api-slider-wrapper">
+                      <input
+                        className="api-custom-slider"
+                        type="range"
+                        min="0.05"
+                        max="1"
+                        step="0.05"
+                        value={topP}
+                        onChange={(event) => setTopP(parseFloat(event.target.value))}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Top K Card */}
+                  <div className="api-param-row">
+                    <div className="api-param-info">
+                      <div className="api-param-title-wrap">
+                        <span className="api-param-name">🎲 Top K</span>
+                        <span className="api-param-badge">{topK}</span>
+                      </div>
+                      <p className="api-param-desc">Jumlah kandidat kata teratas yang dipertimbangkan di setiap langkah generasi kata.</p>
+                    </div>
+                    <div className="api-slider-wrapper">
+                      <input
+                        className="api-custom-slider"
+                        type="range"
+                        min="1"
+                        max="100"
+                        step="1"
+                        value={topK}
+                        onChange={(event) => setTopK(parseInt(event.target.value))}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Max Output Tokens Card */}
+                  <div className="api-param-row">
+                    <div className="api-param-info">
+                      <div className="api-param-title-wrap">
+                        <span className="api-param-name">📏 Max Output Tokens</span>
+                        <span className="api-param-badge">{maxTokens} tokens</span>
+                      </div>
+                      <p className="api-param-desc">Batas panjang karakter respon maksimum yang dapat dihasilkan oleh model AI.</p>
+                    </div>
+                    <div className="api-slider-wrapper">
+                      <input
+                        className="api-custom-slider"
+                        type="range"
+                        min="512"
+                        max="16384"
+                        step="256"
+                        value={maxTokens}
+                        onChange={(event) => setMaxTokens(parseInt(event.target.value))}
+                      />
+                      <div className="api-presets-row">
+                        {[2048, 4096, 8192, 16384].map((tokensVal) => (
+                          <button
+                            key={tokensVal}
+                            type="button"
+                            className={`api-preset-chip ${maxTokens === tokensVal ? 'api-preset-chip--active' : ''}`}
+                            onClick={() => setMaxTokens(tokensVal)}
                           >
-                            <button
-                              className="api-model__select"
-                              type="button"
-                              onClick={() => setActiveModelId(model.id)}
-                            >
-                              <span className="api-model__radio" />
-                              <span className="api-model__name">{model.label}</span>
-                            </button>
-                            <button
-                              className="api-model__delete"
-                              type="button"
-                              onClick={() => handleDeleteModel(model.id)}
-                              aria-label={`Hapus model ${model.label}`}
-                            >
-                              Hapus
-                            </button>
-                          </div>
+                            {tokensVal >= 1024 ? `${tokensVal / 1024}K` : tokensVal}
+                          </button>
                         ))}
                       </div>
-
-                      <div className="api-modal__add">
-                        <input
-                          className="api-modal__input"
-                          type="text"
-                          placeholder="Tambah model baru, contoh: gpt-4o-mini"
-                          value={newModelId}
-                          onChange={(event) => setNewModelId(event.target.value)}
-                        />
-                        <button className="api-modal__btn api-modal__btn--ghost" type="button" onClick={handleAddModel}>
-                          Tambah Model
-                        </button>
-                      </div>
                     </div>
-                  </>
-                )}
+                  </div>
 
-                {/* 9Router Engine */}
-                {aiEngine === '9router' && (
-                  <div className="ninerouter-container">
-                    <div className="api-modal__field">
-                      <label className="api-modal__label">9Router URL</label>
+                  {/* History Limit Card */}
+                  <div className="api-param-row">
+                    <div className="api-param-info">
+                      <div className="api-param-title-wrap">
+                        <span className="api-param-name">📜 History Limit (Konteks Memori)</span>
+                        <span className="api-param-badge">{historyLimit} Pesan</span>
+                      </div>
+                      <p className="api-param-desc">Jumlah pesan riwayat percakapan sebelumnya yang disertakan sebagai konteks memori aktif.</p>
+                    </div>
+                    <div className="api-slider-wrapper">
                       <input
-                        type="text"
-                        className="api-modal__input"
-                        placeholder="https://supernova-inovategames.me/v1"
-                        value={ninerouterUrl}
-                        onChange={(e) => setNinerouterUrl(e.target.value)}
+                        className="api-custom-slider"
+                        type="range"
+                        min="4"
+                        max="60"
+                        step="2"
+                        value={historyLimit}
+                        onChange={(event) => setHistoryLimit(parseInt(event.target.value))}
                       />
-                    </div>
-
-                    <div className="api-modal__field">
-                      <label className="api-modal__label">9Router API Key</label>
-                      <input
-                        type="password"
-                        className="api-modal__input"
-                        placeholder="Masukkan API key 9Router (jika ada)"
-                        value={ninerouterApiKey}
-                        onChange={(e) => setNinerouterApiKey(e.target.value)}
-                      />
-                    </div>
-
-                    {/* Active Selected Model Display */}
-                    <div className="api-modal__field">
-                      <div className="api-modal__field-header">
-                        <label className="api-modal__label">Model / Combo 9Router Aktif</label>
-                        {ninerouterModel && (
-                          <span className="ninerouter-active-pill">
-                            <span className="ninerouter-active-dot"></span>
-                            Aktif: <strong>{ninerouterModel}</strong>
-                          </span>
-                        )}
-                      </div>
-                      <input
-                        type="text"
-                        className="api-modal__input ninerouter-active-input"
-                        placeholder="Pilih dari daftar combo di bawah atau ketik manual..."
-                        value={ninerouterModel}
-                        onChange={(e) => setNinerouterModel(e.target.value)}
-                      />
-                    </div>
-
-                    {/* Add Combo Input */}
-                    <div className="api-modal__field">
-                      <label className="api-modal__label">Tambah Model / Combo Baru</label>
-                      <div className="ninerouter-add-row">
-                        <input
-                          type="text"
-                          className="api-modal__input ninerouter-add-input"
-                          placeholder="Ketik nama combo (contoh: gemini-3-pro-plus, claude-3-7-sonnet)"
-                          value={newComboInput}
-                          onChange={(e) => setNewComboInput(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              handleAddNinerouterCombo();
-                            }
-                          }}
-                        />
-                        <button
-                          type="button"
-                          className="api-modal__btn api-modal__btn--primary ninerouter-add-btn"
-                          disabled={!newComboInput.trim()}
-                          onClick={handleAddNinerouterCombo}
-                        >
-                          <span>＋</span> Tambah Combo
-                        </button>
+                      <div className="api-presets-row">
+                        {[10, 16, 24, 40].map((limitVal) => (
+                          <button
+                            key={limitVal}
+                            type="button"
+                            className={`api-preset-chip ${historyLimit === limitVal ? 'api-preset-chip--active' : ''}`}
+                            onClick={() => setHistoryLimit(limitVal)}
+                          >
+                            {limitVal} pesan
+                          </button>
+                        ))}
                       </div>
                     </div>
-
-                    {/* Combo List Grid */}
-                    <div className="api-modal__field">
-                      <div className="api-modal__field-header">
-                        <label className="api-modal__label">Daftar Pilihan Combo ({ninerouterCombos.length})</label>
-                        <span className="api-modal__hint">Klik combo untuk memilih, atau klik tombol ✕ untuk menghapus</span>
-                      </div>
-
-                      {ninerouterCombos.length === 0 ? (
-                        <div className="ninerouter-empty">
-                          <p>Belum ada combo di daftar. Tambahkan nama combo di atas.</p>
-                        </div>
-                      ) : (
-                        <div className="ninerouter-combos-grid">
-                          {ninerouterCombos.map((combo) => {
-                            const isSelected = ninerouterModel === combo;
-                            return (
-                              <div
-                                key={combo}
-                                className={`ninerouter-combo-card ${isSelected ? 'ninerouter-combo-card--active' : ''}`}
-                                onClick={() => handleSelectNinerouterCombo(combo)}
-                              >
-                                <div className="ninerouter-combo-card__content">
-                                  <span className="ninerouter-combo-card__icon">{isSelected ? '⚡' : '🔮'}</span>
-                                  <span className="ninerouter-combo-card__name" title={combo}>{combo}</span>
-                                </div>
-                                <div className="ninerouter-combo-card__actions">
-                                  {isSelected && (
-                                    <span className="ninerouter-combo-card__badge">Dipilih</span>
-                                  )}
-                                  <button
-                                    type="button"
-                                    className="ninerouter-combo-card__del-btn"
-                                    title={`Hapus combo "${combo}"`}
-                                    onClick={(e) => handleDeleteNinerouterCombo(combo, e)}
-                                  >
-                                    ✕
-                                  </button>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
                   </div>
-                )}
-
-              </div>
-            )}
-
-            {activePage === 'model' && (
-              <div className="api-modal__section">
-                <div className="api-modal__field">
-                  <div className="api-modal__field-header">
-                    <label className="api-modal__label">Temperature: {temperature}</label>
-                    <span className="api-modal__hint">Mengontrol kreativitas respon (0 = fokus, 1 = sangat kreatif).</span>
-                  </div>
-                  <input
-                    className="api-modal__slider"
-                    type="range"
-                    min="0"
-                    max="2"
-                    step="0.05"
-                    value={temperature}
-                    onChange={(event) => setTemperature(parseFloat(event.target.value))}
-                  />
-                </div>
-
-                <div className="api-modal__field">
-                  <div className="api-modal__field-header">
-                    <label className="api-modal__label">Top P: {topP}</label>
-                    <span className="api-modal__hint">Nucleus sampling (0.1 - 1.0).</span>
-                  </div>
-                  <input
-                    className="api-modal__slider"
-                    type="range"
-                    min="0.05"
-                    max="1"
-                    step="0.05"
-                    value={topP}
-                    onChange={(event) => setTopP(parseFloat(event.target.value))}
-                  />
-                </div>
-
-                <div className="api-modal__field">
-                  <div className="api-modal__field-header">
-                    <label className="api-modal__label">Top K: {topK}</label>
-                    <span className="api-modal__hint">Batasan jumlah kata yang dipertimbangkan.</span>
-                  </div>
-                  <input
-                    className="api-modal__slider"
-                    type="range"
-                    min="1"
-                    max="100"
-                    step="1"
-                    value={topK}
-                    onChange={(event) => setTopK(parseInt(event.target.value))}
-                  />
-                </div>
-
-                <div className="api-modal__field">
-                  <div className="api-modal__field-header">
-                    <label className="api-modal__label">Max Output Tokens: {maxTokens}</label>
-                    <span className="api-modal__hint">Panjang maksimum respon yang dihasilkan.</span>
-                  </div>
-                  <input
-                    className="api-modal__slider"
-                    type="range"
-                    min="512"
-                    max="16384"
-                    step="256"
-                    value={maxTokens}
-                    onChange={(event) => setMaxTokens(parseInt(event.target.value))}
-                  />
-                </div>
-
-                <div className="api-modal__field">
-                  <div className="api-modal__field-header">
-                    <label className="api-modal__label">History Limit: {historyLimit} Pesan</label>
-                    <span className="api-modal__hint">Jumlah pesan sebelumnya yang dikirim ke AI sebagai konteks memori.</span>
-                  </div>
-                  <input
-                    className="api-modal__slider"
-                    type="range"
-                    min="4"
-                    max="60"
-                    step="2"
-                    value={historyLimit}
-                    onChange={(event) => setHistoryLimit(parseInt(event.target.value))}
-                  />
                 </div>
               </div>
             )}
 
+            {/* TAB 3: THINKING & REASONING */}
             {activePage === 'thinking' && (
-              <div className="api-modal__section">
-                <div className="api-modal__field api-modal__field--row">
-                  <div>
-                    <label className="api-modal__label">Thinking Mode</label>
-                    <span className="api-modal__hint">Aktifkan untuk menampilkan reasoning model.</span>
+              <div className="api-section-card">
+                <div className="api-section-card__header">
+                  <div className="api-section-card__title">
+                    <span>🧠</span> Penalaran & Thinking Mode
+                  </div>
+                  <span className="api-section-card__badge">Deep Reasoning</span>
+                </div>
+
+                {/* Toggle Card */}
+                <div className="api-toggle-card">
+                  <div className="api-toggle-card__left">
+                    <div className="api-toggle-card__title">Aktifkan Thinking Mode (CoT)</div>
+                    <div className="api-toggle-card__desc">
+                      Membuat AI memikirkan penalaran mendalam sebelum merespon. Sangat efektif untuk skenario roleplay dramatis, puzzle, dan karakter berwatak kompleks.
+                    </div>
                   </div>
                   <button
-                    className={`api-modal__toggle ${thinkingEnabled ? 'api-modal__toggle--on' : ''}`}
+                    className={`api-switch-btn ${thinkingEnabled ? 'api-switch-btn--on' : ''}`}
                     type="button"
                     onClick={() => setThinkingEnabled((prev) => !prev)}
                     aria-pressed={thinkingEnabled}
                   >
-                    <span className="api-modal__toggle-dot" />
+                    <span className="api-switch-knob" />
                   </button>
                 </div>
 
-                <div className="api-modal__field">
-                  <label className="api-modal__label">Thinking Level</label>
-                  <div className={`api-modal__levels ${!thinkingEnabled ? 'api-modal__levels--disabled' : ''}`}>
-                    <label className="api-modal__level">
-                      <input
-                        type="radio"
-                        name="thinking-level"
-                        value="minimal"
-                        checked={thinkingLevel === 'minimal'}
-                        onChange={() => setThinkingLevel('minimal')}
-                        disabled={!thinkingEnabled}
-                      />
-                      <span>MINIMAL</span>
-                    </label>
-                    <label className="api-modal__level">
-                      <input
-                        type="radio"
-                        name="thinking-level"
-                        value="high"
-                        checked={thinkingLevel === 'high'}
-                        onChange={() => setThinkingLevel('high')}
-                        disabled={!thinkingEnabled}
-                      />
-                      <span>HIGH</span>
-                    </label>
+                {/* Thinking Level Cards */}
+                <div className="api-form-field" style={{ marginTop: '16px' }}>
+                  <label className="api-form-label">Tingkat Intensitas Penalaran</label>
+                  <div className={`api-thinking-levels-grid ${!thinkingEnabled ? 'api-thinking-levels-grid--disabled' : ''}`}>
+                    <div
+                      className={`api-level-card ${thinkingLevel === 'minimal' ? 'api-level-card--active' : ''}`}
+                      onClick={() => thinkingEnabled && setThinkingLevel('minimal')}
+                    >
+                      <div className="api-level-card__header">
+                        <span className="api-level-card__icon">⚡</span>
+                        <span className="api-level-card__name">Minimal</span>
+                      </div>
+                      <p className="api-level-card__desc">Penalaran cepat dan ringkas, cocok untuk respon percakapan cepat.</p>
+                      <span className={`api-level-card__indicator ${thinkingLevel === 'minimal' ? 'api-level-card__indicator--active' : ''}`} />
+                    </div>
+
+                    <div
+                      className={`api-level-card ${thinkingLevel === 'high' ? 'api-level-card--active' : ''}`}
+                      onClick={() => thinkingEnabled && setThinkingLevel('high')}
+                    >
+                      <div className="api-level-card__header">
+                        <span className="api-level-card__icon">🔮</span>
+                        <span className="api-level-card__name">High (Mendalam)</span>
+                      </div>
+                      <p className="api-level-card__desc">Penalaran penuh & detail untuk analisis situasi rumit, teka-teki, dan emosi karakter berlapis.</p>
+                      <span className={`api-level-card__indicator ${thinkingLevel === 'high' ? 'api-level-card__indicator--active' : ''}`} />
+                    </div>
                   </div>
                 </div>
               </div>
             )}
           </div>
 
+          {/* FOOTER */}
           <div className="api-modal__footer">
-            <span className="api-modal__footer-note">Perubahan berlaku setelah disimpan.</span>
+            <span className="api-modal__footer-note">Pengaturan langsung disimpan ke memori lokal browser kamu.</span>
             <div className="api-modal__actions">
               <button className="api-modal__btn api-modal__btn--ghost" type="button" onClick={onClose}>
                 Batal
               </button>
               <button className="api-modal__btn api-modal__btn--primary" type="button" onClick={handleSave}>
-                Simpan
+                Simpan Pengaturan
               </button>
             </div>
           </div>
