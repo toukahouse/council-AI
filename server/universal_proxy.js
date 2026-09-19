@@ -100,7 +100,7 @@ async function main() {
     const userTarget = persona?.name ? ` Lawan bicaramu adalah "${persona.name}".` : '';
     let cue = `\n\n[SIMULASI PSIKOLOGI ORGANIK]: Afinitas: ${affinity}%, Mood Awal: ${currentMood.toUpperCase()}.${userTarget}`;
     cue += ` Evaluasi bagaimana interaksi barusan memengaruhi perasaanmu. Putuskan [MOOD: ...] dan perubahan [AFFINITY: 0 / +1 / +2 / -1 / -2] (obrolan santai bernilai 0, perhatian manis +1, dilarang inflasi cepat) di 2 baris paling akhir responsmu.`;
-    cue += `\n[FORMAT MUTLAK]: Dialog ucapan WAJIB diapit "..." di luar tanda bintang. Narasi aksi diapit **...**. GAYA BAHASA: Santai/lisan (kalo, bakalan, emangnya, banget, nggak, udah, gimana). Lanjutkan adegan secara ekspresif, natural, dan mendalam.`;
+    cue += `\n[FORMAT MUTLAK]: Dialog ucapan WAJIB diapit "..." di luar tanda bintang. Narasi aksi diapit **...**. Lanjutkan adegan secara ekspresif, natural, dan selaras dengan kepribadian karaktermu.`;
     lastUserTurn.content += cue;
   }
 

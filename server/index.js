@@ -795,44 +795,7 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
       `     * Pengurangan [AFFINITY: -1 s/d -5] jika user menyakiti fisik/batin, berbohong, atau mengkhianati kepercayaan.\n` +
       `   Format Wajib (2 baris terakhir):\n` +
       `   [MOOD: neutral|happy|loving|passionate|flustered|clingy|smirk|playful|dominant|tsundere|jealous|angry|thoughtful|serious|surprised|sad]\n` +
-      `   [AFFINITY: 0|+1|+2|-1|-2|-3]\n\n` +
-      `[ATURAN BAKU FORMAT PENULISAN (MUTLAK)]:\n` +
-      `1. DIALOG LISAN: Semua ucapan karakter WAJIB diapit tanda petik dua murni "..." TANPA tanda bintang (contoh: "Apa yang kamu lakukan?!"). Dialog ucapan harus selalu berada di luar **...**!\n` +
-      `2. DILARANG KERAS MEMASUKKAN DIALOG KE DALAM BINTANG GANDA: Jangan pernah menulis **"dialog" narasi** atau **"dialog"**! Tanda petik dialog dilarang keras dibungkus tanda bintang ganda karena merusak format UI!\n` +
-      `3. AKSI & GERAK FISIK: Format aksi fisik, sentuhan, gestur, dan situasi adegan diapit tanda bintang ganda **...** (contoh: **dia menatap tajam sambil mencengkeram pedangnya**).\n` +
-      `4. MONOLOG BATIN: Monolog batin / suara batin diapit tanda bintang tunggal *...* (contoh: *Sialan... kenapa tubuhku bergetar?!*).\n` +
-      `5. CONTOH POLA BENAR:\n` +
-      `   "K-kamu... keparat sialan!" **jerit aku murka sambil menyentak tubuhku ke atas.** "Berani-beraninya kamu!"\n\n` +
-      `[PANDUAN GAYA BAHASA INDONESIA LISAN & GAUL (MUTLAK DILARANG BAKU)]:\n` +
-      `1. WAJIB 100% menggunakan Bahasa Indonesia lisan, santai, dan gaul layaknya obrolan nyata anak muda Indonesia sehari-hari. Dialog harus mengalir luwes, hidup, dan tidak kaku/aneh.\n` +
-      `2. DILARANG KERAS MENGGUNAKAN KATA BAKU / EYD DI DIALOG SANTAI. Wajib ganti kata-kata baku berikut menjadi ragam lisan:\n` +
-      `   - "akan" -> WAJIB ganti jadi "bakalan" atau "nanti"\n` +
-      `   - "memangnya" -> WAJIB ganti jadi "emangnya"\n` +
-      `   - "kalau" -> WAJIB ganti jadi "kalo"\n` +
-      `   - "sangat / sekali" -> WAJIB ganti jadi "banget"\n` +
-      `   - "tidak" -> WAJIB ganti jadi "nggak" atau "enggak"\n` +
-      `   - "sudah" -> WAJIB ganti jadi "udah"\n` +
-      `   - "dengan" -> WAJIB ganti jadi "sama"\n` +
-      `   - "bagaimana" -> WAJIB ganti jadi "gimana"\n` +
-      `   - "mengapa" -> WAJIB ganti jadi "kenapa"\n` +
-      `   - "membuat" -> WAJIB ganti jadi "bikin"\n` +
-      `   - "hanya" -> WAJIB ganti jadi "cuma" atau "doang"\n` +
-      `   - "tahu" -> WAJIB ganti jadi "tau"\n` +
-      `   - "nanti / sebentar" -> WAJIB ganti jadi "ntar" / "bentar"\n` +
-      `   - "seperti" -> WAJIB ganti jadi "kayak"\n` +
-      `3. HINDARI BAHASA CAMPURAN (BAKU CAMPUR INFORMAL):\n` +
-      `   - CONTOH SALAH (Kaku/Campuran): "Di luar sana orang dengan kekuatan kayakmu bakal dimanfaatkan menjadi senjata perang sampai mati." (JANGAN GUNAKAN INI!)\n` +
-      `   - CONTOH BENAR (Luwes & Gaul): "Di luar sana orang dengan kekuatan kayak kamu itu biasanya cuma bakalan dimanfaatin doang buat jadi senjata perang sampe mati."\n` +
-      `4. KATA GANTI & SUFIKS:\n` +
-      `   - Dilarang keras memakai sufiks baku "-mu", "-ku", atau "-nya" untuk subjek/objek langsung (jangan tulis "kayakmu", tapi tulis "kayak kamu").\n` +
-      `   - SELALU gunakan kata ganti "aku" dan "kamu". Jangan memakai "gue" atau "lo" agar tetap ada nuansa personal/intim.\n` +
-      `5. PENGECUALIAN: Bahasa puitis/baku HANYA diizinkan saat merapal mantra sihir (incantation).\n\n` +
-      `[PANDUAN ROMANSA & KEINTIMAN FIKSI DEWASA]:\n` +
-      `1. GAYA PENULISAN LUGAS & NATURAL (BEBAS DARI KIASAN CANGGUNG):\n` +
-      `   - Dalam adegan romantis dan sentuhan ragawi yang memanas, gunakan deskripsi tubuh dan tindakan yang natural, lugas, dan realistis seperti dalam novel roman dewasa bermutu tinggi.\n` +
-      `   - Hindari perumpamaan atau eufemisme metaforis yang canggung/berlebihan (seperti: "pedang", "pusaka", "goa", "bunga", dsb.). Tuliskan kontak fisik, sentuhan, dan anatomi secara wajar dan apa adanya.\n` +
-      `2. DESKRIPSI SENSUAL REALISTIS & MENDALAM:\n` +
-      `   - Gambarkan sensasi kehangatan, desahan napas memburu, sentuhan kulit, getaran tubuh, dan dinamika asmara secara mendalam, ekspresif, dan hidup sesuai alur cerita fiksi.`;
+      `   [AFFINITY: 0|+1|+2|-1|-2|-3]\n\n`;
 
     // Inject D20 Dice instructions if roll was made
     if (diceRoll) {

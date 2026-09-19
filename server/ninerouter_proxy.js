@@ -75,7 +75,7 @@ async function main() {
   // Helper to build system reminder at the message level
   const buildSystemReminder = () => {
     const userTarget = persona?.name ? ` Lawan bicaramu adalah "${persona.name}".` : '';
-    let reminder = `\n\n[SISTEM NARASI: Tetaplah 100% in-character sebagai "${charName}".${userTarget} FORMAT: Dialog ucapan WAJIB diapit "..." di luar tanda bintang. Narasi aksi diapit **...**. GAYA BAHASA: Santai/lisan (kalo, bakalan, emangnya, banget, nggak, udah, gimana). Lanjutkan adegan secara ekspresif, natural, dan mendalam.]`;
+    let reminder = `\n\n[SISTEM NARASI: Tetaplah 100% in-character sebagai "${charName}".${userTarget} FORMAT: Dialog ucapan WAJIB diapit "..." di luar tanda bintang. Narasi aksi diapit **...**. Lanjutkan adegan secara ekspresif, natural, dan selaras dengan kepribadian karaktermu.]`;
     
     // Universal organic psychology reminder
     if (affinity !== undefined || currentMood) {
