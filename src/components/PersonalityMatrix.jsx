@@ -131,9 +131,9 @@ export default function PersonalityMatrix({ traits, onChange }) {
   };
 
   const getSliderStatus = (cfg, val) => {
-    if (val >= 65) return cfg.highLabel;
-    if (val <= 35) return cfg.lowLabel;
-    return cfg.midLabel;
+    if (val >= 65) return { label: cfg.highLabel, pct: val };
+    if (val <= 35) return { label: cfg.lowLabel, pct: 100 - val };
+    return { label: cfg.midLabel, pct: val };
   };
 
   return (
@@ -149,13 +149,13 @@ export default function PersonalityMatrix({ traits, onChange }) {
       <div className="personality-matrix__sliders">
         {SLIDER_CONFIGS.map((cfg) => {
           const val = currentSliders[cfg.key] ?? 50;
-          const statusText = getSliderStatus(cfg, val);
+          const status = getSliderStatus(cfg, val);
           return (
             <div key={cfg.key} className="personality-slider">
               <div className="personality-slider__label-row">
                 <span className="personality-slider__name">{cfg.label}</span>
                 <span className="personality-slider__status" style={{ color: cfg.color }}>
-                  {statusText} <strong>({val}%)</strong>
+                  {status.label} <strong>({status.pct}%)</strong>
                 </span>
               </div>
 

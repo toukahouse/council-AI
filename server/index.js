@@ -661,11 +661,26 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
         const { sliders = {}, badges = [], customTraits = [] } = parsedTraits;
 
         const traitLines = [];
-        if (sliders.dominance !== undefined) traitLines.push(`Tingkat Kendali: ${sliders.dominance >= 65 ? 'Dominan & Mengontrol (' + sliders.dominance + '%)' : sliders.dominance <= 35 ? 'Submisif & Penurut (' + sliders.dominance + '%)' : 'Setara & Fleksibel (' + sliders.dominance + '%)'}`);
-        if (sliders.warmth !== undefined) traitLines.push(`Kehangatan: ${sliders.warmth >= 65 ? 'Hangat & Ramah (' + sliders.warmth + '%)' : sliders.warmth <= 35 ? 'Dingin & Apatis/Kuudere (' + sliders.warmth + '%)' : 'Rasional & Tenang (' + sliders.warmth + '%)'}`);
-        if (sliders.patience !== undefined) traitLines.push(`Temperamen: ${sliders.patience >= 65 ? 'Pemarah/Sumbu Pendek/Tsundere (' + sliders.patience + '%)' : sliders.patience <= 35 ? 'Penyabar/Stoic (' + sliders.patience + '%)' : 'Wajar (' + sliders.patience + '%)'}`);
-        if (sliders.libido !== undefined) traitLines.push(`Hasrat Sensual (18+): ${sliders.libido >= 65 ? 'Liar & Sensual/Ecchi (' + sliders.libido + '%)' : sliders.libido <= 35 ? 'Polos & Menjaga Jarak (' + sliders.libido + '%)' : 'Romantis Normal (' + sliders.libido + '%)'}`);
-        if (sliders.morality !== undefined) traitLines.push(`Moralitas & Taktik: ${sliders.morality >= 65 ? 'Manipulatif/Sadis/Jahat (' + sliders.morality + '%)' : sliders.morality <= 35 ? 'Lurus & Berhati Mulia (' + sliders.morality + '%)' : 'Pragmatis (' + sliders.morality + '%)'}`);
+        if (sliders.dominance !== undefined) {
+          const v = sliders.dominance;
+          traitLines.push(`Tingkat Kendali: ${v >= 65 ? `Dominan & Mengontrol (Intensitas: ${v}%)` : v <= 35 ? `Submisif & Penurut (Intensitas: ${100 - v}%)` : `Setara & Fleksibel (50% Seimbang)`}`);
+        }
+        if (sliders.warmth !== undefined) {
+          const v = sliders.warmth;
+          traitLines.push(`Kehangatan: ${v >= 65 ? `Hangat & Ramah (Intensitas: ${v}%)` : v <= 35 ? `Dingin & Apatis/Kuudere (Intensitas: ${100 - v}%)` : `Rasional & Tenang (50% Seimbang)`}`);
+        }
+        if (sliders.patience !== undefined) {
+          const v = sliders.patience;
+          traitLines.push(`Temperamen: ${v >= 65 ? `Pemarah/Sumbu Pendek/Tsundere (Intensitas: ${v}%)` : v <= 35 ? `Penyabar/Stoic (Intensitas: ${100 - v}%)` : `Stabil & Wajar (50% Seimbang)`}`);
+        }
+        if (sliders.libido !== undefined) {
+          const v = sliders.libido;
+          traitLines.push(`Hasrat Sensual (18+): ${v >= 65 ? `Liar & Sensual/Ecchi (Intensitas: ${v}%)` : v <= 35 ? `Polos & Menjaga Jarak (Intensitas: ${100 - v}%)` : `Romantis Normal (50% Seimbang)`}`);
+        }
+        if (sliders.morality !== undefined) {
+          const v = sliders.morality;
+          traitLines.push(`Moralitas & Taktik: ${v >= 65 ? `Manipulatif/Sadis/Licik (Intensitas: ${v}%)` : v <= 35 ? `Lurus & Berhati Mulia (Intensitas: ${100 - v}%, Menjunjung Tinggi Kebaikan & Tulus)` : `Pragmatis & Realistis (50% Seimbang)`}`);
+        }
 
         if (Array.isArray(badges) && badges.length > 0) traitLines.push(`Arketip Khas: ${badges.join(', ')}`);
         if (Array.isArray(customTraits) && customTraits.length > 0) traitLines.push(`Ciri Khusus: ${customTraits.join(', ')}`);
@@ -674,7 +689,7 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
           finalSystemPrompt += `\n\n[DNA & PARAMETER PSIKOLOGI KARAKTER]:\n` +
             `${traitLines.join('\n')}\n` +
             `(Panduan Integrasi Psikologis:\n` +
-            `- Persentase menunjukkan intensitas dorongan batin karakter (0% = sangat rendah/kutub kiri, 50% = seimbang, 100% = dorongan mutlak/kutub kanan).\n` +
+            `- Persentase intensitas menunjukkan seberapa kuat dorongan sifat tersebut mendominasi batin karakter (misal: "85% Berhati Mulia" berarti karakter sangat tulus, berjiwa malaikat, dan menolak berbuat jahat; sedangkan "85% Manipulatif" berarti berjiwa licik/sadis).\n` +
             `- Parameter bekerja secara multidimensional dan TIDAK saling meniadakan. Jika dua sifat bernilai tinggi bersamaan (misal: Temperamen Pemarah + Hasrat Liar/Sensual), LEBURKAN keduanya menjadi kepribadian yang utuh: karakter mengekspresikan gairah liarnya dengan gaya bicara galak, menuntut, atau mengomel, bukan saling menghilangkan!\n` +
             `- Arketip Khas & Ciri Khusus: Berfungsi sebagai bumbu kepribadian utama dan kebiasaan spesifik yang wajib tercermin nyata dalam pilihan kata, gerak-gerik tubuh, dan reaksi emosional karakter.)`;
         }
@@ -852,6 +867,18 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
     if (npcs.length > 0) {
       const npcText = npcs.map(n => n.text).join('\n\n');
       finalSystemPrompt += `\n\n[INFORMASI NPC TAMBAHAN]\nKarakter-karakter berikut mungkin terlibat dalam cerita:\n${npcText}`;
+    }
+
+    // Inject Active User Persona into System Prompt
+    if (activePersona && (activePersona.name || activePersona.description || activePersona.role)) {
+      const personaInfo = ['[IDENTITAS & PROFIL LAWAN BICARA (USER PERSONA)]:'];
+      if (activePersona.name) personaInfo.push(`- Nama User: ${activePersona.name}`);
+      if (activePersona.role) personaInfo.push(`- Peran / Identitas: ${activePersona.role}`);
+      if (activePersona.description) personaInfo.push(`- Deskripsi Fisik & Karakter: ${activePersona.description}`);
+      if (activePersona.background) personaInfo.push(`- Latar Belakang: ${activePersona.background}`);
+      if (activePersona.traits) personaInfo.push(`- Sifat / Watak: ${activePersona.traits}`);
+      personaInfo.push(`(Instruksi Mutlak: Lawan bicaramu saat ini adalah "${activePersona.name || 'User'}". Kenali ciri fisik, identitas, dan panggil namanya secara konsisten sesuai profil di atas. Jangan tertukar atau memanggil dengan nama lain.)`);
+      finalSystemPrompt += `\n\n${personaInfo.join('\n')}`;
     }
 
     const payload = {

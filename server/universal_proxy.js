@@ -49,8 +49,17 @@ async function main() {
   }
   
   // User Persona
-  if (persona?.description) {
-    promptParts.push(`Deskripsi User:\n${persona.description}`);
+  if (persona && (persona.name || persona.description || persona.role)) {
+    if (!character?.systemPrompt?.includes('[IDENTITAS & PROFIL LAWAN BICARA')) {
+      const userParts = ['[IDENTITAS & PROFIL LAWAN BICARA (USER PERSONA)]:'];
+      if (persona.name) userParts.push(`- Nama User: ${persona.name}`);
+      if (persona.role) userParts.push(`- Peran / Identitas: ${persona.role}`);
+      if (persona.description) userParts.push(`- Deskripsi Fisik & Karakter: ${persona.description}`);
+      if (persona.background) userParts.push(`- Latar Belakang: ${persona.background}`);
+      if (persona.traits) userParts.push(`- Sifat / Watak: ${persona.traits}`);
+      userParts.push(`(Instruksi Mutlak: Lawan bicaramu saat ini adalah "${persona.name || 'User'}". Kenali ciri fisik, identitas, dan panggil namanya secara konsisten sesuai profil di atas.)`);
+      promptParts.push(userParts.join('\n'));
+    }
   }
   
   // Memories
@@ -87,7 +96,9 @@ async function main() {
 
   // Inject organic psychological resonance reminder to the last user turn
   if (rawMessages.length > 0 && (affinity !== undefined || currentMood)) {
-    let cue = `\n\n[SIMULASI PSIKOLOGI ORGANIK]: Afinitas: ${affinity}%, Mood Awal: ${currentMood.toUpperCase()}.`;
+    const lastUserTurn = rawMessages[rawMessages.length - 1];
+    const userTarget = persona?.name ? ` Lawan bicaramu adalah "${persona.name}".` : '';
+    let cue = `\n\n[SIMULASI PSIKOLOGI ORGANIK]: Afinitas: ${affinity}%, Mood Awal: ${currentMood.toUpperCase()}.${userTarget}`;
     cue += ` Evaluasi bagaimana interaksi barusan memengaruhi perasaanmu. Putuskan [MOOD: ...] dan perubahan [AFFINITY: 0 / +1 / +2 / -1 / -2] (obrolan santai bernilai 0, perhatian manis +1, dilarang inflasi cepat) di 2 baris paling akhir responsmu.`;
     cue += `\n[FORMAT MUTLAK]: Dialog ucapan WAJIB diapit "..." di luar tanda bintang. Narasi aksi diapit **...**. GAYA BAHASA: Santai/lisan (kalo, bakalan, emangnya, banget, nggak, udah, gimana). Lanjutkan adegan secara ekspresif, natural, dan mendalam.`;
     lastUserTurn.content += cue;

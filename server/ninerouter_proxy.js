@@ -49,8 +49,17 @@ async function main() {
   }
   
   // User Persona
-  if (persona?.description) {
-    promptParts.push(`Deskripsi User:\n${persona.description}`);
+  if (persona && (persona.name || persona.description || persona.role)) {
+    if (!character?.systemPrompt?.includes('[IDENTITAS & PROFIL LAWAN BICARA')) {
+      const userParts = ['[IDENTITAS & PROFIL LAWAN BICARA (USER PERSONA)]:'];
+      if (persona.name) userParts.push(`- Nama User: ${persona.name}`);
+      if (persona.role) userParts.push(`- Peran / Identitas: ${persona.role}`);
+      if (persona.description) userParts.push(`- Deskripsi Fisik & Karakter: ${persona.description}`);
+      if (persona.background) userParts.push(`- Latar Belakang: ${persona.background}`);
+      if (persona.traits) userParts.push(`- Sifat / Watak: ${persona.traits}`);
+      userParts.push(`(Instruksi Mutlak: Lawan bicaramu saat ini adalah "${persona.name || 'User'}". Kenali ciri fisik, identitas, dan panggil namanya secara konsisten sesuai profil di atas.)`);
+      promptParts.push(userParts.join('\n'));
+    }
   }
   
   // Memories
@@ -65,7 +74,8 @@ async function main() {
 
   // Helper to build system reminder at the message level
   const buildSystemReminder = () => {
-    let reminder = `\n\n[SISTEM NARASI: Tetaplah 100% in-character sebagai "${charName}". FORMAT: Dialog ucapan WAJIB diapit "..." di luar tanda bintang. Narasi aksi diapit **...**. GAYA BAHASA: Santai/lisan (kalo, bakalan, emangnya, banget, nggak, udah, gimana). Lanjutkan adegan secara ekspresif, natural, dan mendalam.]`;
+    const userTarget = persona?.name ? ` Lawan bicaramu adalah "${persona.name}".` : '';
+    let reminder = `\n\n[SISTEM NARASI: Tetaplah 100% in-character sebagai "${charName}".${userTarget} FORMAT: Dialog ucapan WAJIB diapit "..." di luar tanda bintang. Narasi aksi diapit **...**. GAYA BAHASA: Santai/lisan (kalo, bakalan, emangnya, banget, nggak, udah, gimana). Lanjutkan adegan secara ekspresif, natural, dan mendalam.]`;
     
     // Universal organic psychology reminder
     if (affinity !== undefined || currentMood) {

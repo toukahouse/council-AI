@@ -59,10 +59,21 @@ def main():
     if sample_dialog:
         system_parts.append(f"Contoh Dialog:\n{sample_dialog}")
 
-    # 2. Deskripsi persona user
-    user_desc = persona.get('description', '')
-    if user_desc:
-        system_parts.append(f"Deskripsi User:\n{user_desc}")
+    # 2. Deskripsi persona user (Lengkap)
+    if persona:
+        user_parts = ["[IDENTITAS & PROFIL LAWAN BICARA (USER PERSONA)]:"]
+        if persona.get('name'):
+            user_parts.append(f"- Nama User: {persona.get('name')}")
+        if persona.get('role'):
+            user_parts.append(f"- Peran / Identitas: {persona.get('role')}")
+        if persona.get('description'):
+            user_parts.append(f"- Deskripsi Fisik & Karakter: {persona.get('description')}")
+        if persona.get('background'):
+            user_parts.append(f"- Latar Belakang: {persona.get('background')}")
+        if persona.get('traits'):
+            user_parts.append(f"- Sifat / Watak: {persona.get('traits')}")
+        user_parts.append(f'(Instruksi Mutlak: Lawan bicaramu saat ini adalah "{persona.get("name", "User")}". Kenali ciri fisik, identitas, dan panggil namanya secara konsisten sesuai profil di atas.)')
+        system_parts.append("\n".join(user_parts))
 
     # 3. Memory Karakter AI
     if memories:
