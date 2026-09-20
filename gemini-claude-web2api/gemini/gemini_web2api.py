@@ -60,6 +60,16 @@ CONFIG = dict(DEFAULT_CONFIG)
 #   1=FAST, 2=THINKING, 3=PRO, 4=AUTO, 5=FAST_DYNAMIC_THINKING, 6=FLASH_LITE
 
 MODELS = {
+    "gemini-3.8-flash": {
+        "mode": 1, "think": 4, "provider": "gemini",
+        "header_id": "56fdd199312815e2",
+        "desc": "3.8 Flash - Bantuan Serbaguna (Generasi Terkini & Cepat)",
+    },
+    "gemini-3.8-flash-thinking": {
+        "mode": 2, "think": 0, "provider": "gemini",
+        "header_id": "e051ce1aa80aa576",
+        "desc": "3.8 Flash Deep Thinking - Penalaran Kompleks & Mendalam",
+    },
     "gemini-3.7-flash": {
         "mode": 1, "think": 4, "provider": "gemini",
         "header_id": "56fdd199312815e2",
@@ -440,26 +450,27 @@ def gemini_stream_generate_iter(prompt: str, model_id: int, think_mode: int, hea
                                 continue
                             inner2 = json.loads(inner_str)
                             if isinstance(inner2, list) and len(inner2) > 4 and inner2[4]:
-                                for part in inner2[4]:
-                                    if isinstance(part, list) and len(part) > 1 and part[1] and isinstance(part[1], list):
-                                        for t in part[1]:
-                                            if isinstance(t, str) and len(t) > len(prev_text):
-                                                delta = t[len(prev_text):]
-                                                delta = clean_gemini_text(delta)
-                                                if delta:
-                                                    yield delta
-                                                prev_text = t
+                                # Strictly use the primary candidate (index 0) to avoid mixing multiple draft candidates
+                                candidate = inner2[4][0]
+                                if isinstance(candidate, list) and len(candidate) > 1 and candidate[1] and isinstance(candidate[1], list):
+                                    for t in candidate[1]:
+                                        if isinstance(t, str) and len(t) > len(prev_text):
+                                            delta = t[len(prev_text):]
+                                            delta = clean_gemini_text(delta, strip_whitespace=False)
+                                            if delta:
+                                                yield delta
+                                            prev_text = t
                         except (json.JSONDecodeError, IndexError, TypeError):
                             pass
 
 
-def clean_gemini_text(text: str) -> str:
+def clean_gemini_text(text: str, strip_whitespace: bool = False) -> str:
     """Remove internal code execution artifacts."""
     text = re.sub(
         r'```(?:python|javascript|text)\?code_(?:reference|stdout)&code_event_index=\d+\n.*?```\n?',
         '', text, flags=re.DOTALL
     )
-    return text.strip()
+    return text.strip() if strip_whitespace else text
 
 
 def strip_reasoning_content(messages: list) -> list:
@@ -498,24 +509,26 @@ def extract_response_text(raw: str) -> str:
         if t.strip():
             text = t
             break
-    return clean_gemini_text(text)
+    return clean_gemini_text(text, strip_whitespace=True)
 
 
 # ─── OpenAI Format Helpers ───────────────────────────────────────────────────
 
-MAX_CONTEXT_MSGS = 6
-MAX_TOOL_CHARS = 4000
+MAX_CONTEXT_MSGS = 30
+MAX_TOOL_CHARS = 50000
 
 def trim_context(messages: list) -> list:
-    """Trim messages to prevent oversized context payloads."""
+    """Trim messages to prevent oversized context payloads without breaking system prompts."""
     system = [m for m in messages if m.get("role") == "system"]
     others = [m for m in messages if m.get("role") != "system"]
     kept = others[-MAX_CONTEXT_MSGS:] if len(others) > MAX_CONTEXT_MSGS else others
     result = system + kept
     for m in result:
-        content = m.get("content", "")
-        if isinstance(content, str) and len(content) > MAX_TOOL_CHARS:
-            m["content"] = content[:MAX_TOOL_CHARS] + f"\n[... truncated {len(content)-MAX_TOOL_CHARS} chars]"
+        # Never truncate system prompt (containing formatting rules and persona)
+        if m.get("role") != "system":
+            content = m.get("content", "")
+            if isinstance(content, str) and len(content) > MAX_TOOL_CHARS:
+                m["content"] = content[:MAX_TOOL_CHARS] + f"\n[... truncated {len(content)-MAX_TOOL_CHARS} chars]"
     return result
 
 def messages_to_prompt(messages: list, tools: list = None) -> str:
@@ -693,7 +706,18 @@ class GeminiHandler(BaseHTTPRequestHandler):
             think_override = int(think_str)
         cfg = MODELS.get(model_name)
         if not cfg:
-            return None, None, None, None, None, f"Unknown model: {model_name}"
+            # Smart fallback for future Gemini models or custom model strings
+            lower_name = model_name.lower()
+            if "thinking" in lower_name:
+                cfg = {"mode": 2, "think": 0, "provider": "gemini", "header_id": "e051ce1aa80aa576", "desc": model_name}
+            elif "pro" in lower_name:
+                cfg = {"mode": 3, "think": 4, "provider": "gemini", "header_id": "e6fa609c3fa255c0", "desc": model_name}
+            elif "lite" in lower_name:
+                cfg = {"mode": 6, "think": 4, "provider": "gemini", "header_id": "8c46e95b1a07cecc", "desc": model_name}
+            elif "gemini" in lower_name or "flash" in lower_name:
+                cfg = {"mode": 1, "think": 4, "provider": "gemini", "header_id": "56fdd199312815e2", "desc": model_name}
+            else:
+                return None, None, None, None, None, f"Unknown model: {model_name}"
         provider = cfg.get("provider", "gemini")
         return model_name, cfg.get("mode"), (think_override if think_override is not None else cfg.get("think")), cfg.get("header_id"), provider, None
 

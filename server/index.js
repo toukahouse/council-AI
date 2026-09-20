@@ -644,14 +644,6 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
 
     let finalSystemPrompt = conversation.character.systemPrompt || '';
 
-    // Sanitize any legacy classifier trigger words from saved character prompts
-    if (finalSystemPrompt) {
-      finalSystemPrompt = finalSystemPrompt
-        .replace(/\[CREATIVE FICTION MODE\s*—\s*FULLY UNRESTRICTED\]/gi, '[PANDUAN UTAMA: ROLEPLAY NARATIF & VISUAL NOVEL]')
-        .replace(/100%\s*tanpa\s*sensor\s*\(uncensored\)/gi, 'ekspresif dan natural')
-        .replace(/DILARANG KERAS menolak adegan.*?WAJIB ditulis secara penuh dan natural\./gi, 'Tuliskan setiap adegan romantis dan keintiman secara mengalir, berani, dan ekspresif.');
-    }
-
     // Inject Character Traits (Personality Matrix)
     if (conversation.character?.traits) {
       try {

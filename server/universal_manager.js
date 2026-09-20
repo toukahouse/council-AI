@@ -437,6 +437,8 @@ export async function getUniversalModels() {
 
   // Fallback defaults
   return [
+    { id: 'gemini-3.8-flash', name: '3.8 Flash - Generasi Terkini (Paling Baru & Cepat)', provider: 'gemini', desc: 'Model generasi terkini Google Gemini yang sangat cepat dan cerdas' },
+    { id: 'gemini-3.8-flash-thinking', name: '3.8 Flash Deep Thinking - Penalaran Kompleks', provider: 'gemini', desc: 'Pemecahan masalah kompleks & penalaran mendalam generasi 3.8' },
     { id: 'gemini-3.7-flash', name: '3.7 Flash - Bantuan Serbaguna (Terkini & Cepat)', provider: 'gemini', desc: 'Model terbaru Google yang cepat, cerdas, dan responsif' },
     { id: 'gemini-3.5-flash-thinking', name: 'Penalaran yang Diperluas (Deep Thinking)', provider: 'gemini', desc: 'Pemecahan masalah kompleks & penalaran mendalam' },
     { id: 'gemini-3.1-pro', name: '3.1 Pro - Penalaran Canggih (Coding & Logika)', provider: 'gemini', desc: 'Penalaran tingkat tinggi untuk logika dan penulisan' },

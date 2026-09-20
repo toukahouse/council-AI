@@ -9,6 +9,22 @@ const initialModels = [
 const UNIVERSAL_MODELS = [
   // Google Gemini Models
   {
+    id: 'gemini-3.8-flash',
+    name: 'Gemini 3.8 Flash',
+    provider: 'Google',
+    badge: '🔥 Generasi Terkini 3.8',
+    icon: '⚡',
+    desc: 'Model generasi terkini Google Gemini yang paling cepat, cerdas, dan responsif.'
+  },
+  {
+    id: 'gemini-3.8-flash-thinking',
+    name: 'Gemini 3.8 Flash Thinking',
+    provider: 'Google',
+    badge: '🧠 Deep Reasoning 3.8',
+    icon: '🔮',
+    desc: 'Penalaran kompleks mendalam generasi 3.8 untuk narasi dan intrik mendalam.'
+  },
+  {
     id: 'gemini-3.7-flash',
     name: 'Gemini 3.7 Flash',
     provider: 'Google',

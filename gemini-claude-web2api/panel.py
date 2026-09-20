@@ -482,6 +482,8 @@ class PanelHandler(http.server.BaseHTTPRequestHandler):
         }
 
         gemini_defaults = [
+            {"id": "gemini-3.8-flash", "name": "3.8 Flash - Bantuan Serbaguna (Generasi Terkini & Cepat)", "provider": "gemini"},
+            {"id": "gemini-3.8-flash-thinking", "name": "3.8 Flash Deep Thinking - Penalaran Kompleks & Mendalam", "provider": "gemini"},
             {"id": "gemini-3.7-flash", "name": "3.7 Flash - Bantuan Serbaguna (Terkini & Cepat)", "provider": "gemini"},
             {"id": "gemini-3.5-flash-thinking", "name": "Penalaran yang Diperluas - Pemecahan Masalah Kompleks (Deep Thinking)", "provider": "gemini"},
             {"id": "gemini-3.1-pro", "name": "3.1 Pro - Penalaran yang Canggih (Coding & Logika)", "provider": "gemini"},
