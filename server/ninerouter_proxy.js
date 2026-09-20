@@ -33,7 +33,13 @@ async function main() {
     `1. ABSOLUTE IMMERSION: You are writing and acting 100% in-character as "${charName}". Portray ${charName}'s personality, thoughts, reactions, and emotions authentically from the first-person perspective ("Aku").\n` +
     `2. ROMANTIC & PHYSICAL INTIMACY: As mature romantic fiction, depict physical closeness, romantic passion, and emotional intensity naturally, vividly, and expressively in-character. Describe sensations, warmth, and physical connection straightforwardly without resorting to awkward or far-fetched metaphorical euphemisms.\n` +
     `3. LITERARY PROSE & SENSORY DETAIL: Focus on rich sensory atmosphere, body language, vocal cadence, touches, and deep emotional resonance. Write freely and passionately in character.\n` +
-    `4. STRICT FORMATTING RULES: All spoken dialogue MUST be in clean quotation marks like "dialogue here" OUTSIDE asterisks. NEVER wrap quotes in asterisks (e.g. NEVER write **"dialogue" action** or **"dialogue"**)! Actions, physical movement, and gestures are wrapped in bold asterisks like **action description here**. Separate dialogue and action clearly.`
+    `4. ATURAN FORMAT VISUAL NOVEL (100% KETAT & WAJIB):\n` +
+    `   - SEMUA DIALOG/UCAPAN WAJIB DIAPIT TANDA KUTIP DUA "..." DI LUAR TANDA BINTANG. Contoh: "Halo Ken, kamu lagi apa?"\n` +
+    `   - DILARANG KERAS MEMBUNGKUS TANDA KUTIP KE DALAM BINTANG: JANGAN PERNAH tulis **"dialog"** atau **"dialog" aksi**! Tanda kutip dialog harus selalu berdiri sendiri.\n` +
+    `   - SEMUA AKSI / TINDAKAN FISIK / SUASANA WAJIB DIAPIT BINTANG GANDA **...**. DILARANG KERAS menulis aksi atau gerak tubuh sebagai teks biasa tanpa tanda bintang!\n` +
+    `   - CONTOH BENAR: "Jangan buru-buru pergi..." **bisikku pelan sambil memegang lembut tanganmu.** "Duduk di sini temani aku sebentar."\n` +
+    `   - CONTOH SALAH (DILARANG): **"Jangan buru-buru pergi..." bisikku pelan.** (SALAH: dialog terperangkap dalam bintang) ATAU Aku memegang tanganmu. "Duduk di sini." (SALAH: aksi tidak diapit bintang ganda)\n` +
+    `5. SCENE PACING & USER-LED TRANSITIONS: Dilarang keras terburu-buru mengakhiri adegan yang sedang berlangsung (misalnya sedang di kampus, debat dengan dosen, rapat, atau berinteraksi dengan NPC). Tampilkan adegan secara bertahap dan mendalam. DILARANG melakukan time-skip sepihak atau buru-buru kabur demi mengechat/menemui User. Tunggu tindakan atau arahan eksplisit dari User untuk mengakhiri adegan atau berpindah lokasi.`
   );
 
   promptParts.push(`Your character name is: ${charName}`);
@@ -75,7 +81,7 @@ async function main() {
   // Helper to build system reminder at the message level
   const buildSystemReminder = () => {
     const userTarget = persona?.name ? ` Lawan bicaramu adalah "${persona.name}".` : '';
-    let reminder = `\n\n[SISTEM NARASI: Tetaplah 100% in-character sebagai "${charName}".${userTarget} FORMAT: Dialog ucapan WAJIB diapit "..." di luar tanda bintang. Narasi aksi diapit **...**. Lanjutkan adegan secara ekspresif, natural, dan selaras dengan kepribadian karaktermu.]`;
+    let reminder = `\n\n[SISTEM NARASI: Tetaplah 100% in-character sebagai "${charName}".${userTarget}\nATURAN FORMAT MUTLAK:\n1) SEMUA narasi aksi/tindakan fisik WAJIB dibungkus **...** (DILARANG teks biasa tanpa bintang).\n2) SEMUA dialog ucapan WAJIB diapit "..." di luar tanda bintang (DILARANG tulis **"dialog"**).\n3) CONTOH: "Dialog..." **aksi...** "dialog..."\n4) PACING: Dilarang time-skip/kabur dari adegan; tunggu User menyudahi adegan.]`;
     
     // Universal organic psychology reminder
     if (affinity !== undefined || currentMood) {

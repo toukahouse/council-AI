@@ -62,36 +62,62 @@ const ChatMessageComponent = ({ message, seqId, isTyping, animate, charName, cha
 
   const formatContent = (text) => {
     if (!text) return { __html: '' };
-    // Escape HTML first to prevent XSS
-    let escaped = text.replace(/&/g, '&amp;')
-                      .replace(/</g, '&lt;')
-                      .replace(/>/g, '&gt;');
 
-    // Pre-processing: auto-separate dialogue quotes accidentally trapped inside **...**
-    escaped = escaped.replace(/\*\*([\s\S]*?)\*\*/g, (match, inner) => {
-      const quotePattern = /("[^"]*"|“[^”]*”|&quot;[^&]*&quot;)/g;
+    let clean = text;
+
+    // 1. Pre-processing: auto-separate dialogue quotes accidentally trapped inside **...**
+    // e.g. **"Halo" sambil tersenyum** -> "Halo" **sambil tersenyum**
+    // e.g. **"Halo"** -> "Halo"
+    clean = clean.replace(/\*\*([\s\S]*?)\*\*/g, (match, inner) => {
+      const quotePattern = /("[^"]*"|“[^”]*”|「[^」]*」)/g;
       if (!quotePattern.test(inner)) return match;
-      const parts = inner.split(/("[^"]*"|“[^”]*”|&quot;[^&]*&quot;)/g);
+      const parts = inner.split(quotePattern);
       let res = '';
       for (const part of parts) {
         if (!part) continue;
-        if (/^("[^"]*"|“[^”]*”|&quot;[^&]*&quot;)$/.test(part)) {
-          res += part;
+        if (/^("[^"]*"|“[^”]*”|「[^」]*」)$/.test(part)) {
+          res += ` ${part} `;
         } else {
           const trimmed = part.trim();
-          if (trimmed) {
-            const leadingWs = part.match(/^\s*/)[0];
-            const trailingWs = part.match(/\s*$/)[0];
-            res += leadingWs + '**' + trimmed + '**' + trailingWs;
-          } else {
-            res += part;
-          }
+          if (trimmed) res += ` **${trimmed}** `;
         }
       }
-      return res;
+      return res.replace(/\s+/g, ' ');
     });
 
-    // Replace **text** with bold, italic, and colored span
+    // 2. Intelligent Auto-Tagging for Untagged Action Text:
+    // If the message has quotes, but contains non-quote text that is completely missing **...**,
+    // auto-wrap those non-quote blocks into **...** so they display with proper action styling
+    const quoteRegex = /("[^"]*"|“[^”]*”|「[^」]*」)/g;
+    if (quoteRegex.test(clean)) {
+      const segments = clean.split(quoteRegex);
+      clean = segments.map(seg => {
+        if (!seg) return '';
+        // If it's a quote, keep it clean
+        if (/^("[^"]*"|“[^”]*”|「[^」]*」)$/.test(seg)) {
+          return seg;
+        }
+        // If it's outside quote and doesn't contain ** or * yet, wrap in **
+        const trimmed = seg.trim();
+        if (trimmed && !trimmed.includes('**') && !trimmed.includes('*') && !trimmed.startsWith('[MOOD:') && !trimmed.startsWith('[AFFINITY:')) {
+          const leadingWs = seg.match(/^\s*/)[0];
+          const trailingWs = seg.match(/\s*$/)[0];
+          return `${leadingWs}**${trimmed}**${trailingWs}`;
+        }
+        return seg;
+      }).join('');
+    }
+
+    // 3. Ensure spacing between adjacent quotes and asterisks
+    clean = clean.replace(/(\*\*[\s\S]*?\*\*|\*[^\*]+?\*)(["“「])/g, '$1 $2');
+    clean = clean.replace(/(["”」])(\*\*|\*)/g, '$1 $2');
+
+    // 4. Escape HTML to prevent XSS
+    let escaped = clean.replace(/&/g, '&amp;')
+                       .replace(/</g, '&lt;')
+                       .replace(/>/g, '&gt;');
+
+    // 5. Replace **text** with bold, italic, and colored span
     let formatted = escaped.replace(/\*\*([\s\S]*?)\*\*/g, '<span style="font-weight: bold; font-style: italic; color: var(--text-bold-color, #eab308);">$1</span>');
     // Replace *text* with italic span
     formatted = formatted.replace(/\*([^\*]+?)\*/g, '<span style="font-style: italic;">$1</span>');

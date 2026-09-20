@@ -465,12 +465,14 @@ def gemini_stream_generate_iter(prompt: str, model_id: int, think_mode: int, hea
 
 
 def clean_gemini_text(text: str, strip_whitespace: bool = False) -> str:
-    """Remove internal code execution artifacts."""
+    """Remove internal code execution artifacts and turn labels."""
     text = re.sub(
         r'```(?:python|javascript|text)\?code_(?:reference|stdout)&code_event_index=\d+\n.*?```\n?',
         '', text, flags=re.DOTALL
     )
+    text = re.sub(r'^\s*(?:\[(?:Character|Assistant|AI|Model)\]:\s*|(?:Character|Assistant|AI|Model):\s*)', '', text, flags=re.IGNORECASE)
     return text.strip() if strip_whitespace else text
+
 
 
 def strip_reasoning_content(messages: list) -> list:
@@ -496,12 +498,12 @@ def extract_response_text(raw: str) -> str:
                 continue
             inner = json.loads(inner_str)
             if isinstance(inner, list) and len(inner) > 4 and inner[4]:
-                for part in inner[4]:
-                    if isinstance(part, list) and len(part) > 1 and part[1]:
-                        if isinstance(part[1], list):
-                            for t in part[1]:
-                                if isinstance(t, str) and len(t) > 0:
-                                    texts.append(t)
+                candidate = inner[4][0]
+                if isinstance(candidate, list) and len(candidate) > 1 and candidate[1]:
+                    if isinstance(candidate[1], list):
+                        for t in candidate[1]:
+                            if isinstance(t, str) and len(t) > 0:
+                                texts.append(t)
         except (json.JSONDecodeError, IndexError, TypeError):
             pass
     text = ""
@@ -561,7 +563,7 @@ def messages_to_prompt(messages: list, tools: list = None) -> str:
                 if c.get("type") in ("text", "input_text")
             )
         if role == "system":
-            parts.append(f"[System instruction]: {content}")
+            parts.append(f"[System instruction]:\n{content}")
         elif role == "assistant":
             if msg.get("tool_calls"):
                 tc_strs = []
@@ -571,14 +573,22 @@ def messages_to_prompt(messages: list, tools: list = None) -> str:
                         f'```tool_call\n{{"name": "{fn.get("name")}", '
                         f'"arguments": {fn.get("arguments", "{}")}}}\n```'
                     )
-                parts.append(f"[Assistant]: {content or ''}\n" + "\n".join(tc_strs))
+                parts.append(f"[Character]:\n{content or ''}\n" + "\n".join(tc_strs))
             else:
-                parts.append(f"[Assistant]: {content}")
+                parts.append(f"[Character]:\n{content}")
         elif role == "tool":
-            parts.append(f"[Tool result for {msg.get('name', '')}]: {content}")
+            parts.append(f"[Tool result for {msg.get('name', '')}]:\n{content}")
+        elif role == "user":
+            parts.append(f"[User]:\n{content}")
         else:
             parts.append(content if content else "")
+
+    # Provide completion anchor for the character
+    if messages and messages[-1].get("role") == "user":
+        parts.append("[Character]:")
+
     return "\n\n".join(p for p in parts if p)
+
 
 
 def parse_tool_calls(text: str) -> tuple:
