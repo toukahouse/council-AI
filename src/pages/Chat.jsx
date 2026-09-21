@@ -576,7 +576,7 @@ export default function Chat({ onNavigate, conversationData }) {
             if (localMsg) {
               return { 
                 ...serverMsg, 
-                thoughtProcess: localMsg.thoughtProcess,
+                thoughtProcess: localMsg.thoughtProcess || serverMsg.thoughtProcess,
                 startTime: localMsg.startTime,
                 endTime: localMsg.endTime
               };

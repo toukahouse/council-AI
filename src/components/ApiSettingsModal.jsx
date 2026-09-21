@@ -2,8 +2,12 @@ import { useState, useEffect } from 'react';
 import './ApiSettingsModal.css';
 
 const initialModels = [
-  { id: 'gemma-4-31b-it', label: 'gemma-4-31b-it' },
-  { id: 'gemini-2.5-pro', label: 'gemini-2.5-pro' },
+  { id: 'gemini-3.8-flash', label: 'gemini-3.8-flash (🔥 Generasi Terkini & Super Cepat)' },
+  { id: 'gemini-3.7-flash', label: 'gemini-3.7-flash (🌟 Sangat Cerdas & Responsif)' },
+  { id: 'gemini-3.5-flash', label: 'gemini-3.5-flash (💡 Seimbang & Cepat)' },
+  { id: 'gemini-3.1-pro-preview', label: 'gemini-3.1-pro-preview (👑 Flagship Canggih)' },
+  { id: 'gemini-2.5-flash', label: 'gemini-2.5-flash (⚡ Hemat Biaya / Flex Tier)' },
+  { id: 'gemini-2.5-pro', label: 'gemini-2.5-pro (🧠 Penalaran Logika)' },
 ];
 
 const UNIVERSAL_MODELS = [
@@ -12,49 +16,41 @@ const UNIVERSAL_MODELS = [
     id: 'gemini-3.8-flash',
     name: 'Gemini 3.8 Flash',
     provider: 'Google',
-    badge: '🔥 Generasi Terkini 3.8',
+    badge: '🔥 Generasi Terkini 3.8 (GA)',
     icon: '⚡',
-    desc: 'Model generasi terkini Google Gemini yang paling cepat, cerdas, dan responsif.'
-  },
-  {
-    id: 'gemini-3.8-flash-thinking',
-    name: 'Gemini 3.8 Flash Thinking',
-    provider: 'Google',
-    badge: '🧠 Deep Reasoning 3.8',
-    icon: '🔮',
-    desc: 'Penalaran kompleks mendalam generasi 3.8 untuk narasi dan intrik mendalam.'
+    desc: 'Model generasi terkini Google Gemini yang paling cepat, cerdas, dan responsif dengan dukungan CoT Thinking.'
   },
   {
     id: 'gemini-3.7-flash',
     name: 'Gemini 3.7 Flash',
     provider: 'Google',
-    badge: '🌟 Rekomendasi Terkini',
+    badge: '🌟 Rekomendasi Terkini (GA)',
     icon: '💎',
-    desc: 'Model terbaru Google yang sangat cepat, pintar, dan responsif untuk roleplay.'
+    desc: 'Model Google yang sangat cepat, pintar, dan responsif untuk roleplay dengan reasoning terpadu.'
   },
   {
-    id: 'gemini-3.5-flash-thinking',
-    name: 'Gemini 3.5 Flash Thinking',
+    id: 'gemini-3.1-pro-preview',
+    name: 'Gemini 3.1 Pro Preview',
     provider: 'Google',
-    badge: '🧠 Deep Reasoning',
+    badge: '👑 Flagship Reasoning (Pratinjau)',
     icon: '🔮',
-    desc: 'Penalaran diperluas (Chain-of-Thought) untuk pemecahan masalah & narasi kompleks.'
+    desc: 'Penalaran tingkat tinggi untuk alur logika mendalam, intrik narasi kompleks, dan deskripsi detail.'
   },
   {
-    id: 'gemini-3.1-pro',
-    name: 'Gemini 3.1 Pro',
+    id: 'gemini-2.5-flash',
+    name: 'Gemini 2.5 Flash',
     provider: 'Google',
-    badge: '👑 Flagship Canggih',
-    icon: '⚡',
-    desc: 'Penalaran tingkat tinggi untuk logika mendalam, coding, dan deskripsi detail.'
+    badge: '⚡ Cepat & Handal',
+    icon: '✨',
+    desc: 'Model serbaguna generasi 2.5 dengan latensi rendah dan pemikiran adaptif.'
   },
   {
-    id: 'gemini-3.5-flash-lite',
-    name: 'Gemini 3.5 Flash-Lite',
+    id: 'gemini-2.5-pro',
+    name: 'Gemini 2.5 Pro',
     provider: 'Google',
-    badge: '⚡ Super Cepat',
-    icon: '🪶',
-    desc: 'Versi teringan dengan latensi respons super instan.'
+    badge: '🎯 Pro 2.5',
+    icon: '👑',
+    desc: 'Model flagship generasi 2.5 untuk skenario narasi mendalam.'
   },
   {
     id: 'gemini-3.5-flash',
@@ -183,6 +179,15 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
   const [ninerouterCombos, setNinerouterCombos] = useState(DEFAULT_NINEROUTER_COMBOS);
   const [newComboInput, setNewComboInput] = useState('');
 
+  // Official Gemini / Vertex AI Settings
+  const [geminiProvider, setGeminiProvider] = useState('studio'); // 'studio' | 'vertex'
+  const [vertexProjectId, setVertexProjectId] = useState('');
+  const [vertexLocation, setVertexLocation] = useState('us-central1');
+  const [vertexServiceTier, setVertexServiceTier] = useState('flex'); // 'flex' | 'standard'
+  const [vertexCredentials, setVertexCredentials] = useState('');
+  const [isTestingGemini, setIsTestingGemini] = useState(false);
+  const [geminiTestFeedback, setGeminiTestFeedback] = useState(null);
+
   // Load settings from localStorage
   useEffect(() => {
     try {
@@ -190,8 +195,31 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.apiKey !== undefined) setApiKey(parsed.apiKey);
-        if (parsed.models) setModels(parsed.models);
-        if (parsed.activeModelId) setActiveModelId(parsed.activeModelId);
+        if (parsed.models) {
+          let updatedModels = [...parsed.models];
+          const newDefaults = [
+            { id: 'gemini-3.8-flash', label: 'gemini-3.8-flash (🔥 Generasi Terkini & Super Cepat)' },
+            { id: 'gemini-3.7-flash', label: 'gemini-3.7-flash (🌟 Sangat Cerdas & Responsif)' },
+            { id: 'gemini-3.5-flash', label: 'gemini-3.5-flash (💡 Seimbang & Cepat)' },
+            { id: 'gemini-3.1-pro-preview', label: 'gemini-3.1-pro-preview (👑 Flagship Canggih)' },
+            { id: 'gemini-2.5-flash', label: 'gemini-2.5-flash (⚡ Hemat Biaya / Flex Tier)' },
+            { id: 'gemini-2.5-pro', label: 'gemini-2.5-pro (🧠 Penalaran Logika)' },
+          ];
+          for (const m of newDefaults) {
+            if (!updatedModels.some(existing => existing.id === m.id)) {
+              updatedModels.push(m);
+            }
+          }
+          setModels(updatedModels);
+        }
+        if (parsed.activeModelId) {
+          // If previous active model was gemma, automatically migrate to gemini-3.8-flash
+          if (parsed.activeModelId.toLowerCase().includes('gemma')) {
+            setActiveModelId('gemini-3.8-flash');
+          } else {
+            setActiveModelId(parsed.activeModelId);
+          }
+        }
         if (parsed.temperature !== undefined) setTemperature(parsed.temperature);
         if (parsed.topP !== undefined) setTopP(parsed.topP);
         if (parsed.topK !== undefined) setTopK(parsed.topK);
@@ -225,6 +253,13 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
         if (parsed.ninerouterCombos && Array.isArray(parsed.ninerouterCombos) && parsed.ninerouterCombos.length > 0) {
           setNinerouterCombos(parsed.ninerouterCombos);
         }
+
+        // Official Gemini / Vertex AI settings
+        if (parsed.geminiProvider) setGeminiProvider(parsed.geminiProvider);
+        if (parsed.vertexProjectId !== undefined) setVertexProjectId(parsed.vertexProjectId);
+        if (parsed.vertexLocation !== undefined) setVertexLocation(parsed.vertexLocation);
+        if (parsed.vertexServiceTier !== undefined) setVertexServiceTier(parsed.vertexServiceTier);
+        if (parsed.vertexCredentials !== undefined) setVertexCredentials(parsed.vertexCredentials);
       }
     } catch (e) {
       console.error("Error loading settings", e);
@@ -387,6 +422,57 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
     setNinerouterModel(combo);
   };
 
+  const handleVertexCredentialsChange = (val) => {
+    setVertexCredentials(val);
+    const trimmed = val.trim();
+    if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (parsed.project_id && !vertexProjectId) {
+          setVertexProjectId(parsed.project_id);
+        }
+      } catch (e) {
+        // ignore parse error while typing
+      }
+    }
+  };
+
+  const handleTestGeminiConnection = async () => {
+    setIsTestingGemini(true);
+    setGeminiTestFeedback(null);
+    try {
+      const res = await fetch('/api/gemini/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiSettings: {
+            geminiProvider,
+            apiKey,
+            vertexProjectId,
+            vertexLocation,
+            vertexServiceTier,
+            vertexCredentials,
+            activeModelId
+          }
+        })
+      });
+      const data = await res.json();
+      setGeminiTestFeedback({
+        success: data.success,
+        message: data.message || (data.success ? 'Koneksi berhasil!' : 'Koneksi gagal.'),
+        sampleResponse: data.sampleResponse,
+        latency: data.latency
+      });
+    } catch (err) {
+      setGeminiTestFeedback({
+        success: false,
+        message: `Gagal menghubungi server: ${err.message}`
+      });
+    } finally {
+      setIsTestingGemini(false);
+    }
+  };
+
   const handleSave = () => {
     const settings = {
       apiKey,
@@ -400,6 +486,11 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
       thinkingEnabled,
       thinkingLevel,
       aiEngine,
+      geminiProvider,
+      vertexProjectId,
+      vertexLocation,
+      vertexServiceTier,
+      vertexCredentials,
       universalModel,
       universalProxyUrl,
       ninerouterUrl,
@@ -984,32 +1075,212 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                   </div>
                 )}
 
-                {/* OFFICIAL GEMINI API DETAIL SECTION */}
+                {/* OFFICIAL GEMINI / VERTEX AI DETAIL SECTION */}
                 {aiEngine === 'api' && (
                   <div className="api-subengine-panel">
                     <div className="api-section-card">
                       <div className="api-section-card__header">
                         <div className="api-section-card__title">
-                          <span>🔑</span> Kunci API Resmi Google
+                          <span>✨</span> Google GenAI Engine (Official & GCP Vertex AI)
                         </div>
-                        <span className="api-section-card__badge">Official API</span>
+                        <span className="api-section-card__badge">
+                          {geminiProvider === 'vertex' ? 'GCP Vertex AI' : 'AI Studio'}
+                        </span>
                       </div>
 
-                      <div className="api-form-field">
-                        <label className="api-form-label" htmlFor="api-key-input">Gemini API Key</label>
-                        <input
-                          id="api-key-input"
-                          className="api-modal__input"
-                          type="password"
-                          placeholder="Masukkan API key Google AI Studio kamu (AIzaSy...)"
-                          value={apiKey}
-                          onChange={(event) => setApiKey(event.target.value)}
-                        />
-                        <span className="api-input-hint">API key disimpan aman secara lokal di browser kamu.</span>
+                      {/* Sub-Provider Selector: AI Studio vs Vertex AI */}
+                      <div className="api-provider-segmented-control">
+                        <button
+                          type="button"
+                          className={`api-segmented-btn ${geminiProvider === 'studio' ? 'api-segmented-btn--active' : ''}`}
+                          onClick={() => {
+                            setGeminiProvider('studio');
+                            setGeminiTestFeedback(null);
+                          }}
+                        >
+                          <span className="api-segmented-icon">🔑</span>
+                          <span className="api-segmented-text">
+                            <strong>Google AI Studio</strong>
+                            <small>API Key Mandiri (AIzaSy...)</small>
+                          </span>
+                        </button>
+
+                        <button
+                          type="button"
+                          className={`api-segmented-btn ${geminiProvider === 'vertex' ? 'api-segmented-btn--active' : ''}`}
+                          onClick={() => {
+                            setGeminiProvider('vertex');
+                            setGeminiTestFeedback(null);
+                          }}
+                        >
+                          <span className="api-segmented-icon">☁️</span>
+                          <span className="api-segmented-text">
+                            <strong>GCP Vertex AI</strong>
+                            <small>Saldo / Kredit Google Cloud</small>
+                          </span>
+                        </button>
                       </div>
 
-                      <div className="api-form-field" style={{ marginTop: '16px' }}>
-                        <label className="api-form-label">Daftar Model Tersedia</label>
+                      {/* Google AI Studio Form */}
+                      {geminiProvider === 'studio' && (
+                        <div className="api-form-field" style={{ marginTop: '8px' }}>
+                          <label className="api-form-label" htmlFor="api-key-input">Gemini API Key</label>
+                          <input
+                            id="api-key-input"
+                            className="api-modal__input"
+                            type="password"
+                            placeholder="Masukkan API key Google AI Studio kamu (AIzaSy...)"
+                            value={apiKey}
+                            onChange={(event) => setApiKey(event.target.value)}
+                          />
+                          <span className="api-input-hint">
+                            Dapatkan kunci gratis dari <a href="https://aistudio.google.com/" target="_blank" rel="noreferrer" style={{ color: '#a78bfa', textDecoration: 'underline' }}>Google AI Studio</a>. Disimpan aman secara lokal di browser.
+                          </span>
+                        </div>
+                      )}
+
+                      {/* GCP Vertex AI Form */}
+                      {geminiProvider === 'vertex' && (
+                        <div className="api-vertex-form" style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                          <div className="api-info-box api-info-box--vertex">
+                            <span className="api-info-box__icon">💡</span>
+                            <div className="api-info-box__content">
+                              <strong>Kredit & Saldo Google Cloud:</strong>
+                              <p>Seluruh pemanggilan API Gemini akan otomatis memotong kuota saldo/kredit GCP pada Billing Account proyek Anda. Pastikan <code>Vertex AI API</code> sudah diaktifkan di GCP Console.</p>
+                            </div>
+                          </div>
+
+                          <div className="api-form-grid">
+                            <div className="api-form-field">
+                              <label className="api-form-label">
+                                <span className="api-label-icon">🆔</span> Project ID GCP
+                              </label>
+                              <input
+                                className="api-modal__input"
+                                type="text"
+                                placeholder="misal: my-chatbot-project-12345"
+                                value={vertexProjectId}
+                                onChange={(e) => setVertexProjectId(e.target.value)}
+                              />
+                              <span className="api-input-hint">ID Proyek GCP Anda (otomatis terisi bila paste JSON).</span>
+                            </div>
+
+                            <div className="api-form-field">
+                              <label className="api-form-label">
+                                <span className="api-label-icon">🌐</span> Region / Location
+                              </label>
+                              <select
+                                className="api-modal__input api-select-dropdown"
+                                value={vertexLocation}
+                                onChange={(e) => setVertexLocation(e.target.value)}
+                              >
+                                <option value="global">global (🌍 Rekomendasi Google untuk Flex PayGo)</option>
+                                <option value="us-central1">us-central1 (Iowa - Kuota Terbesar)</option>
+                                <option value="asia-southeast1">asia-southeast1 (Singapura - Latensi Cepat)</option>
+                                <option value="asia-east1">asia-east1 (Taiwan)</option>
+                                <option value="us-east4">us-east4 (Virginia)</option>
+                                <option value="europe-west1">europe-west1 (Belgia)</option>
+                              </select>
+                              <span className="api-input-hint">Wilayah server komputasi Vertex AI (pilih "global" atau "us-central1").</span>
+                            </div>
+                          </div>
+
+                          <div className="api-form-field">
+                            <label className="api-form-label">
+                              <span className="api-label-icon">💰</span> Service Tier (Kategori Hemat Biaya)
+                            </label>
+                            <select
+                              className="api-modal__input api-select-dropdown"
+                              value={vertexServiceTier}
+                              onChange={(e) => setVertexServiceTier(e.target.value)}
+                            >
+                              <option value="flex">⚡ Flex Tier (Diskon Harga ~50% / Saldo GCP Jauh Lebih Awet)</option>
+                              <option value="standard">Standard Tier (Harga Normal / Prioritas Standar)</option>
+                            </select>
+                            <span className="api-input-hint">
+                              Flex Tier mengaktifkan <code>service_tier="flex"</code> yang memangkas biaya token secara drastis untuk menghemat kredit GCP Anda.
+                            </span>
+                          </div>
+
+                          <div className="api-form-field">
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <label className="api-form-label">
+                                <span className="api-label-icon">📜</span> Service Account JSON Key
+                              </label>
+                              <span style={{ fontSize: '11px', color: '#94a3b8' }}>Bisa Paste JSON atau Tulis Path File</span>
+                            </div>
+                            <textarea
+                              className="api-modal__input api-textarea-code"
+                              rows={4}
+                              placeholder={`Paste isi file service_account.json di sini...\nAtau isi path file lokal di VPS/Docker, contoh: /app/gcp-key.json\n(Bisa dikosongkan jika menggunakan GOOGLE_APPLICATION_CREDENTIALS di Docker)`}
+                              value={vertexCredentials}
+                              onChange={(e) => handleVertexCredentialsChange(e.target.value)}
+                            />
+                            <span className="api-input-hint">
+                              Butuh role <code>Vertex AI User</code> (<code>roles/aiplatform.user</code>). Disimpan aman di browser/Docker Anda.
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Test Connection Button & Feedback */}
+                      <div className="api-test-connection-section" style={{ marginTop: '10px' }}>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                          <button
+                            type="button"
+                            className="api-btn-test-action"
+                            disabled={isTestingGemini}
+                            onClick={handleTestGeminiConnection}
+                          >
+                            {isTestingGemini ? (
+                              <>
+                                <span className="api-btn-spinner" />
+                                <span>Menguji Koneksi {geminiProvider === 'vertex' ? 'Vertex AI' : 'AI Studio'}...</span>
+                              </>
+                            ) : (
+                              <>
+                                <span>⚡</span>
+                                <span>Test Koneksi {geminiProvider === 'vertex' ? 'Vertex AI (GCP)' : 'Google AI Studio'}</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+
+                        {geminiTestFeedback && (
+                          <div className={`api-test-feedback-box ${geminiTestFeedback.success ? 'api-test-feedback-box--success' : 'api-test-feedback-box--error'}`}>
+                            <div className="api-test-feedback-header">
+                              <span className="api-test-feedback-icon">
+                                {geminiTestFeedback.success ? '✅' : '❌'}
+                              </span>
+                              <span className="api-test-feedback-title">
+                                {geminiTestFeedback.success ? 'Koneksi Berhasil!' : 'Koneksi Gagal'}
+                              </span>
+                              {geminiTestFeedback.latency && (
+                                <span className="api-test-feedback-latency">
+                                  {geminiTestFeedback.latency} ms
+                                </span>
+                              )}
+                            </div>
+                            <p className="api-test-feedback-msg">{geminiTestFeedback.message}</p>
+                            {geminiTestFeedback.sampleResponse && (
+                              <div className="api-test-feedback-sample">
+                                <em>Respon Model:</em> "{geminiTestFeedback.sampleResponse}"
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Model Selection */}
+                      <div className="api-form-field" style={{ marginTop: '18px', borderTop: '1px solid rgba(255, 255, 255, 0.07)', paddingTop: '16px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                          <label className="api-form-label">
+                            <span className="api-label-icon">🤖</span> Model yang Aktif Digunakan
+                          </label>
+                          <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+                            Model Aktif: <strong style={{ color: '#a78bfa' }}>{activeModelId}</strong>
+                          </span>
+                        </div>
                         <div className="api-modal__models">
                           {models.map((model) => (
                             <div
@@ -1239,18 +1510,30 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
 
                 {/* Thinking Level Cards */}
                 <div className="api-form-field" style={{ marginTop: '16px' }}>
-                  <label className="api-form-label">Tingkat Intensitas Penalaran</label>
+                  <label className="api-form-label">Tingkat Intensitas Penalaran (Thinking Level)</label>
                   <div className={`api-thinking-levels-grid ${!thinkingEnabled ? 'api-thinking-levels-grid--disabled' : ''}`}>
                     <div
-                      className={`api-level-card ${thinkingLevel === 'minimal' ? 'api-level-card--active' : ''}`}
-                      onClick={() => thinkingEnabled && setThinkingLevel('minimal')}
+                      className={`api-level-card ${(thinkingLevel === 'minimal' || thinkingLevel === 'low') ? 'api-level-card--active' : ''}`}
+                      onClick={() => thinkingEnabled && setThinkingLevel('low')}
                     >
                       <div className="api-level-card__header">
                         <span className="api-level-card__icon">⚡</span>
-                        <span className="api-level-card__name">Minimal</span>
+                        <span className="api-level-card__name">LOW (Minimal)</span>
                       </div>
-                      <p className="api-level-card__desc">Penalaran cepat dan ringkas, cocok untuk respon percakapan cepat.</p>
-                      <span className={`api-level-card__indicator ${thinkingLevel === 'minimal' ? 'api-level-card__indicator--active' : ''}`} />
+                      <p className="api-level-card__desc">Penalaran cepat dan ringkas, cocok untuk pencarian atau respon chat biasa.</p>
+                      <span className={`api-level-card__indicator ${(thinkingLevel === 'minimal' || thinkingLevel === 'low') ? 'api-level-card__indicator--active' : ''}`} />
+                    </div>
+
+                    <div
+                      className={`api-level-card ${thinkingLevel === 'medium' ? 'api-level-card--active' : ''}`}
+                      onClick={() => thinkingEnabled && setThinkingLevel('medium')}
+                    >
+                      <div className="api-level-card__header">
+                        <span className="api-level-card__icon">⚖️</span>
+                        <span className="api-level-card__name">MEDIUM (Default)</span>
+                      </div>
+                      <p className="api-level-card__desc">Tingkat default resmi Google. Keseimbangan optimal untuk dialog dan narasi.</p>
+                      <span className={`api-level-card__indicator ${thinkingLevel === 'medium' ? 'api-level-card__indicator--active' : ''}`} />
                     </div>
 
                     <div
@@ -1259,9 +1542,9 @@ export default function ApiSettingsModal({ isOpen, onClose }) {
                     >
                       <div className="api-level-card__header">
                         <span className="api-level-card__icon">🔮</span>
-                        <span className="api-level-card__name">High (Mendalam)</span>
+                        <span className="api-level-card__name">HIGH (Mendalam)</span>
                       </div>
-                      <p className="api-level-card__desc">Penalaran penuh & detail untuk analisis situasi rumit, teka-teki, dan emosi karakter berlapis.</p>
+                      <p className="api-level-card__desc">Penalaran penuh & detail untuk adegan dramatis, psikologi karakter, dan emosi berlapis.</p>
                       <span className={`api-level-card__indicator ${thinkingLevel === 'high' ? 'api-level-card__indicator--active' : ''}`} />
                     </div>
                   </div>

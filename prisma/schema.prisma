@@ -68,6 +68,7 @@ model Message {
   role           String       // "user" or "ai"
   content        String
   diceRoll       String?
+  thoughtProcess String?
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   createdAt      DateTime     @default(now())

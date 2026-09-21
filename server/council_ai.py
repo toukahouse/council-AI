@@ -82,36 +82,132 @@ def main():
         
     system_instruction = "\n\n".join(system_parts)
 
-    api_key = api_settings.get('apiKey')
-    if not api_key:
-        api_key = os.environ.get("GEMINI_API_KEY")
+    gemini_provider = api_settings.get('geminiProvider', 'studio')
+    client = None
 
-    client = genai.Client(
-        api_key=api_key,
-    )
+    if gemini_provider == 'vertex':
+        project_id = api_settings.get('vertexProjectId') or os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("GCP_PROJECT")
+        location = api_settings.get('vertexLocation') or os.environ.get("GOOGLE_CLOUD_REGION") or "us-central1"
+        credentials_data = (api_settings.get('vertexCredentials') or '').strip()
+        creds = None
 
-    model = api_settings.get('activeModelId', "gemma-4-31b-it")
-    contents = []
+        if credentials_data:
+            if credentials_data.startswith('{') or credentials_data.endswith('}'):
+                try:
+                    from google.oauth2 import service_account
+                    info = json.loads(credentials_data)
+                    creds = service_account.Credentials.from_service_account_info(
+                        info,
+                        scopes=["https://www.googleapis.com/auth/cloud-platform"]
+                    )
+                    if not project_id and 'project_id' in info:
+                        project_id = info['project_id']
+                except Exception as e:
+                    err_msg = f"Gagal membaca Service Account JSON: {e}"
+                    print(json.dumps({"type": "error", "content": err_msg}), flush=True)
+                    print(f"[{err_msg}]", file=sys.stderr)
+                    return
+            elif os.path.isfile(credentials_data):
+                try:
+                    from google.oauth2 import service_account
+                    creds = service_account.Credentials.from_service_account_file(
+                        credentials_data,
+                        scopes=["https://www.googleapis.com/auth/cloud-platform"]
+                    )
+                except Exception as e:
+                    err_msg = f"Gagal membaca file Service Account '{credentials_data}': {e}"
+                    print(json.dumps({"type": "error", "content": err_msg}), flush=True)
+                    print(f"[{err_msg}]", file=sys.stderr)
+                    return
+            else:
+                err_msg = "Format Kredensial Service Account tidak valid. Masukkan teks JSON lengkap atau tentukan path file yang ada di server."
+                print(json.dumps({"type": "error", "content": err_msg}), flush=True)
+                print(f"[{err_msg}]", file=sys.stderr)
+                return
+
+        if not project_id:
+            err_msg = "GCP Project ID belum diisi. Masukkan Project ID GCP Anda di menu pengaturan API."
+            print(json.dumps({"type": "error", "content": err_msg}), flush=True)
+            print(f"[{err_msg}]", file=sys.stderr)
+            return
+
+        os.environ["GOOGLE_GENAI_USE_ENTERPRISE"] = "True"
+
+        vertex_service_tier = str(api_settings.get('vertexServiceTier', '')).strip().lower()
+        http_headers = {}
+        if vertex_service_tier == 'flex':
+            http_headers = {
+                "X-Vertex-AI-LLM-Request-Type": "shared",
+                "X-Vertex-AI-LLM-Shared-Request-Type": "flex"
+            }
+
+        client_kwargs = {
+            "vertexai": True,
+            "project": project_id,
+            "location": location,
+            "http_options": types.HttpOptions(
+                headers=http_headers,
+                timeout=600000  # 10 minutes timeout in milliseconds for Flex queues
+            )
+        }
+        if creds:
+            client_kwargs["credentials"] = creds
+
+        try:
+            client = genai.Client(**client_kwargs)
+        except Exception as e:
+            err_msg = f"Inisialisasi Vertex AI Gagal: {e}"
+            print(json.dumps({"type": "error", "content": err_msg}), flush=True)
+            print(f"[{err_msg}]", file=sys.stderr)
+            return
+    else:
+        api_key = api_settings.get('apiKey')
+        if not api_key:
+            api_key = os.environ.get("GEMINI_API_KEY")
+
+        try:
+            client = genai.Client(api_key=api_key)
+        except Exception as e:
+            err_msg = f"Inisialisasi Gemini API Studio Gagal: {e}"
+            print(json.dumps({"type": "error", "content": err_msg}), flush=True)
+            print(f"[{err_msg}]", file=sys.stderr)
+            return
+
+    model = api_settings.get('activeModelId', "gemini-3.8-flash")
+    if gemini_provider == 'vertex' and ('gemma' in str(model).lower()):
+        model = "gemini-3.8-flash"
+    if 'gemini-3.8-flash' in str(model).lower():
+        model = "gemini-3.8-flash"
+    elif 'gemini-3.7-flash' in str(model).lower():
+        model = "gemini-3.7-flash"
+    elif 'gemini-3.1-pro' in str(model).lower():
+        model = "gemini-3.1-pro-preview" if gemini_provider == 'vertex' else "gemini-3.1-pro"
+    raw_contents = []
     
     # 4. Chat History
     for msg in history:
-        # map 'ai' to 'model', otherwise 'user'
+        content_str = (msg.get("content") or "").strip()
+        if not content_str:
+            continue
         msg_role = "model" if msg.get("role") == "ai" else "user"
-        contents.append(
-            types.Content(
-                role=msg_role,
-                parts=[types.Part.from_text(text=msg.get("content", ""))]
-            )
-        )
+        raw_contents.append((msg_role, content_str))
         
     # 5. Pesan Baru dari User
-    if new_message:
-        contents.append(
-            types.Content(
-                role="user",
-                parts=[types.Part.from_text(text=new_message)]
-            )
-        )
+    if new_message and new_message.strip():
+        raw_contents.append(("user", new_message.strip()))
+
+    # Pastikan urutan chat selang-seling (user/model) dan gabungkan turn berurutan dengan role yang sama
+    sanitized_contents = []
+    for role, text in raw_contents:
+        if sanitized_contents and sanitized_contents[-1]["role"] == role:
+            sanitized_contents[-1]["parts"].append(types.Part.from_text(text=text))
+        else:
+            sanitized_contents.append({
+                "role": role,
+                "parts": [types.Part.from_text(text=text)]
+            })
+
+    contents = [types.Content(role=c["role"], parts=c["parts"]) for c in sanitized_contents]
 
     # Pastikan turn terakhir selalu dari role user (syarat mutlak Google Gemini API)
     if not contents or contents[-1].role != "user":
@@ -122,20 +218,36 @@ def main():
             )
         )
 
-    # Tambahkan pengingat psikologi organik di giliran terakhir
-        override_text = f"\n\n[SIMULASI PSIKOLOGI ORGANIK]: Afinitas: {affinity}%, Mood Awal: {str(current_mood).upper()}."
-        override_text += " Kamu adalah individu bernyawa dengan harga diri dan perasaan, BUKAN boneka yang terkunci di satu mood. Evaluasi secara organik bagaimana perkataan/tindakan user barusan memengaruhi emosi dan egomu sesuai kepribadian unik karaktermu. Putuskan [MOOD: ...] dan perubahan [AFFINITY: 0 / +1 / +2 / -1 / -2] (obrolan santai bernilai 0, perhatian manis +1, dilarang inflasi cepat) di 2 baris paling akhir responsmu."
-        override_text += "\n[FORMAT MUTLAK]: Dialog ucapan WAJIB diapit \"...\" di luar tanda bintang. Narasi aksi diapit **...**. GAYA BAHASA: Santai/lisan (kalo, bakalan, emangnya, banget, nggak, udah, gimana). Lanjutkan adegan secara ekspresif, natural, dan mendalam."
-        
-        last_part = contents[-1].parts[-1]
-        last_part.text = (last_part.text or "") + override_text
+    # Tambahkan pengingat psikologi organik di giliran user terakhir
+    override_text = f"\n\n[SIMULASI PSIKOLOGI ORGANIK]: Afinitas: {affinity}%, Mood Awal: {str(current_mood).upper()}."
+    override_text += " Kamu adalah individu bernyawa dengan harga diri dan perasaan, BUKAN boneka yang terkunci di satu mood. Evaluasi secara organik bagaimana perkataan/tindakan user barusan memengaruhi emosi dan egomu sesuai kepribadian unik karaktermu. Putuskan [MOOD: ...] dan perubahan [AFFINITY: 0 / +1 / +2 / -1 / -2] (obrolan santai bernilai 0, perhatian manis +1, dilarang inflasi cepat) di 2 baris paling akhir responsmu."
+    override_text += "\n[FORMAT MUTLAK]: Dialog ucapan WAJIB diapit \"...\" di luar tanda bintang. Narasi aksi diapit **...**. GAYA BAHASA: Santai/lisan (kalo, bakalan, emangnya, banget, nggak, udah, gimana). Lanjutkan adegan secara ekspresif, natural, dan mendalam."
+    
+    last_part = contents[-1].parts[-1]
+    last_part.text = (last_part.text or "") + override_text
 
     temperature = float(api_settings.get('temperature', 0.8))
     top_p = float(api_settings.get('topP', 0.95))
     top_k = int(api_settings.get('topK', 40))
-    max_tokens = int(api_settings.get('maxTokens', 2048))
+    max_tokens = int(api_settings.get('maxTokens', 8192))
     thinking_enabled = api_settings.get('thinkingEnabled', True)
-    thinking_level = str(api_settings.get('thinkingLevel', 'HIGH')).upper()
+    
+    raw_level = str(api_settings.get('thinkingLevel', 'HIGH')).upper()
+    if raw_level in ['MINIMAL', 'LOW']:
+        thinking_level = 'LOW'
+    elif raw_level == 'MEDIUM':
+        thinking_level = 'MEDIUM'
+    else:
+        thinking_level = 'HIGH'
+
+    # Check model architecture
+    is_gemini_3 = any(ver in model.lower() for ver in ['3.8', '3.7', '3.5', '3.1', 'gemini-3'])
+    is_gemini_2_5 = '2.5' in model.lower()
+    is_reasoning_model = is_gemini_3 or is_gemini_2_5
+
+    # Pro/Flash reasoning consumes max_output_tokens, so guarantee at least 8192 headroom
+    if thinking_enabled and is_reasoning_model:
+        max_tokens = max(max_tokens, 8192)
 
     # Disable all safety filters so adult roleplay fiction is not blocked
     safety_settings = [
@@ -162,16 +274,36 @@ def main():
     ]
 
     config_args = {
-        "temperature": temperature,
-        "top_p": top_p,
-        "top_k": top_k,
         "max_output_tokens": max_tokens,
         "system_instruction": system_instruction,
         "safety_settings": safety_settings,
     }
 
+    # As documented by Google for Gemini 3.8/3.7/3.x:
+    # "Hapus parameter yang tidak digunakan lagi: Hapus temperature, top_p, dan top_k"
+    if not (is_reasoning_model and thinking_enabled):
+        config_args["temperature"] = temperature
+        config_args["top_p"] = top_p
+        config_args["top_k"] = top_k
+
     if thinking_enabled:
-        config_args["thinking_config"] = types.ThinkingConfig(thinking_level=thinking_level)
+        if is_gemini_3:
+            # Gemini 3.8 / 3.7 / 3.1 uses string enum thinking_level (LOW, MEDIUM, HIGH)
+            config_args["thinking_config"] = types.ThinkingConfig(
+                thinking_level=thinking_level,
+                include_thoughts=True
+            )
+        elif is_gemini_2_5:
+            # Gemini 2.5 uses integer thinking_budget
+            budget = 4096 if thinking_level == 'LOW' else (16384 if thinking_level == 'HIGH' else 8192)
+            config_args["thinking_config"] = types.ThinkingConfig(
+                thinking_budget=budget,
+                include_thoughts=True
+            )
+        else:
+            config_args["thinking_config"] = types.ThinkingConfig(
+                include_thoughts=True
+            )
         
     generate_content_config = types.GenerateContentConfig(**config_args)
 
@@ -194,7 +326,9 @@ def main():
                 payload = {"type": "text", "content": chunk.text}
                 print(json.dumps(payload), flush=True)
     except Exception as e:
-        print(f"[Error from Gemini API: {e}]", file=sys.stderr)
+        err_msg = f"Gemini/Vertex AI Error: {e}"
+        print(json.dumps({"type": "error", "content": err_msg}), flush=True)
+        print(f"[{err_msg}]", file=sys.stderr)
 
 if __name__ == "__main__":
     main()

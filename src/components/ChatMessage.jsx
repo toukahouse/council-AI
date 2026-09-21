@@ -173,43 +173,6 @@ const ChatMessageComponent = ({ message, seqId, isTyping, animate, charName, cha
                 {message.affinityChange > 0 ? `+${message.affinityChange}` : message.affinityChange} Afinitas
               </span>
             )}
-            {(message.thoughtProcess || message.isThinking) && (
-              <div style={{ position: 'relative' }}>
-                <button 
-                  onClick={() => setShowThoughts(!showThoughts)}
-                  style={{ 
-                    background: 'none', border: 'none', cursor: 'pointer', padding: '2px', 
-                    display: 'flex', alignItems: 'center', 
-                    color: message.isThinking ? '#eab308' : '#8b5cf6',
-                    opacity: message.isThinking ? (Math.floor(Date.now() / 500) % 2 === 0 ? 1 : 0.6) : 1,
-                    transition: 'opacity 0.2s'
-                  }}
-                  title="View Thought Process"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9 18h6"></path>
-                    <path d="M10 22h4"></path>
-                    <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path>
-                  </svg>
-                </button>
-                {showThoughts && message.thoughtProcess && (
-                  <div style={{ 
-                    position: 'absolute', top: '100%', left: 0, zIndex: 100, 
-                    background: '#111118', border: '1px solid rgba(139, 92, 246, 0.4)', 
-                    borderRadius: '8px', padding: '10px', minWidth: '320px', maxWidth: '400px', 
-                    maxHeight: '250px', overflowY: 'auto', boxShadow: '0 12px 30px rgba(0,0,0,0.8)', 
-                    fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px',
-                    fontFamily: 'monospace', whiteSpace: 'pre-wrap'
-                  }}>
-                    <div style={{ fontWeight: '600', marginBottom: '8px', color: '#8b5cf6', borderBottom: '1px solid rgba(139, 92, 246, 0.2)', paddingBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12h4l2-9 5 18 2-9h5"/></svg>
-                      Real-time Thought Process
-                    </div>
-                    {message.thoughtProcess.replace(/\$?\\rightarrow\$?/g, '→')}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         ) : (
           <span className="message__name" style={{ alignSelf: 'flex-end' }}>{displayUserName}</span>
@@ -235,6 +198,39 @@ const ChatMessageComponent = ({ message, seqId, isTyping, animate, charName, cha
               </strong>{' '}
               <span style={{ opacity: 0.8 }}>({diceData.action})</span>
             </span>
+          </div>
+        )}
+
+        {/* Collapsible Chain-of-Thought (Penalaran AI) Box */}
+        {!isUser && (message.thoughtProcess || message.isThinking) && (
+          <div className={`message__thought-box ${message.isThinking ? 'message__thought-box--live' : ''}`}>
+            <button 
+              type="button"
+              className="message__thought-toggle-btn"
+              onClick={() => setShowThoughts(!showThoughts)}
+              title="Buka / Tutup Alur Penalaran AI"
+            >
+              <span className="message__thought-pulse-icon">
+                {message.isThinking ? '🧠' : '💭'}
+              </span>
+              <span className="message__thought-summary">
+                {message.isThinking ? 'Sedang menalar alur & emosi...' : 'Alur Pikiran Karakter (Chain of Thought)'}
+              </span>
+              <span className="message__thought-toggle-icon">
+                {showThoughts ? '▲ Sembunyikan' : '▼ Buka Nalar'}
+              </span>
+            </button>
+            {showThoughts && (
+              <div className="message__thought-body">
+                <div className="message__thought-header">
+                  <span>Alur Nalar Real-time</span>
+                  {message.isThinking && <span className="message__thought-tag">Streaming...</span>}
+                </div>
+                <div className="message__thought-text">
+                  {(message.thoughtProcess || 'Sedang merumuskan nalar dan tindakan adegan...').replace(/\$?\\rightarrow\$?/g, '→')}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

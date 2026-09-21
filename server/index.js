@@ -34,6 +34,7 @@ async function autoMigrateDb() {
     await pool.query(`
       ALTER TABLE "Character" ADD COLUMN IF NOT EXISTS "traits" TEXT;
       ALTER TABLE "Message" ADD COLUMN IF NOT EXISTS "diceRoll" TEXT;
+      ALTER TABLE "Message" ADD COLUMN IF NOT EXISTS "thoughtProcess" TEXT;
       ALTER TABLE "Conversation" ADD COLUMN IF NOT EXISTS "affinity" INTEGER DEFAULT 20;
       ALTER TABLE "Conversation" ADD COLUMN IF NOT EXISTS "currentMood" TEXT DEFAULT 'neutral';
       ALTER TABLE "Conversation" ADD COLUMN IF NOT EXISTS "roleplayTime" TEXT DEFAULT '12:00';
@@ -553,6 +554,107 @@ app.get('/api/universal/logs/:service', async (req, res) => {
   }
 });
 
+// Test Gemini / Vertex AI connection
+app.post('/api/gemini/test', async (req, res) => {
+  const { apiSettings } = req.body || {};
+  const startTime = Date.now();
+
+  const sanitizedModel = (apiSettings?.activeModelId && !apiSettings.activeModelId.toLowerCase().includes('gemma'))
+    ? apiSettings.activeModelId
+    : 'gemini-3.8-flash';
+
+  const testPayload = {
+    character: { name: 'TestAI', systemPrompt: 'Kamu adalah asisten tes koneksi.' },
+    persona: { name: 'Tester' },
+    memories: [],
+    history: [],
+    newMessage: 'Koneksi tes. Katakan "Koneksi Berhasil".',
+    apiSettings: {
+      ...(apiSettings || {}),
+      activeModelId: sanitizedModel,
+      maxTokens: 50,
+      thinkingEnabled: false,
+    },
+    affinity: 50,
+    currentMood: 'NORMAL'
+  };
+
+  const pythonScript = path.join(__dirname, 'council_ai.py');
+  const pythonCommand = process.platform === 'win32' ? 'python' : 'python3.11';
+  
+  const child = spawn(pythonCommand, [pythonScript]);
+  let stdoutData = '';
+  let stderrData = '';
+  let returned = false;
+
+  // Extended timeout to accommodate Flex Tier queue (90 seconds)
+  const timer = setTimeout(() => {
+    if (!returned) {
+      returned = true;
+      try { child.kill(); } catch (e) {}
+      res.status(504).json({ 
+        success: false, 
+        message: 'Waktu tunggu pengujian habis (Timeout 90 detik). Jika menggunakan Flex Tier, server Google mungkin sedang dalam antrean padat, atau pastikan Vertex AI API sudah diaktifkan di GCP Console.' 
+      });
+    }
+  }, 90000);
+
+  child.stdout.on('data', (data) => {
+    stdoutData += data.toString();
+  });
+
+  child.stderr.on('data', (data) => {
+    stderrData += data.toString();
+  });
+
+  child.on('close', (code) => {
+    clearTimeout(timer);
+    if (returned) return;
+    returned = true;
+
+    const latency = Date.now() - startTime;
+    let fullText = '';
+    let errorMessage = '';
+
+    const lines = stdoutData.split('\n');
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      try {
+        const parsed = JSON.parse(line.trim());
+        if (parsed.type === 'text') {
+          fullText += parsed.content;
+        } else if (parsed.type === 'error') {
+          errorMessage = parsed.content;
+        }
+      } catch (e) {
+        fullText += line;
+      }
+    }
+
+    if (errorMessage) {
+      return res.json({ success: false, message: errorMessage, latency });
+    }
+
+    if (code !== 0 && !fullText) {
+      return res.json({ 
+        success: false, 
+        message: stderrData.trim() || `Script selesai dengan kode error ${code}`,
+        latency 
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Koneksi Berhasil!',
+      sampleResponse: fullText.trim(),
+      latency
+    });
+  });
+
+  child.stdin.write(JSON.stringify(testPayload));
+  child.stdin.end();
+});
+
 // Stream AI response
 app.post('/api/chat/:conversationId/stream', async (req, res) => {
   try {
@@ -976,6 +1078,7 @@ app.post('/api/chat/:conversationId/stream', async (req, res) => {
             data: {
               role: 'ai',
               content: cleanedResponse,
+              thoughtProcess: aiThoughtProcess || null,
               conversationId
             }
           });

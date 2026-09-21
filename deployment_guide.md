@@ -129,7 +129,10 @@ services:
     environment:
       - NODE_ENV=production
       # - PORT=3001
-      # Tambahkan variabel .env Anda yang lain di sini
+      # (Opsional jika ingin otomatis memuat kunci GCP Vertex AI di VPS):
+      # - GOOGLE_APPLICATION_CREDENTIALS=/app/gcp-key.json
+    # volumes:
+    #   - ./gcp-key.json:/app/gcp-key.json:ro
 ```
 
 ---
