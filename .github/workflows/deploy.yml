@@ -8,7 +8,7 @@ on:
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   SERVICE_NAME: council-ai
-  REGION: asia-southeast1 # Region terdekat (Singapore)
+  REGION: us-central1 # Region Always Free Tier (Iowa, US)
 
 jobs:
   build-and-deploy:
@@ -28,12 +28,12 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Configure Docker for Artifact Registry
-        run: gcloud auth configure-docker asia-southeast1-docker.pkg.dev --quiet
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
       - name: Build and Push Docker Image
         run: |
-          IMAGE_TAG="asia-southeast1-docker.pkg.dev/${{ env.PROJECT_ID }}/council-ai/${{ env.SERVICE_NAME }}:${{ github.sha }}"
-          IMAGE_LATEST="asia-southeast1-docker.pkg.dev/${{ env.PROJECT_ID }}/council-ai/${{ env.SERVICE_NAME }}:latest"
+          IMAGE_TAG="us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/council-ai/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+          IMAGE_LATEST="us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/council-ai/${{ env.SERVICE_NAME }}:latest"
           
           docker build -t "$IMAGE_TAG" -t "$IMAGE_LATEST" .
           docker push "$IMAGE_TAG"
@@ -42,7 +42,7 @@ jobs:
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image "asia-southeast1-docker.pkg.dev/${{ env.PROJECT_ID }}/council-ai/${{ env.SERVICE_NAME }}:${{ github.sha }}" \
+            --image "us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/council-ai/${{ env.SERVICE_NAME }}:${{ github.sha }}" \
             --region ${{ env.REGION }} \
             --platform managed \
             --allow-unauthenticated \
