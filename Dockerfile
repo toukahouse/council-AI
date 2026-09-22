@@ -29,12 +29,9 @@ ENV PATH="/app/venv/bin:$PATH"
 # Install module Python yang dibutuhkan oleh council_ai.py & gemini-claude-web2api
 RUN pip install --no-cache-dir google-genai requests curl_cffi httpx
 
-# Expose port backend dan proxy internal (3001: Backend, 8081: Gemini, 8082: Claude, 8083: Panel)
-EXPOSE 3001
-EXPOSE 8081
-EXPOSE 8082
-EXPOSE 8083
+# Expose port utama Cloud Run (8080)
+EXPOSE 8080
 
-# Command untuk menjalankan server (Pastikan script start menjalankan Node.js Anda)
+# Command untuk menjalankan server Express backend & static frontend
 CMD ["npm", "run", "start"]
  

@@ -1413,8 +1413,8 @@ app.get(/.*/, (req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
 });
 
-app.listen(port, () => {
-  console.log(`🚀 Backend Server running on http://localhost:${port}`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`🚀 Backend Server running on http://0.0.0.0:${port}`);
   // Check and auto-start Universal Proxy services if configured
   universalManager.autoStartProxies();
 });

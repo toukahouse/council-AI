@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log
+.git
+.github
+.env
+*.log
+dist
+__pycache__
+venv
+.DS_Store
+*key*.json
+credentials*.json
