@@ -214,10 +214,21 @@ const ChatMessageComponent = ({ message, seqId, isTyping, animate, charName, cha
                 {message.isThinking ? '🧠' : '💭'}
               </span>
               <span className="message__thought-summary">
-                {message.isThinking ? 'Sedang menalar alur & emosi...' : 'Alur Pikiran Karakter (Chain of Thought)'}
+                {message.isThinking ? (
+                  <>
+                    <span className="thought-label--desktop">Sedang menalar alur & emosi...</span>
+                    <span className="thought-label--mobile">Sedang menalar...</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="thought-label--desktop">Alur Pikiran Karakter (Chain of Thought)</span>
+                    <span className="thought-label--mobile">Alur Pikiran Karakter</span>
+                  </>
+                )}
               </span>
               <span className="message__thought-toggle-icon">
-                {showThoughts ? '▲ Sembunyikan' : '▼ Buka Nalar'}
+                <span className="thought-label--desktop">{showThoughts ? '▲ Sembunyikan' : '▼ Buka Nalar'}</span>
+                <span className="thought-label--mobile">{showThoughts ? '▲ Tutup' : '▼ Buka'}</span>
               </span>
             </button>
             {showThoughts && (

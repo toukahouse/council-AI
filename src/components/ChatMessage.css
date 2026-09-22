@@ -3,6 +3,9 @@
   align-items: flex-end;
   gap: 12px;
   padding: 4px 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .message--animate {
@@ -76,6 +79,8 @@
   flex-direction: column;
   gap: 5px;
   max-width: 65%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 /* User message: align bubble text and timestamp to the right */
@@ -178,7 +183,12 @@
   }
 
   .message__content-wrap {
-    max-width: 85%;
+    max-width: calc(100% - 48px);
+    min-width: 0;
+  }
+
+  .message--user .message__content-wrap {
+    max-width: 88%;
   }
 
   .message__bubble {
@@ -188,7 +198,11 @@
 
 @media (max-width: 480px) {
   .message__content-wrap {
-    max-width: 100%;
+    max-width: calc(100% - 44px);
+  }
+
+  .message--user .message__content-wrap {
+    max-width: 92%;
   }
 }
 
@@ -537,6 +551,8 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  max-width: 100%;
+  box-sizing: border-box;
   background: rgba(30, 27, 75, 0.65);
   border: 1px solid rgba(129, 140, 248, 0.3);
   padding: 6px 12px;
@@ -561,6 +577,8 @@
   overflow: hidden;
   margin-bottom: 6px;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   backdrop-filter: blur(12px);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
@@ -579,6 +597,8 @@
 
 .message__thought-toggle-btn {
   width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -602,6 +622,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .message__thought-box--live .message__thought-pulse-icon {
@@ -614,7 +635,8 @@
 }
 
 .message__thought-summary {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -631,6 +653,7 @@
   padding: 3px 8px;
   border-radius: 6px;
   white-space: nowrap;
+  flex-shrink: 0;
   transition: background 0.15s ease;
 }
 
@@ -639,12 +662,22 @@
   color: #ffffff;
 }
 
+.thought-label--desktop {
+  display: inline;
+}
+
+.thought-label--mobile {
+  display: none;
+}
+
 .message__thought-body {
   border-top: 1px solid rgba(139, 92, 246, 0.2);
   padding: 10px 14px;
   background: rgba(10, 8, 20, 0.7);
   max-height: 280px;
   overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
   animation: thought-expand 0.2s ease-out;
 }
 
@@ -685,5 +718,56 @@
   font-family: 'Fira Code', Consolas, Monaco, monospace;
   white-space: pre-wrap;
   word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .thought-label--desktop {
+    display: none;
+  }
+
+  .thought-label--mobile {
+    display: inline;
+  }
+
+  .message__thought-toggle-btn {
+    padding: 7px 10px;
+    gap: 6px;
+    font-size: 11px;
+  }
+
+  .message__thought-summary {
+    font-size: 11px;
+  }
+
+  .message__thought-toggle-icon {
+    font-size: 9.5px;
+    padding: 2.5px 6px;
+  }
+
+  .message__thought-body {
+    padding: 8px 10px;
+    max-height: 220px;
+  }
+
+  .message__thought-text {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 420px) {
+  .message__thought-toggle-btn {
+    padding: 6px 8px;
+    gap: 5px;
+  }
+
+  .message__thought-summary {
+    font-size: 10px;
+  }
+
+  .message__thought-toggle-icon {
+    font-size: 9px;
+    padding: 2px 5px;
+  }
 }
 
