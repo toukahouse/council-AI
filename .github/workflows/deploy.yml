@@ -27,13 +27,13 @@ jobs:
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Configure Docker for Google Container Registry
-        run: gcloud auth configure-docker --quiet
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker asia-southeast1-docker.pkg.dev --quiet
 
       - name: Build and Push Docker Image
         run: |
-          IMAGE_TAG="gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
-          IMAGE_LATEST="gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:latest"
+          IMAGE_TAG="asia-southeast1-docker.pkg.dev/${{ env.PROJECT_ID }}/council-ai/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+          IMAGE_LATEST="asia-southeast1-docker.pkg.dev/${{ env.PROJECT_ID }}/council-ai/${{ env.SERVICE_NAME }}:latest"
           
           docker build -t "$IMAGE_TAG" -t "$IMAGE_LATEST" .
           docker push "$IMAGE_TAG"
@@ -42,7 +42,7 @@ jobs:
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image "gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}" \
+            --image "asia-southeast1-docker.pkg.dev/${{ env.PROJECT_ID }}/council-ai/${{ env.SERVICE_NAME }}:${{ github.sha }}" \
             --region ${{ env.REGION }} \
             --platform managed \
             --allow-unauthenticated \
