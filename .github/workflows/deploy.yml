@@ -50,4 +50,7 @@ jobs:
             --memory 1Gi \
             --cpu 1 \
             --timeout 300s \
+            --cpu-throttling \
+            --min-instances 0 \
+            --max-instances 2 \
             --update-env-vars "NODE_ENV=production,DATABASE_URL=${{ secrets.DATABASE_URL }}"
